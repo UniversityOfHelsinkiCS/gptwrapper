@@ -189,7 +189,7 @@ export const ChatBox = ({
   return (
     <Box sx={{ mb: 1 }}>
       <Box sx={{ mb: 0.75, px: 0.5, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
-        <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} />
+        <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} isMobile={isMobile} />
         <UsageSelector />
       </Box>
       <Box

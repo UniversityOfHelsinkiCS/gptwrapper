@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { getModelDisplayName, inProduction, isFreeModel, isMockModel, ModelConfig, ValidModelName, validModels } from '@config'
-import { Box, Chip, Divider, MenuItem, Typography, Menu, ListSubheader } from '@mui/material'
+import { Box, Chip, Divider, MenuItem, Typography, Menu, ListSubheader, useMediaQuery } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
@@ -10,6 +10,8 @@ import PsychologyIcon from '@mui/icons-material/Psychology'
 import { usePromptState } from './PromptState'
 import useCurrentUser from '../../hooks/useCurrentUser'
 import { visuallyHidden } from '@mui/utils'
+import { useIsEmbedded } from '../../contexts/EmbeddedContext'
+import { focusIndicatorStyle } from '../../util/accessibility'
 
 const tagChipSx = {
   height: 18,
@@ -21,6 +23,11 @@ const tagChipSx = {
   '& .MuiChip-label': { px: 0.75 },
 }
 
+const isPointerOver = (element: Element | null | undefined, { clientX, clientY }: React.MouseEvent) => {
+  const rect = element?.getBoundingClientRect()
+  return !!rect && clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom
+}
+
 const filterAvailableModels = (models: ModelConfig[], isTokenLimitExceeded: boolean, isAdmin: boolean | undefined): ModelConfig[] => {
   return models.filter((model) => !isTokenLimitExceeded || isFreeModel(model.name)).filter((model) => !isMockModel(model.name) || !inProduction || isAdmin)
 }
@@ -29,18 +36,24 @@ const ModelSelector = ({
   currentModel,
   setModel,
   isTokenLimitExceeded,
+  isMobile,
 }: {
   currentModel: ValidModelName
   setModel: (model: ValidModelName) => void
   isTokenLimitExceeded: boolean
+  isMobile: boolean
 }) => {
   const { t } = useTranslation()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const [moreAnchorEl, setMoreAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [moreOpen, setMoreOpen] = React.useState(false)
+  const menuPaperRef = React.useRef<HTMLDivElement>(null)
   const open = Boolean(anchorEl)
-  const moreOpen = Boolean(moreAnchorEl)
   const { user } = useCurrentUser()
   const { activePrompt } = usePromptState()
+  const isEmbedded = useIsEmbedded()
+  const sideBySide = !isMobile && !isEmbedded
+  const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
+  const transitionDuration = reduceMotion ? 0 : 'auto'
 
   const { availableModels, mainModels, moreModels } = React.useMemo(() => {
     const availableModels = filterAvailableModels(validModels, isTokenLimitExceeded, user?.isAdmin)
@@ -54,12 +67,17 @@ const ModelSelector = ({
   const isCurrentInMore = moreModels.some((model) => model.name === currentModel)
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setMoreOpen(!sideBySide && isCurrentInMore)
     setAnchorEl(event.currentTarget)
   }
 
   const handleClose = () => {
-    setMoreAnchorEl(null)
+    setMoreOpen(false)
     setAnchorEl(null)
+  }
+
+  const handleBackdropMouseMove = (event: React.MouseEvent<HTMLElement>) => {
+    event.currentTarget.style.cursor = isPointerOver(anchorEl, event) ? 'pointer' : ''
   }
 
   const handleSelect = (model: ValidModelName) => {
@@ -71,7 +89,7 @@ const ModelSelector = ({
 
   const isCurrentFree = isFreeModel(currentModel)
 
-  const renderOption = (model: ModelConfig) => {
+  const renderOption = (model: ModelConfig, nested = false) => {
     const { name, displayName, descriptionKey, tags } = model
     const active = name === currentModel
     const description = descriptionKey && t(descriptionKey)
@@ -87,7 +105,7 @@ const ModelSelector = ({
         role="menuitemradio"
         aria-checked={active}
         aria-label={[displayName, description, selfHostedLabel, freeLabel].filter(Boolean).join(', ')}
-        sx={{ gap: 1, py: 1, px: 1.75, alignItems: 'flex-start', mt: 1 }}
+        sx={{ gap: 1, py: 1, pr: 1.75, pl: nested ? 3.5 : 1.75, alignItems: 'flex-start', mt: nested ? 0 : 1, ...focusIndicatorStyle() }}
       >
         <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.25, whiteSpace: 'normal' }}>
           <Typography sx={{ fontSize: '0.875rem', fontWeight: active ? 600 : 400 }}>{displayName}</Typography>
@@ -101,6 +119,21 @@ const ModelSelector = ({
   }
 
   const menuPaperStyle = { minWidth: 260, borderRadius: '0.75rem' }
+  const MoreToggleIcon = sideBySide ? ChevronRightIcon : moreOpen ? ExpandLessIcon : ExpandMoreIcon
+  const currentDisplayName = getModelDisplayName(currentModel)
+  const featuredPaper = menuPaperRef.current
+  const sideMenuToggleProps = sideBySide
+    ? {
+        'aria-haspopup': 'menu' as const,
+        'aria-controls': moreOpen ? 'more-models-menu' : undefined,
+        onKeyDown: (event: React.KeyboardEvent) => {
+          if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            setMoreOpen(true)
+          }
+        },
+      }
+    : {}
 
   return (
     <>
@@ -135,7 +168,7 @@ const ModelSelector = ({
       >
         <PsychologyIcon sx={{ fontSize: 14, color: 'primary.main' }} />
         <Typography sx={visuallyHidden}>{t('accessibility:selectModel')}</Typography>
-        <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'text.primary', lineHeight: 1 }}>{getModelDisplayName(currentModel)}</Typography>
+        <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'text.primary', lineHeight: 1 }}>{currentDisplayName}</Typography>
         {isCurrentFree && <Chip label={t('chat:freeModel')} size="small" color="success" sx={tagChipSx} />}
         {!disabled &&
           (open ? (
@@ -151,9 +184,12 @@ const ModelSelector = ({
         onClose={handleClose}
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transitionDuration={transitionDuration}
         slotProps={{
           list: { 'aria-label': t('sidebar:modelTitle') },
-          paper: { style: { ...menuPaperStyle, marginTop: '-8px' } },
+          paper: { ref: menuPaperRef, style: { ...menuPaperStyle, marginTop: '-8px' } },
+          transition: { onEntering: () => isCurrentInMore && setMoreOpen(true) },
+          backdrop: { onMouseMove: handleBackdropMouseMove },
         }}
       >
         <ListSubheader sx={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.secondary' }}>
@@ -166,47 +202,51 @@ const ModelSelector = ({
           <Divider key="more-divider" />,
           <MenuItem
             key="more-toggle"
-            onClick={(event) => setMoreAnchorEl(event.currentTarget)}
-            onKeyDown={(event) => {
-              if (event.key === 'ArrowRight') {
-                event.preventDefault()
-                setMoreAnchorEl(event.currentTarget)
-              }
-            }}
+            onClick={() => setMoreOpen((prev) => !prev)}
+            {...sideMenuToggleProps}
             selected={isCurrentInMore}
-            aria-haspopup="menu"
+            aria-label={isCurrentInMore ? t('chat:moreModelsSelected', { model: currentDisplayName }) : undefined}
             aria-expanded={moreOpen}
-            aria-controls={moreOpen ? 'more-models-menu' : undefined}
             data-testid="more-models-toggle"
-            sx={{ gap: 1, py: 1, px: 1.75, alignItems: 'center', color: 'primary.main' }}
+            sx={{ gap: 1, py: 1, px: 1.75, alignItems: 'center', color: 'primary.main', ...focusIndicatorStyle() }}
           >
             <Typography sx={{ flex: 1, fontSize: '0.8125rem', fontWeight: 600 }}>{t('chat:moreModels')}</Typography>
-            <ChevronRightIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+            <MoreToggleIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
           </MenuItem>,
         ]}
+        {!sideBySide && moreOpen && moreModels.map((model) => renderOption(model, true))}
       </Menu>
-      <Menu
-        id="more-models-menu"
-        anchorEl={moreAnchorEl}
-        open={moreOpen}
-        onClose={() => setMoreAnchorEl(null)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        slotProps={{
-          list: {
-            'aria-label': t('chat:moreModels'),
-            onKeyDown: (event: React.KeyboardEvent) => {
-              if (event.key === 'ArrowLeft') {
-                event.preventDefault()
-                setMoreAnchorEl(null)
-              }
+      {sideBySide && (
+        <Menu
+          id="more-models-menu"
+          anchorReference="anchorPosition"
+          anchorPosition={
+            featuredPaper
+              ? { left: featuredPaper.offsetLeft + featuredPaper.offsetWidth, top: featuredPaper.offsetTop + featuredPaper.offsetHeight }
+              : undefined
+          }
+          open={open && moreOpen}
+          onClose={() => setMoreOpen(false)}
+          sx={{ pointerEvents: 'none' }}
+          disableEnforceFocus
+          transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          transitionDuration={transitionDuration}
+          slotProps={{
+            list: {
+              'aria-label': t('chat:moreModels'),
+              onKeyDown: (event: React.KeyboardEvent) => {
+                if (event.key === 'ArrowLeft') {
+                  event.preventDefault()
+                  setMoreOpen(false)
+                }
+              },
             },
-          },
-          paper: { style: { ...menuPaperStyle, marginLeft: '4px' } },
-        }}
-      >
-        {moreModels.map(renderOption)}
-      </Menu>
+            paper: { style: { ...menuPaperStyle, marginLeft: '4px', pointerEvents: 'auto' } },
+          }}
+        >
+          {moreModels.map((model) => renderOption(model))}
+        </Menu>
+      )}
     </>
   )
 }
