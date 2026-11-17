@@ -1105,7 +1105,6 @@
     "refused": "Not copied: {{refused}} (reserved folder, invalid name or a folder with the same name).",
     "error": "Something went wrong with the files in this browser.",
     "empty": "You have not added any files yet.",
-    "folders": "Folders",
     "looseFiles": "Files outside folders",
     "usage": "Storage used by this site in this browser: {{used}} of {{quota}}",
     "clear": "Clear my files",
@@ -1148,6 +1147,9 @@
     "importNotesEmpty": "Nothing was imported: the zip has no files in Agent notes.",
     "folderOutputs": "Outputs",
     "folderAgentNotes": "Agent notes",
-    "folderFiles": "Files"
+    "folderFiles": "Files",
+    "yourFolders": "Your folders",
+    "defaultFolders": "Default folders",
+    "defaultFolderHint": "Single files you add"
   }
 }

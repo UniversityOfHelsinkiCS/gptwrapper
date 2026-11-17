@@ -1106,7 +1106,6 @@
     "refused": "Ei kopioitu: {{refused}} (varattu kansio, virheellinen nimi tai samanniminen kansio).",
     "error": "Tiedostojen käsittelyssä tässä selaimessa tapahtui virhe.",
     "empty": "Et ole vielä lisännyt tiedostoja.",
-    "folders": "Kansiot",
     "looseFiles": "Kansioiden ulkopuoliset tiedostot",
     "usage": "Tämän sivuston käyttämä tila tässä selaimessa: {{used}} / {{quota}}",
     "clear": "Tyhjennä omat tiedostot",
@@ -1149,6 +1148,9 @@
     "importNotesEmpty": "Mitään ei tuotu: zip-tiedostossa ei ole tiedostoja Avustajan muistiinpanot -kansiossa.",
     "folderOutputs": "Tuotokset",
     "folderAgentNotes": "Avustajan muistiinpanot",
-    "folderFiles": "Tiedostot"
+    "folderFiles": "Tiedostot",
+    "yourFolders": "Omat kansiot",
+    "defaultFolders": "Oletuskansiot",
+    "defaultFolderHint": "Yksittäin lisätyt tiedostot"
   }
 }

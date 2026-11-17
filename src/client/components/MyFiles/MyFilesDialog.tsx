@@ -35,7 +35,7 @@ import {
 } from '../../util/myFiles/importFiles'
 import { downloadMyFile, saveBlob } from '../../util/myFiles/download'
 import { exportAgentNotes, NOTES_ZIP_FILE_NAME, NotesZipError, readAgentNotesZip, replaceAgentNotes, type NotesZipFile } from '../../util/myFiles/notesZip'
-import { AGENT_NOTES_FOLDER, OUTPUTS_FOLDER, RESERVED_FOLDERS, baseName, isReservedPath } from '../../util/myFiles/paths'
+import { AGENT_NOTES_FOLDER, DEFAULT_FOLDER, OUTPUTS_FOLDER, RESERVED_FOLDERS, baseName, isReservedPath } from '../../util/myFiles/paths'
 import { getPdfTextCache } from '../../util/myFiles/pdfText'
 import type { MyFilesEntry, MyFilesStore } from '../../util/myFiles/store'
 import ConfirmDialog from '../ChatV2/general/ConfirmDialog'
@@ -73,6 +73,9 @@ interface FolderGroup {
   size: number
 }
 
+/** The app's own folders, in the order they are shown: single added files first, then the folders the assistant fills. */
+const DEFAULT_FOLDERS: readonly string[] = [DEFAULT_FOLDER, ...RESERVED_FOLDERS]
+
 const groupEntries = (entries: MyFilesEntry[]) => {
   const folders = new Map<string, FolderGroup>()
   const rootFiles: MyFilesEntry[] = []
@@ -90,13 +93,12 @@ const groupEntries = (entries: MyFilesEntry[]) => {
       group.size += entry.size
     }
   }
-  // Reserved folders come last, in their fixed order.
-  const sorted = [...folders.values()].sort((a, b) => {
-    if (a.reserved !== b.reserved) return a.reserved ? 1 : -1
-    if (a.reserved) return RESERVED_FOLDERS.indexOf(a.name as never) - RESERVED_FOLDERS.indexOf(b.name as never)
-    return a.name.localeCompare(b.name)
-  })
-  return { folders: sorted, rootFiles }
+  const all = [...folders.values()]
+  const userFolders = all.filter((folder) => !DEFAULT_FOLDERS.includes(folder.name)).sort((a, b) => a.name.localeCompare(b.name))
+  const defaultFolders = all
+    .filter((folder) => DEFAULT_FOLDERS.includes(folder.name))
+    .sort((a, b) => DEFAULT_FOLDERS.indexOf(a.name) - DEFAULT_FOLDERS.indexOf(b.name))
+  return { userFolders, defaultFolders, rootFiles }
 }
 
 type FileStatus = 'added' | 'updated'
@@ -321,9 +323,9 @@ const FolderItem = ({
           // An empty folder has nothing to expand, so it is plain text rather than a button.
           <Box sx={rowSx}>{label}</Box>
         )}
-        {folder.reserved ? (
+        {folder.reserved || folder.name === DEFAULT_FOLDER ? (
           <Typography variant="body2" color="text.secondary" sx={{ px: 1 }}>
-            {t('myFiles:reserved')}
+            {t(folder.reserved ? 'myFiles:reserved' : 'myFiles:defaultFolderHint')}
           </Typography>
         ) : (
           <Button size="small" onClick={() => onSync(folder.name)} disabled={disabled} aria-label={t('myFiles:syncFolderNamed', { ...params, name })}>
@@ -503,9 +505,34 @@ const MyFilesContent = ({ store }: { store: MyFilesStore }) => {
     await refresh()
   }
 
-  const { folders, rootFiles } = useMemo(() => groupEntries(entries ?? []), [entries])
+  const { userFolders, defaultFolders, rootFiles } = useMemo(() => groupEntries(entries ?? []), [entries])
   const statuses = useMemo(() => resultStatuses(result), [result])
-  const hasUserFiles = folders.some((folder) => !folder.reserved || folder.files.length) || rootFiles.length > 0
+  const hasUserFiles = userFolders.length > 0 || defaultFolders.some((folder) => folder.files.length) || rootFiles.length > 0
+  const userFoldersHeadingId = useId()
+  const defaultFoldersHeadingId = useId()
+  const folderItem = (folder: FolderGroup) => (
+    <FolderItem
+      key={folder.name}
+      folder={folder}
+      statuses={statuses}
+      onSync={pickFolder}
+      disabled={busy}
+      store={store}
+      onExportNotes={() => void handleExportNotes()}
+      onImportNotes={() => notesZipInputRef.current?.click()}
+      onDownloadError={() => setNotice({ text: t('myFiles:downloadFailed'), error: true })}
+    />
+  )
+  const folderList = (headingId: string, heading: string, folders: FolderGroup[], testId: string) => (
+    <Box component="section" aria-labelledby={headingId} sx={{ mb: 2 }} data-testid={testId}>
+      <Typography id={headingId} component="h3" variant="subtitle2" sx={{ mb: 0.5 }}>
+        {heading}
+      </Typography>
+      <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0 }}>
+        {folders.map(folderItem)}
+      </Box>
+    </Box>
+  )
 
   return (
     <>
@@ -614,21 +641,8 @@ const MyFilesContent = ({ store }: { store: MyFilesStore }) => {
               {t('myFiles:empty')}
             </Typography>
           )}
-          <Box component="ul" aria-label={t('myFiles:folders')} sx={{ listStyle: 'none', m: 0, p: 0 }}>
-            {folders.map((folder) => (
-              <FolderItem
-                key={folder.name}
-                folder={folder}
-                statuses={statuses}
-                onSync={pickFolder}
-                disabled={busy}
-                store={store}
-                onExportNotes={() => void handleExportNotes()}
-                onImportNotes={() => notesZipInputRef.current?.click()}
-                onDownloadError={() => setNotice({ text: t('myFiles:downloadFailed'), error: true })}
-              />
-            ))}
-          </Box>
+          {userFolders.length > 0 && folderList(userFoldersHeadingId, t('myFiles:yourFolders'), userFolders, 'my-files-user-folders')}
+          {defaultFolders.length > 0 && folderList(defaultFoldersHeadingId, t('myFiles:defaultFolders'), defaultFolders, 'my-files-default-folders')}
           {rootFiles.length > 0 && (
             <Box sx={{ mt: 2 }}>
               <FileTable files={rootFiles} stripPrefix="" statuses={statuses} label={t('myFiles:looseFiles')} />

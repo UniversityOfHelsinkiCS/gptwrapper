@@ -1081,7 +1081,6 @@
     "refused": "Inte kopierade: {{refused}} (reserverad mapp, ogiltigt namn eller en mapp med samma namn).",
     "error": "Något gick fel med filerna i den här webbläsaren.",
     "empty": "Du har inte lagt till några filer ännu.",
-    "folders": "Mappar",
     "looseFiles": "Filer utanför mappar",
     "usage": "Lagring som webbplatsen använder i den här webbläsaren: {{used}} av {{quota}}",
     "clear": "Töm mina filer",
@@ -1124,6 +1123,9 @@
     "importNotesEmpty": "Inget importerades: zip-filen har inga filer i Assistentens anteckningar.",
     "folderOutputs": "Utdata",
     "folderAgentNotes": "Assistentens anteckningar",
-    "folderFiles": "Filer"
+    "folderFiles": "Filer",
+    "yourFolders": "Dina mappar",
+    "defaultFolders": "Standardmappar",
+    "defaultFolderHint": "Enskilda filer som du lägger till"
   }
 }
