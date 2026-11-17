@@ -13,6 +13,12 @@ export type ReservedFolder = (typeof RESERVED_FOLDERS)[number]
 export const OUTPUTS_FOLDER: ReservedFolder = 'Outputs'
 export const AGENT_NOTES_FOLDER: ReservedFolder = 'Agent notes'
 
+/**
+ * Where single picked or dropped files go. Only top-level folders can be attached to a chat, so a file at the root
+ * could never be used. Not translated: the name is stored in the chats that attach it.
+ */
+export const DEFAULT_FOLDER = 'Files'
+
 const MAX_SEGMENT_LENGTH = 255
 
 /** Splits and validates a path. Throws `MyFilesError('invalid_path')` for '..', backslashes, control characters and over-long names. */

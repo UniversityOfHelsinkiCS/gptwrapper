@@ -1,4 +1,4 @@
-import { RESERVED_FOLDERS, isReservedPath, normalizePath } from './paths'
+import { DEFAULT_FOLDER, RESERVED_FOLDERS, isReservedPath, normalizePath } from './paths'
 import { isMyFilesError, type MyFilesStore } from './store'
 
 /** A file picked or dropped by the student, with its path relative to what was picked (a folder's files start with the folder name). */
@@ -36,7 +36,7 @@ export const intoFolder = (sources: ImportSource[], folder: string): ImportSourc
   })
 
 /**
- * Copies picked files into the store. A file whose path already exists with the same size and `lastModified` is
+ * Copies picked files into the store. A single file (a path with no folder) goes into `DEFAULT_FOLDER`. A file whose path already exists with the same size and `lastModified` is
  * skipped, a changed one is replaced ("updated"). Paths in reserved folders, invalid paths and paths that collide with
  * a folder (or have a file as a parent) are refused. One failure does not stop the rest.
  */
@@ -62,6 +62,7 @@ export const importFiles = async (
         result.refused.push({ path: rawPath, reason: 'invalid_path' })
         continue
       }
+      if (!path.includes('/')) path = `${DEFAULT_FOLDER}/${path}`
       if (isReservedPath(path)) {
         result.refused.push({ path, reason: 'reserved' })
         continue
