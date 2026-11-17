@@ -110,7 +110,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
     }
   }
 
-  // The file tools are always on for admins' socket runs whose browser runs them, whatever the prompt has.
+  // The file tools are always on for socket runs whose browser runs them, whatever the prompt has.
   if (clientTools) {
     const clientRunTools = [...fileToolsFor(clientTools.attachedFolders), ...readPdfFor(clientTools.attachedFolders)]
     enabledTools.push(...clientRunTools.filter((tool) => !enabledTools.some((t) => t.name === tool.name)))

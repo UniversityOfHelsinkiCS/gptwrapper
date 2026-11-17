@@ -93,7 +93,7 @@ const summarizeReadPdf = (part: SubagentPart): string => {
 
 /**
  * The PDF reader subagent (issue 14). Not enabled per prompt (no `promptOption`): like the file tools, it is on for
- * admins' socket runs, when folders are attached (`readPdfFor`).
+ * socket runs whose browser runs the file tools, when folders are attached (`readPdfFor`).
  */
 export const readPdf: SubagentToolModule = {
   name: READ_PDF,

@@ -163,7 +163,7 @@ const fileToolModule = (name: FileToolName): PlainToolModule<FileToolsConfig> =>
   executor: 'client',
   access: 'admin',
   maturity: 'experimental',
-  // No `promptOption`: the file tools are not enabled per prompt but for admins' socket runs (`fileToolsFor`).
+  // No `promptOption`: the file tools are not enabled per prompt but for socket runs whose browser runs them (`fileToolsFor`).
   // The overview of the folders is given once, with the first tool.
   ...(name === 'ls' ? { instructions: fileToolsInstructions } : {}),
   create: createFileTool(name),
