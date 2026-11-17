@@ -124,9 +124,9 @@ const ChatV2Content = () => {
     z.coerce.number(),
   )
 
-  // My files folders attached to this chat, for the agent's file tools. Experimental: admins over the WebSocket, not embedded.
+  // My files folders attached to this chat, for the agent's file tools. Experimental: over the WebSocket, not embedded.
   const myFilesStore = useMyFilesStore()
-  const canAttachFolders = !!user?.isAdmin && !isEmbeddedMode && !!myFilesStore
+  const canAttachFolders = !isEmbeddedMode && !!myFilesStore
   const [storedAttachedFolders, setAttachedFolders] = useLocalStorageState<unknown>(`${localStoragePrefix}-attached-folders`, [])
   const attachedFolders = useMemo(() => parseStoredFolders(storedAttachedFolders), [storedAttachedFolders])
 
@@ -201,8 +201,8 @@ const ChatV2Content = () => {
       return
     }
 
-    // Admins chat over the WebSocket (experimental, needed for the My files tools), everyone else and embedded mode over HTTP.
-    const transport = user?.isAdmin && !isEmbeddedMode ? new WebSocketChatTransport() : new HttpChatTransport()
+    // The full app chats over the WebSocket (needed for the My files tools), embedded mode over HTTP.
+    const transport = !isEmbeddedMode ? new WebSocketChatTransport() : new HttpChatTransport()
     streamControllerRef.current = transport
 
     const formData = new FormData()

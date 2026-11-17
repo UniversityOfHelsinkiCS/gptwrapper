@@ -40,6 +40,7 @@ import { getPdfTextCache } from '../../util/myFiles/pdfText'
 import type { MyFilesEntry, MyFilesStore } from '../../util/myFiles/store'
 import ConfirmDialog from '../ChatV2/general/ConfirmDialog'
 import { folderLabel } from './folderLabel'
+import { ExperimentalChip } from './ExperimentalChip'
 import { useMyFilesStore } from './MyFilesStoreContext'
 
 const PERSIST_REQUESTED_KEY = 'myFilesPersistRequested'
@@ -694,7 +695,10 @@ const MyFilesDialog = ({ open, onClose }: { open: boolean; onClose: () => void }
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md" data-testid="my-files-dialog">
-      <DialogTitle>{t('myFiles:title')}</DialogTitle>
+      <DialogTitle>
+        {t('myFiles:title')}
+        <ExperimentalChip />
+      </DialogTitle>
       <DialogContent>{store ? <MyFilesContent store={store} /> : <Alert severity="warning">{t('myFiles:unsupported')}</Alert>}</DialogContent>
       <DialogActions>
         <Button onClick={onClose} data-testid="my-files-close">

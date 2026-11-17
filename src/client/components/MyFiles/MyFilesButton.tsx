@@ -5,12 +5,13 @@ import { useTranslation } from 'react-i18next'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import type { User } from '../../types'
 import { TextButton } from '../ChatV2/general/Buttons'
+import { ExperimentalChip } from './ExperimentalChip'
 
 const MyFilesDialog = lazy(() => import('./MyFilesDialog'))
 
 /**
- * Opens the My files dialog. Experimental: admins only, and never in embedded mode (iframe storage is partitioned,
- * so the files would not be the same as in the full app).
+ * Opens the My files dialog. Experimental (tagged in the dialog), for everyone, but never in embedded mode (iframe
+ * storage is partitioned, so the files would not be the same as in the full app).
  */
 const MyFilesButton = ({ user, collapsed = false }: { user?: User | null; collapsed?: boolean }) => {
   const { t } = useTranslation()
@@ -18,7 +19,7 @@ const MyFilesButton = ({ user, collapsed = false }: { user?: User | null; collap
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  if (!user?.isAdmin || isEmbedded) return null
+  if (!user || isEmbedded) return null
 
   const handleOpen = () => {
     setMounted(true)
@@ -36,6 +37,7 @@ const MyFilesButton = ({ user, collapsed = false }: { user?: User | null; collap
       ) : (
         <TextButton startIcon={<FolderOutlined />} onClick={handleOpen} aria-haspopup="dialog" size="large" data-testid="my-files-button">
           {t('myFiles:title')}
+          <ExperimentalChip />
         </TextButton>
       )}
       {mounted && (
