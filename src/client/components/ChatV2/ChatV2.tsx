@@ -27,7 +27,8 @@ import { invalidateUserUsage } from '../../hooks/useUserUsage'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import sidebarOpen from '../../assets/sidebar-open.svg'
 import { ChatBox, type ChatBoxActions } from './ChatBox'
-import { findQuiz, quizAnswerMessage, type QuizSelection } from './tools/quizAnswerContext'
+import { findQuiz, quizAnswerMessage, quizResultAnnouncement, type QuizSelection } from './tools/quizAnswerContext'
+import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
 import { OutlineButtonBlack } from './general/Buttons'
 import { handleCompletionStreamError } from './error'
 import ToolResult from './ToolResult'
@@ -61,6 +62,8 @@ import { AttachFolders, parseStoredFolders } from '../MyFiles/AttachFolders'
 import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
 import { executeFileTool } from '../../util/myFiles/agentTools'
 import type { ClientTools } from './chatTransport'
+
+const QUIZ_ANNOUNCEMENT_DELAY_FROM_CHAT_BOX = 700
 
 /**
  * Conversation rendering needs a lot of assets (mainly Katex) so we lazy load it to improve initial page load performance
@@ -469,6 +472,14 @@ const ChatV2Content = () => {
     const explanation = message.trim().slice(0, 10_000)
     const answer: QuizAnswer = { callId: openQuizSelection.callId, selected: openQuizSelection.selected, ...(explanation ? { explanation } : {}) }
     setQuizSelection(null)
+
+    // Sent from the chat box, the screen reader first reacts to Enter and the field being emptied, which cuts
+    // off an announcement made right away, so it waits for that.
+    const announcement = lastMessage?.role === 'assistant' ? quizResultAnnouncement(lastMessage.parts, answer, t) : ''
+    if (announcement) {
+      const fromChatBox = document.activeElement?.id === 'chat-input'
+      setTimeout(() => announceToScreenReader(announcement), fromChatBox ? QUIZ_ANNOUNCEMENT_DELAY_FROM_CHAT_BOX : 0)
+    }
     handleSendMessage(quizAnswerMessage(openQuiz, answer, t), false, [], undefined, answer)
   }
 

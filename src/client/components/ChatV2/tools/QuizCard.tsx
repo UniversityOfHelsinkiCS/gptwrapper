@@ -4,19 +4,19 @@ import HighlightOff from '@mui/icons-material/HighlightOff'
 import Quiz from '@mui/icons-material/Quiz'
 import { Box, Checkbox, type Theme, FormControlLabel, FormGroup, Radio, RadioGroup, Typography } from '@mui/material'
 import { visuallyHidden } from '@mui/utils'
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import type { ToolPart } from '../../../../shared/agentChat'
-import { parseQuiz, type Quiz as QuizInput, QUIZ_IDK, quizOutcome, type QuizOutcome, type QuizResult } from '../../../../shared/quiz'
+import { parseQuiz, type Quiz as QuizInput, QUIZ_IDK, quizOutcome, type QuizOutcome } from '../../../../shared/quiz'
 import { accessibleTextColor } from '../../../theme'
 import { optionFocusIndicatorStyle } from '../../../util/accessibility'
 import { BlueButton } from '../general/Buttons'
 import { preprocessMath } from '../util'
-import { useQuizAnswer } from './quizAnswerContext'
+import { isQuizResult, QUIZ_OUTCOME_KEY, useQuizAnswer } from './quizAnswerContext'
 import { ToolPartRow } from './ToolPartRow'
 
 /** Markdown and math of the quiz. `inline` keeps it phrasing content, for option labels. */
@@ -30,13 +30,10 @@ const QuizMarkdown = ({ text, inline = false }: { text: string; inline?: boolean
   </ReactMarkdown>
 )
 
-const isQuizResult = (value: unknown): value is QuizResult =>
-  typeof value === 'object' && value !== null && Array.isArray((value as QuizResult).correct) && typeof (value as QuizResult).explanation === 'string'
-
 const OUTCOME = {
-  correct: { key: 'chat:quizCorrect', icon: <CheckCircleOutline fontSize="small" />, color: (theme: Theme) => accessibleTextColor(theme, 'success') },
-  incorrect: { key: 'chat:quizIncorrect', icon: <HighlightOff fontSize="small" />, color: (theme: Theme) => accessibleTextColor(theme, 'error') },
-  idk: { key: 'chat:quizIdkResult', icon: <HelpOutline fontSize="small" />, color: 'text.primary' },
+  correct: { key: QUIZ_OUTCOME_KEY.correct, icon: <CheckCircleOutline fontSize="small" />, color: (theme: Theme) => accessibleTextColor(theme, 'success') },
+  incorrect: { key: QUIZ_OUTCOME_KEY.incorrect, icon: <HighlightOff fontSize="small" />, color: (theme: Theme) => accessibleTextColor(theme, 'error') },
+  idk: { key: QUIZ_OUTCOME_KEY.idk, icon: <HelpOutline fontSize="small" />, color: 'text.primary' },
 } as const satisfies Record<QuizOutcome, unknown>
 
 /** Selecting "I don't know" clears the other options and the other way round, also in multi-select. */
@@ -50,13 +47,15 @@ const toggleOption = (selected: string[], id: string, multiSelect: boolean): str
  * One multiple-choice question from `present_quiz`, with an "I don't know" option and Submit. The student explains
  * their answer in the chat box, and Submit (or sending from the chat box) sends the picked options with that text
  * as a user message. The card then shows right or wrong and the explanation from the tool's result (no model call).
- * The answered state comes from that message, so it survives a reload.
+ * The answered state comes from that message, so it survives a reload. Focus does not move when the answer is sent:
+ * ChatV2 announces the outcome.
  */
 export const QuizCard = ({ part, quiz }: { part: ToolPart; quiz: QuizInput }) => {
   const { t } = useTranslation()
   const { answer: sentAnswer, selection, onSelect, onSubmit, closed } = useQuizAnswer()
-  const [submitted, setSubmitted] = useState(false)
-  const resultRef = useRef<HTMLDivElement>(null)
+  // After Submit the button stays, unusable, until focus leaves it. Removing it would lose focus, and moving focus
+  // elsewhere would make the screen reader read that instead of the announced outcome.
+  const [holdSubmit, setHoldSubmit] = useState(false)
   const titleId = useId()
   const questionId = useId()
   const submitDescriptionId = useId()
@@ -68,18 +67,13 @@ export const QuizCard = ({ part, quiz }: { part: ToolPart; quiz: QuizInput }) =>
   const result = isQuizResult(part.result) ? part.result : null
   const outcome = answer && result ? quizOutcome(result.correct, answer.selected) : null
 
-  // Submit removes the button, so focus moves to the result, which a screen reader then reads.
-  useEffect(() => {
-    if (submitted && outcome) resultRef.current?.focus()
-  }, [submitted, outcome])
-
   const options = [...quiz.options, { id: QUIZ_IDK, text: t('chat:quizIdk') }]
 
   const select = (id: string) => onSelect?.({ callId: part.callId, selected: toggleOption(selected, id, quiz.multiSelect) })
 
   const handleSubmit = () => {
     if (locked || selected.length === 0) return
-    setSubmitted(true)
+    setHoldSubmit(true)
     onSubmit?.()
   }
 
@@ -125,9 +119,9 @@ export const QuizCard = ({ part, quiz }: { part: ToolPart; quiz: QuizInput }) =>
       }}
       control={
         quiz.multiSelect ? (
-          <Checkbox checked={shownSelected.includes(option.id)} onChange={() => select(option.id)} />
+          <Checkbox disableRipple checked={shownSelected.includes(option.id)} onChange={() => select(option.id)} />
         ) : (
-          <Radio checked={shownSelected.includes(option.id)} />
+          <Radio disableRipple checked={shownSelected.includes(option.id)} />
         )
       }
     />
@@ -143,7 +137,7 @@ export const QuizCard = ({ part, quiz }: { part: ToolPart; quiz: QuizInput }) =>
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, opacity: 0.85 }}>
         <Quiz aria-hidden fontSize="small" />
-        <Typography id={titleId} component="span" variant="body2" sx={{ fontWeight: 600 }}>
+        <Typography id={titleId} component="h3" variant="body2" sx={{ fontWeight: 600 }}>
           {t('chat:quizTitle')}
         </Typography>
       </Box>
@@ -170,9 +164,17 @@ export const QuizCard = ({ part, quiz }: { part: ToolPart; quiz: QuizInput }) =>
         </Typography>
       )}
 
-      {!locked && (
+      {(!locked || holdSubmit) && (
         <>
-          <BlueButton data-testid="quiz-submit" onClick={handleSubmit} disabled={selected.length === 0} aria-describedby={submitDescriptionId} sx={{ mt: 1.5 }}>
+          <BlueButton
+            data-testid="quiz-submit"
+            onClick={handleSubmit}
+            onBlur={() => setHoldSubmit(false)}
+            disabled={!locked && selected.length === 0}
+            aria-disabled={locked || undefined}
+            aria-describedby={submitDescriptionId}
+            sx={{ mt: 1.5, '&[aria-disabled="true"]': { opacity: 0.6, cursor: 'default' } }}
+          >
             {t('chat:quizSubmit')}
           </BlueButton>
           <Box id={submitDescriptionId} sx={visuallyHidden}>
@@ -182,7 +184,7 @@ export const QuizCard = ({ part, quiz }: { part: ToolPart; quiz: QuizInput }) =>
       )}
 
       {outcome && result && (
-        <Box ref={resultRef} tabIndex={-1} data-testid="quiz-result" data-quiz-outcome={outcome} sx={{ mt: 1.5, outline: 'none' }}>
+        <Box data-testid="quiz-result" data-quiz-outcome={outcome} sx={{ mt: 1.5 }}>
           <Typography component="p" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600, color: OUTCOME[outcome].color }}>
             <Box component="span" aria-hidden sx={{ display: 'flex' }}>
               {OUTCOME[outcome].icon}

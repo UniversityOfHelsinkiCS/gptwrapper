@@ -1,7 +1,7 @@
 import { createContext, type ReactNode, useContext, useMemo } from 'react'
 import type { TFunction } from 'i18next'
 import type { AssistantPart } from '../../../../shared/agentChat'
-import { parseQuiz, PRESENT_QUIZ, type Quiz, QUIZ_IDK, type QuizAnswer } from '../../../../shared/quiz'
+import { parseQuiz, PRESENT_QUIZ, type Quiz, QUIZ_IDK, type QuizAnswer, quizOutcome, type QuizOutcome, type QuizResult } from '../../../../shared/quiz'
 
 /** The options picked in the open quiz, before it is answered. Shared by the quiz card and the chat box, which sends the answer with its text. */
 export type QuizSelection = { callId: string; selected: string[] }
@@ -40,4 +40,19 @@ export const quizAnswerMessage = (quiz: Quiz, answer: QuizAnswer, t: TFunction):
   const label = (id: string) => (id === QUIZ_IDK ? t('chat:quizIdk') : quiz.options.find((option) => option.id === id)?.text ?? id)
   const picked = t('chat:quizAnswerMessage', { answer: answer.selected.map(label).join(', '), interpolation: { escapeValue: false } })
   return [picked, answer.explanation].filter(Boolean).join('\n\n')
+}
+
+export const isQuizResult = (value: unknown): value is QuizResult =>
+  typeof value === 'object' && value !== null && Array.isArray((value as QuizResult).correct) && typeof (value as QuizResult).explanation === 'string'
+
+/** The translation key of the headline of each outcome, shown on the card and announced when the answer is sent. */
+export const QUIZ_OUTCOME_KEY = { correct: 'chat:quizCorrect', incorrect: 'chat:quizIncorrect', idk: 'chat:quizIdkResult' } as const satisfies Record<
+  QuizOutcome,
+  string
+>
+
+export const quizResultAnnouncement = (parts: AssistantPart[], answer: QuizAnswer, t: TFunction): string => {
+  const part = parts.find((p) => p.type === 'tool' && p.name === PRESENT_QUIZ && p.callId === answer.callId)
+  if (part?.type !== 'tool' || !isQuizResult(part.result)) return ''
+  return `${t(QUIZ_OUTCOME_KEY[quizOutcome(part.result.correct, answer.selected)])} ${t('chat:quizResultSeeCard')}`
 }

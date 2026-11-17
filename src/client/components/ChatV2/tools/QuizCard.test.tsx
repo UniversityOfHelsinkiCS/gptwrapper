@@ -7,7 +7,7 @@ import type { ToolPart } from '../../../../shared/agentChat'
 import type { QuizAnswer } from '../../../../shared/quiz'
 import en from '../../../locales/en.json'
 import { QuizPart } from './QuizCard'
-import { findQuiz, quizAnswerMessage, QuizAnswerProvider, type QuizAnswerContextValue, type QuizSelection } from './quizAnswerContext'
+import { findQuiz, quizAnswerMessage, QuizAnswerProvider, quizResultAnnouncement, type QuizAnswerContextValue, type QuizSelection } from './quizAnswerContext'
 
 const i18n = i18next.createInstance()
 
@@ -111,12 +111,13 @@ describe('QuizCard', () => {
     expect(document.getElementById(descriptionId)!.textContent).toBe('Also sends the text in the message box.')
   })
 
-  test('Submit sends the answer; the answer then locks the card, shows the result and gets focus', () => {
+  test('Submit sends the answer; the answer then locks the card and shows the result, and focus stays on Submit until it leaves', () => {
     const onSubmit = vi.fn()
     const part = quizPart(singleQuiz)
     const { rerender } = renderQuiz(part, { open: true, onSubmit })
 
     fireEvent.click(radio('4'))
+    submitButton()!.focus()
     fireEvent.click(submitButton()!)
     expect(onSubmit).toHaveBeenCalledTimes(1)
 
@@ -127,7 +128,10 @@ describe('QuizCard', () => {
       </I18nextProvider>,
     )
 
-    expect(submitButton()).toBeNull()
+    expect(document.activeElement).toBe(submitButton())
+    expect(submitButton()!.getAttribute('aria-disabled')).toBe('true')
+    fireEvent.click(submitButton()!)
+    expect(onSubmit).toHaveBeenCalledTimes(1)
     expect(radio('4').disabled).toBe(true)
     expect(radio('4').checked).toBe(true)
     expect(radio('7').disabled).toBe(true)
@@ -138,7 +142,8 @@ describe('QuizCard', () => {
     expect(result.getAttribute('data-quiz-outcome')).toBe('incorrect')
     expect(result.textContent).toContain('Not quite.')
     expect(result.textContent).toContain('Seven has no other divisors.')
-    expect(document.activeElement).toBe(result)
+    fireEvent.blur(submitButton()!)
+    expect(submitButton()).toBeNull()
     // The options say which one was right and which one the student picked
     expect(radio('7').closest('label')!.textContent).toContain('(correct answer)')
     expect(radio('4').closest('label')!.textContent).toContain('(your answer)')
@@ -201,6 +206,17 @@ describe('quiz answer message', () => {
       'My answer: 2, 4\n\nthey divide by two',
     )
     expect(quizAnswerMessage(quiz, { callId: 'quiz_1', selected: ['idk'] }, t)).toBe("My answer: I don't know")
+  })
+
+  test('quizResultAnnouncement says the outcome and points to the card for the explanation', () => {
+    const t = i18n.getFixedT('en')
+    const parts = [quizPart(singleQuiz)]
+    expect(quizResultAnnouncement(parts, { callId: 'quiz_1', selected: ['b'] }, t)).toBe('Correct! The explanation is in the quiz card.')
+    expect(quizResultAnnouncement(parts, { callId: 'quiz_1', selected: ['a'] }, t)).toBe('Not quite. The explanation is in the quiz card.')
+    expect(quizResultAnnouncement(parts, { callId: 'quiz_1', selected: ['idk'] }, t)).toBe(
+      'No problem, here is the answer. The explanation is in the quiz card.',
+    )
+    expect(quizResultAnnouncement(parts, { callId: 'other', selected: ['b'] }, t)).toBe('')
   })
 
   test('finds only a ready quiz with that call id', () => {

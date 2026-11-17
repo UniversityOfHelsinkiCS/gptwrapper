@@ -90,15 +90,25 @@ describe('ChatBox', () => {
     expect(input().value).toBe('')
   })
 
-  test('with a quiz option picked, the chat box asks why, also in its accessible description', () => {
+  test('with a quiz option picked, the chat box asks why in its placeholder, and the field and Send say that the answer is sent', () => {
+    const quizSend = 'Sends your quiz answer, with this text as your reasoning.'
+    const sendDescription = () => document.getElementById(sendButton().getAttribute('aria-describedby')!)!.textContent
+
     const { rerenderWith } = renderChatBox({ quizPrompt: 'reasoning' })
     expect(input().placeholder).toBe('Why did you pick this? (optional)')
-    expect(description()).toContain('Why did you pick this? (optional)')
+    expect(description()).not.toContain('(optional)')
+    expect(description()).toContain(quizSend)
     expect(description()).toContain('Enter sends the message')
+    expect(sendDescription()).toBe(quizSend)
 
     rerenderWith('unclear')
     expect(input().placeholder).toBe('What part is unclear? (optional)')
-    expect(description()).toContain('What part is unclear? (optional)')
+    expect(description()).toContain(quizSend)
+
+    rerenderWith(null)
+    expect(input().placeholder).toBe('Type your message here...')
+    expect(description()).not.toContain(quizSend)
+    expect(sendButton().getAttribute('aria-describedby')).toBeNull()
   })
 
   test('with a quiz option picked, Send works with an empty chat box', () => {

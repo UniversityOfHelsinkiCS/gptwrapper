@@ -276,8 +276,8 @@ export const ChatBox = ({
               {isShiftEnterSend ? t('accessibility:sendInstructionsShiftEnter') : t('accessibility:sendInstructionsEnter')}
             </Box>
             {quizPrompt && (
-              <Box id="chat-input-quiz-prompt" sx={visuallyHidden}>
-                {quizPromptText}
+              <Box id="chat-input-quiz-send" sx={visuallyHidden}>
+                {t('chat:quizSendDescription')}
               </Box>
             )}
             <TextField
@@ -297,7 +297,7 @@ export const ChatBox = ({
                 htmlInput: {
                   'data-testid': 'chat-input',
                   'aria-label': t('chat:messageLabel'),
-                  'aria-describedby': quizPrompt ? 'chat-input-quiz-prompt chat-input-instructions' : 'chat-input-instructions',
+                  'aria-describedby': quizPrompt ? 'chat-input-quiz-send chat-input-instructions' : 'chat-input-instructions',
                 },
                 input: {
                   disableUnderline: true,
@@ -374,6 +374,7 @@ export const ChatBox = ({
                     <IconButton
                       type="submit"
                       aria-label={t('common:send')}
+                      aria-describedby={quizPrompt ? 'chat-input-quiz-send' : undefined}
                       ref={sendButtonRef}
                       data-testid="send-chat-message"
                       disabled={acuallyDisabled}
