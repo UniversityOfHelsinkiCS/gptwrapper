@@ -57,7 +57,8 @@ const SideBar = ({
       sx={{
         position: 'sticky',
         top: 0,
-        height: '100vh',
+        // dvh keeps the bottom buttons above mobile browser toolbars
+        height: '100dvh',
         bgcolor: 'background.paper',
       }}
     >
@@ -68,7 +69,8 @@ const SideBar = ({
           justifyContent: 'space-between',
           pt: 3,
           height: '100%',
-          width: !open ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)',
+          // min() keeps the open sidebar and its close button inside narrow viewports (WCAG 1.4.10)
+          width: !open ? 'var(--sidebar-width-collapsed)' : 'min(var(--sidebar-width), 100vw)',
           borderRight: '1px solid',
           borderRightColor: 'divider',
           zIndex: 999,
@@ -109,7 +111,7 @@ const SideBar = ({
               }}
             >
               <Tooltip arrow placement="right" title={t('sidebar:close')}>
-                <TextButton ref={closeButtonRef} onClick={() => setOpen((prev) => !prev)} sx={{ mr: 1 }}>
+                <TextButton ref={closeButtonRef} onClick={() => setOpen((prev) => !prev)} sx={{ mr: 1 }} data-testid="left-panel-close">
                   <CustomIcon src={sidebarClose} alt={t('sidebar:close')} />
                 </TextButton>
               </Tooltip>

@@ -553,13 +553,10 @@ const ChatV2Content = () => {
   const hasToolResults = !!shownToolResults && shownToolResults.length > 0 && canShowToolResults
   const toolResultsKey = shownToolResults?.map((toolResult) => toolResult.callId).join(',')
   const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
-  const leftPanelFloating = isEmbeddedMode || isMobile
   const showFloatingButtons = isMobile && !isEmbeddedMode
   const [sideBarOpen, setSideBarOpen] = useState<boolean>(() => {
     return isMobile || isEmbeddedMode ? false : !defaultCollapsedSidebar
   })
-  const leftPanelCollapsed = !sideBarOpen || leftPanelFloating
-  const leftPanelContentWidth = leftPanelCollapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width)'
   const rightPanelContentWidth = !hasToolResults || isMobile ? '0px' : rightMenuExpanded ? 'var(--right-menu-width)' : 'var(--sidebar-width-collapsed)'
   const rightPanelCollapsed = !isMobile && hasToolResults && !rightMenuExpanded
 
@@ -632,6 +629,7 @@ const ChatV2Content = () => {
           onClose={() => {
             setSideBarOpen(!sideBarOpen)
           }}
+          sx={{ '& .MuiDrawer-paper': { maxWidth: '100vw' } }}
         >
           <SideBar
             open={true} // always open in drawer
@@ -658,8 +656,8 @@ const ChatV2Content = () => {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            // magical -11px prevents horizontal overflow when vertical scrollbar appears
-            width: `calc(100vw - 11px - ${leftPanelContentWidth} - ${rightPanelContentWidth})`,
+            // the parent flex column already gets the space left over by the side panels
+            width: '100%',
             maxWidth: '1080px',
             marginLeft: 'auto',
             marginRight: 'auto',

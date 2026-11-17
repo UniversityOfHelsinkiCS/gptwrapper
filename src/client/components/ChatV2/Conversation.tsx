@@ -47,11 +47,12 @@ const UserMessageItem = ({ message }: { message: UserMessage }) => (
     sx={{
       backgroundColor: 'action.hover',
       padding: '1rem 1.5rem',
-      marginLeft: 10, //applies only in mobile
+      marginLeft: { xs: 4, sm: 10 },
       borderRadius: '1rem 0.0rem 1rem 1rem',
       boxShadow: '0px 2px 2px rgba(0, 0, 0, 0.2)',
       whiteSpace: 'pre-wrap',
-      maxWidth: { xs: '90vw', sm: '60vw', md: '50vw' },
+      // on mobile relative to the chat column, not the viewport, so the bubble cannot overflow it
+      maxWidth: { xs: '100%', sm: '60vw', md: '50vw' },
       // minWidth: { xs: '70vw', sm: 0 },
       wordBreak: 'break-word',
       width: 'fit-content',
@@ -482,7 +483,7 @@ export const MessageItem = ({
     )
   } else {
     return (
-      <Box data-sentry-mask data-testid="user-message" sx={{ alignSelf: 'flex-end' }}>
+      <Box data-sentry-mask data-testid="user-message" sx={{ alignSelf: 'flex-end', maxWidth: '100%', minWidth: 0 }}>
         <Typography component="h2" sx={visuallyHidden}>
           {numberedHeading(t('accessibility:userMessageHeading'), number)}
         </Typography>
