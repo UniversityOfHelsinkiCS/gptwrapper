@@ -258,7 +258,9 @@ for (const [role, roleTest] of [
       await expect(card.getByTestId('quiz-result')).toContainText('7 is only divisible by 1 and itself')
       await expect(card.getByRole('radio', { name: /^7/ })).toBeDisabled()
       await expect(card.getByTestId('quiz-explanation')).toContainText('It has no other divisors')
-      await expect(card.getByTestId('quiz-result')).toBeFocused()
+      // Focus stays on the now unusable Submit button, ChatV2 announces the outcome
+      await expect(submit).toBeFocused()
+      await expect(submit).toHaveAttribute('aria-disabled', 'true')
       await expect(chatInput).toHaveValue('')
       await expect(chatInput).toHaveAttribute('placeholder', 'Type your message here...')
 
