@@ -1145,6 +1145,9 @@
     "importNotesInvalidPath": "Nothing was imported: the zip has a file outside Agent notes ({{path}}).",
     "importNotesTooLarge": "Nothing was imported: the zip is too large.",
     "importNotesTooMany": "Nothing was imported: the zip has too many files.",
-    "importNotesEmpty": "Nothing was imported: the zip has no files in Agent notes."
+    "importNotesEmpty": "Nothing was imported: the zip has no files in Agent notes.",
+    "folderOutputs": "Outputs",
+    "folderAgentNotes": "Agent notes",
+    "folderFiles": "Files"
   }
 }

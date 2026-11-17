@@ -266,7 +266,7 @@
     "fileToolWriteFile": "Skrev filen {{path}}",
     "fileToolEditFile": "Redigerade filen {{path}}",
     "fileToolDeleteFile": "Raderade {{path}}",
-    "outputFiles": "Filer från det här svaret (i Mina filer, Outputs)"
+    "outputFiles": "Filer från det här svaret (i Mina filer, Utdata)"
   },
   "settings": {
     "prompt": "Samtalsstart",
@@ -1086,7 +1086,7 @@
     "usage": "Lagring som webbplatsen använder i den här webbläsaren: {{used}} av {{quota}}",
     "clear": "Töm mina filer",
     "clearConfirmTitle": "Töm mina filer?",
-    "clearConfirmMessage": "Alla filer och mappar i Mina filer raderas från den här webbläsaren, även Outputs och Agent notes. Originalen på din enhet påverkas inte.",
+    "clearConfirmMessage": "Alla filer och mappar i Mina filer raderas från den här webbläsaren, även Utdata och Assistentens anteckningar. Originalen på din enhet påverkas inte.",
     "unsupported": "Den här webbläsaren stöder inte lagring av filer för chatten.",
     "name": "Namn",
     "size": "Storlek",
@@ -1111,16 +1111,19 @@
     "viewNoteNamed": "Visa {{name}}",
     "hideNoteNamed": "Dölj {{name}}",
     "noteContent": "Innehållet i {{name}}",
-    "exportNotes": "Exportera Agent notes som zip",
-    "importNotes": "Importera Agent notes från zip",
-    "importNotesConfirmTitle": "Ersätta Agent notes?",
-    "importNotesConfirmMessage": "Allt i Agent notes raderas och ersätts med de {{files}} filerna i {{name}}.",
+    "exportNotes": "Exportera assistentens anteckningar som zip",
+    "importNotes": "Importera assistentens anteckningar från zip",
+    "importNotesConfirmTitle": "Ersätta assistentens anteckningar?",
+    "importNotesConfirmMessage": "Allt i Assistentens anteckningar raderas och ersätts med de {{files}} filerna i {{name}}.",
     "importNotesConfirm": "Ersätt",
-    "importNotesDone": "Agent notes ersatt: {{files}} filer importerade.",
-    "importNotesInvalid": "Filen kunde inte läsas som en zip med Agent notes.",
-    "importNotesInvalidPath": "Inget importerades: zip-filen har en fil utanför Agent notes ({{path}}).",
+    "importNotesDone": "Assistentens anteckningar ersatta: {{files}} filer importerade.",
+    "importNotesInvalid": "Filen kunde inte läsas som en zip med assistentens anteckningar.",
+    "importNotesInvalidPath": "Inget importerades: zip-filen har en fil utanför Assistentens anteckningar ({{path}}).",
     "importNotesTooLarge": "Inget importerades: zip-filen är för stor.",
     "importNotesTooMany": "Inget importerades: zip-filen har för många filer.",
-    "importNotesEmpty": "Inget importerades: zip-filen har inga filer i Agent notes."
+    "importNotesEmpty": "Inget importerades: zip-filen har inga filer i Assistentens anteckningar.",
+    "folderOutputs": "Utdata",
+    "folderAgentNotes": "Assistentens anteckningar",
+    "folderFiles": "Filer"
   }
 }

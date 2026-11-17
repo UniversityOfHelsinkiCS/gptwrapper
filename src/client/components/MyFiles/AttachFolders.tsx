@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { MAX_ATTACHED_FOLDERS } from '../../../shared/fileTools'
 import { isReservedPath } from '../../util/myFiles/paths'
 import type { MyFilesStore } from '../../util/myFiles/store'
+import { folderLabel } from './folderLabel'
 
 /** The student's own top-level folders in My files, which can be attached to a chat (not `Outputs` or `Agent notes`). */
 export const listAttachableFolders = async (store: MyFilesStore): Promise<string[]> =>
@@ -92,7 +93,7 @@ export const AttachFolders = ({
               data-folder={folder}
             >
               <ListItemIcon aria-hidden>{attached ? <CheckBox fontSize="small" /> : <CheckBoxOutlineBlank fontSize="small" />}</ListItemIcon>
-              <ListItemText>{folder}</ListItemText>
+              <ListItemText>{folderLabel(t, folder)}</ListItemText>
             </MenuItem>
           )
         })}
@@ -110,9 +111,11 @@ export const AttachFolders = ({
           key={folder}
           sx={{ borderRadius: 100, maxWidth: '14rem' }}
           icon={<FolderOutlined aria-hidden />}
-          label={folder}
+          label={folderLabel(t, folder)}
           onDelete={() => onChange(attachedFolders.filter((f) => f !== folder))}
-          aria-label={[t('myFiles:attachedFolder', { name: folder }), t('myFiles:detachFolder')].join(', ')}
+          aria-label={[t('myFiles:attachedFolder', { name: folderLabel(t, folder), interpolation: { escapeValue: false } }), t('myFiles:detachFolder')].join(
+            ', ',
+          )}
           data-testid="attached-folder"
           data-folder={folder}
         />

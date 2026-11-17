@@ -262,7 +262,7 @@
     "fileToolWriteFile": "Kirjoitti tiedoston {{path}}",
     "fileToolEditFile": "Muokkasi tiedostoa {{path}}",
     "fileToolDeleteFile": "Poisti kohteen {{path}}",
-    "outputFiles": "Tämän vastauksen tiedostot (Omat tiedostot, Outputs)"
+    "outputFiles": "Tämän vastauksen tiedostot (Omat tiedostot, Tuotokset)"
   },
   "settings": {
     "prompt": "Keskustelun alustus",
@@ -1111,7 +1111,7 @@
     "usage": "Tämän sivuston käyttämä tila tässä selaimessa: {{used}} / {{quota}}",
     "clear": "Tyhjennä omat tiedostot",
     "clearConfirmTitle": "Tyhjennetäänkö omat tiedostot?",
-    "clearConfirmMessage": "Kaikki Omien tiedostojen tiedostot ja kansiot poistetaan tästä selaimesta, myös Outputs ja Agent notes. Laitteellasi olevat alkuperäiset tiedostot säilyvät.",
+    "clearConfirmMessage": "Kaikki Omien tiedostojen tiedostot ja kansiot poistetaan tästä selaimesta, myös Tuotokset ja Avustajan muistiinpanot. Laitteellasi olevat alkuperäiset tiedostot säilyvät.",
     "unsupported": "Tämä selain ei tue tiedostojen tallentamista keskustelua varten.",
     "name": "Nimi",
     "size": "Koko",
@@ -1136,16 +1136,19 @@
     "viewNoteNamed": "Näytä {{name}}",
     "hideNoteNamed": "Piilota {{name}}",
     "noteContent": "Tiedoston {{name}} sisältö",
-    "exportNotes": "Vie Agent notes zip-tiedostona",
-    "importNotes": "Tuo Agent notes zip-tiedostosta",
-    "importNotesConfirmTitle": "Korvataanko Agent notes?",
-    "importNotesConfirmMessage": "Kaikki Agent notes -kansion tiedostot poistetaan, ja tilalle tuodaan {{files}} tiedostoa zip-tiedostosta {{name}}.",
+    "exportNotes": "Vie avustajan muistiinpanot zip-tiedostona",
+    "importNotes": "Tuo avustajan muistiinpanot zip-tiedostosta",
+    "importNotesConfirmTitle": "Korvataanko avustajan muistiinpanot?",
+    "importNotesConfirmMessage": "Kaikki Avustajan muistiinpanot -kansion tiedostot poistetaan, ja tilalle tuodaan {{files}} tiedostoa zip-tiedostosta {{name}}.",
     "importNotesConfirm": "Korvaa",
-    "importNotesDone": "Agent notes korvattu: {{files}} tiedostoa tuotu.",
-    "importNotesInvalid": "Tiedostoa ei voitu lukea Agent notes -zip-tiedostona.",
-    "importNotesInvalidPath": "Mitään ei tuotu: zip-tiedostossa on tiedosto Agent notes -kansion ulkopuolella ({{path}}).",
+    "importNotesDone": "Avustajan muistiinpanot korvattu: {{files}} tiedostoa tuotu.",
+    "importNotesInvalid": "Tiedostoa ei voitu lukea avustajan muistiinpanojen zip-tiedostona.",
+    "importNotesInvalidPath": "Mitään ei tuotu: zip-tiedostossa on tiedosto Avustajan muistiinpanot -kansion ulkopuolella ({{path}}).",
     "importNotesTooLarge": "Mitään ei tuotu: zip-tiedosto on liian suuri.",
     "importNotesTooMany": "Mitään ei tuotu: zip-tiedostossa on liikaa tiedostoja.",
-    "importNotesEmpty": "Mitään ei tuotu: zip-tiedostossa ei ole tiedostoja Agent notes -kansiossa."
+    "importNotesEmpty": "Mitään ei tuotu: zip-tiedostossa ei ole tiedostoja Avustajan muistiinpanot -kansiossa.",
+    "folderOutputs": "Tuotokset",
+    "folderAgentNotes": "Avustajan muistiinpanot",
+    "folderFiles": "Tiedostot"
   }
 }

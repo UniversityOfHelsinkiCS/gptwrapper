@@ -39,6 +39,7 @@ import { AGENT_NOTES_FOLDER, OUTPUTS_FOLDER, RESERVED_FOLDERS, baseName, isReser
 import { getPdfTextCache } from '../../util/myFiles/pdfText'
 import type { MyFilesEntry, MyFilesStore } from '../../util/myFiles/store'
 import ConfirmDialog from '../ChatV2/general/ConfirmDialog'
+import { folderLabel } from './folderLabel'
 import { useMyFilesStore } from './MyFilesStoreContext'
 
 const PERSIST_REQUESTED_KEY = 'myFilesPersistRequested'
@@ -290,11 +291,12 @@ const FolderItem = ({
   const details = isNotes ? (file: MyFilesEntry) => (viewing.includes(file.path) ? <NoteText store={store} path={file.path} /> : null) : undefined
   const contentId = useId()
   const hasFiles = folder.files.length > 0
+  const name = folderLabel(t, folder.name)
   const label = (
     <>
       <FolderOutlined fontSize="small" aria-hidden />
       <Box component="span" sx={{ fontWeight: 'bold', wordBreak: 'break-word' }}>
-        {folder.name}
+        {name}
       </Box>
       <Box component="span" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
         {t('myFiles:folderSummary', { files: folder.files.length, size: formatBytes(folder.size, i18n.language) })}
@@ -324,7 +326,7 @@ const FolderItem = ({
             {t('myFiles:reserved')}
           </Typography>
         ) : (
-          <Button size="small" onClick={() => onSync(folder.name)} disabled={disabled} aria-label={t('myFiles:syncFolderNamed', { name: folder.name })}>
+          <Button size="small" onClick={() => onSync(folder.name)} disabled={disabled} aria-label={t('myFiles:syncFolderNamed', { ...params, name })}>
             {t('myFiles:syncFolder')}
           </Button>
         )}
@@ -341,7 +343,7 @@ const FolderItem = ({
       )}
       {open && hasFiles && (
         <Box id={contentId} sx={{ pl: 4, pb: 1 }}>
-          <FileTable files={folder.files} stripPrefix={folder.name} statuses={statuses} label={folder.name} actions={actions} details={details} />
+          <FileTable files={folder.files} stripPrefix={folder.name} statuses={statuses} label={name} actions={actions} details={details} />
         </Box>
       )}
     </Box>
