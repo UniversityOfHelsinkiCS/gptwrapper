@@ -22,7 +22,6 @@ This list includes the issues that have been identified in the accessibility eva
 ### Operability issues
 
 - Toast notifications cannot be reached with a keyboard or a screen reader while a dialog is open. (WCAG 2.1.1)
-- In the service, there are instances where an error message (or other information that cannot be inferred from elsewhere) is presented only in a toast notification. (WCAG 2.2.1)
 - Focusable elements, such as the Information and settings button, are obscured by floating toast notification content. When the view is zoomed to 400%, there are many floating elements that hide content in keyboard focus. (WCAG 2.4.11 \*WCAG 2.2 requirement)
 - Toast notifications disappear automatically after about 20 seconds. The timer pauses while the keyboard focus or the mouse is on a notification, but it does not pause while a screen reader user reads the page with the virtual cursor. The timing cannot be changed by the user. Notifications are not stored anywhere after they disappear. At most four notifications are shown at a time: when a fifth one arrives, the oldest disappears immediately and can no longer be focused or read. (WCAG 2.2.1)
 
