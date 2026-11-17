@@ -77,11 +77,12 @@ adminTest('uploads into reserved folders are refused', async ({ page }) => {
   }
 })
 
-studentTest('students do not see My files', async ({ page }) => {
+studentTest('students see My files, tagged as experimental', async ({ page }) => {
   await page.goto('/general')
   await acceptDisclaimer(page)
-  await expect(page.getByTestId('new-conversation-button')).toBeVisible()
-  await expect(page.getByTestId('my-files-button')).toHaveCount(0)
+  await expect(page.getByTestId('my-files-button')).toContainText('Experimental')
+  await page.getByTestId('my-files-button').click()
+  await expect(page.getByRole('dialog', { name: 'My files' })).toContainText('Experimental')
 })
 
 adminTest('My files is hidden in embedded mode', async ({ page }) => {
@@ -163,11 +164,11 @@ adminTest('the agent reads a file from an attached folder in the browser', async
   }
 })
 
-studentTest('students cannot attach folders', async ({ page }) => {
+studentTest('students can attach folders', async ({ page }) => {
   await page.goto('/general')
   await acceptDisclaimer(page)
   await expect(page.getByTestId('chat-input')).toBeVisible()
-  await expect(page.getByTestId('attach-folders-button')).toHaveCount(0)
+  await expect(page.getByTestId('attach-folders-button')).toBeVisible()
 })
 
 adminTest('the agent writes a file into Outputs, downloaded from the chat and from My files', async ({ page }) => {

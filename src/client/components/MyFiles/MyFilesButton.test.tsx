@@ -49,20 +49,20 @@ const pick = async (testId: string, files: File[]) => {
 }
 
 const openDialog = async () => {
-  fireEvent.click(screen.getByRole('button', { name: 'My files' }))
+  fireEvent.click(screen.getByRole('button', { name: 'My files Experimental' }))
   return screen.findByRole('dialog')
 }
 
 describe('MyFilesButton', () => {
-  test('is hidden from non-admins', () => {
+  test('is shown to students too, tagged as experimental', () => {
     renderButton(student)
-    expect(screen.queryByRole('button', { name: 'My files' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'My files Experimental' })).toBeTruthy()
   })
 
   test('is hidden in embedded mode', () => {
     embedded = true
     renderButton(admin)
-    expect(screen.queryByRole('button', { name: 'My files' })).toBeNull()
+    expect(screen.queryByRole('button', { name: /^My files/ })).toBeNull()
   })
 
   test('lists the reserved folders, adds a folder, skips unchanged files and marks changed ones as updated', async () => {

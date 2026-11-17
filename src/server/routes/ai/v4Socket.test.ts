@@ -434,19 +434,21 @@ describe('the read_pdf subagent over the chat socket', () => {
     client.ws.close()
   })
 
-  test('is not on without attached folders, nor for students', async () => {
+  test('is not on without attached folders', async () => {
     const admin = await connect(adminHeaders)
     admin.send(runStart('1', 'say hi', []))
     await admin.runEnd('1')
-    const student = await connect()
-    student.send(runStart('2', 'say hi', ['Course notes']))
-    await student.runEnd('2')
 
-    expect(vi.mocked(runAgent).mock.calls.map(([params]) => params.meta.tools)).toEqual([
-      expect.not.arrayContaining(['read_pdf']),
-      expect.not.arrayContaining(['read_pdf']),
-    ])
+    expect(vi.mocked(runAgent).mock.calls.map(([params]) => params.meta.tools)).toEqual([expect.not.arrayContaining(['read_pdf'])])
     admin.ws.close()
+  })
+
+  test('is on for students with attached folders', async () => {
+    const student = await connect()
+    student.send(runStart('1', 'say hi', ['Course notes']))
+    await student.runEnd('1')
+
+    expect(vi.mocked(runAgent).mock.calls.map(([params]) => params.meta.tools)).toEqual([expect.arrayContaining(['read_pdf'])])
     student.ws.close()
   })
 })
@@ -545,7 +547,7 @@ describe('client-executed tools over the chat socket', () => {
     expect(vi.mocked(runAgent).mock.calls[0][0].signal.reason).toBe('client_disconnected')
   })
 
-  test('students, and browsers that do not run the tools, get no client tools; admins get them also without folders', async () => {
+  test('browsers that do not run the tools get no client tools; students and admins get them also without folders', async () => {
     const student = await connect()
     student.send(runStart('1', 'say hi', ['Course notes']))
     await student.runEnd('1')
@@ -557,8 +559,7 @@ describe('client-executed tools over the chat socket', () => {
     admin.send(runStart('4', 'say hi', []))
     await admin.runEnd('4')
 
-    expect(vi.mocked(runAgent).mock.calls.map(([params]) => params.clientTools?.attachedFolders)).toEqual([undefined, undefined, [], []])
-    expect(student.received.some((m) => m.type === 'tool.request')).toBe(false)
+    expect(vi.mocked(runAgent).mock.calls.map(([params]) => params.clientTools?.attachedFolders)).toEqual([['Course notes'], undefined, [], []])
     student.ws.close()
     admin.ws.close()
   })
