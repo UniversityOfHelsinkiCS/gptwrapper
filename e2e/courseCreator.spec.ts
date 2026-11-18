@@ -5,12 +5,7 @@ import { acceptDisclaimer } from './utils/test-helpers'
 
 const openCourseCreatorPage = async (page: Page) => {
   await page.goto('/course-creator')
-
-  const disclaimerSubmit = page.getByTestId('submit-accept-disclaimer')
-  if (await disclaimerSubmit.isVisible()) {
-    await acceptDisclaimer(page)
-  }
-
+  await acceptDisclaimer(page)
   await expect(page.getByTestId('course-creator-page')).toBeVisible()
 }
 
@@ -30,7 +25,6 @@ const createCustomChat = async (page: Page, name: string, description: string, c
 test.describe('Course creator custom chats', () => {
   test.beforeEach(async ({ page }) => {
     await openCourseCreatorPage(page)
-    await acceptDisclaimer(page)
   })
 
   test('can list, edit and save custom chat instance', async ({ page }) => {
