@@ -1,4 +1,5 @@
 import express from 'express'
+import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { Op, Sequelize, WhereOptions } from 'sequelize'
 
 import type { ActivityPeriod, RequestWithUser } from '../types'
@@ -11,6 +12,7 @@ import _ from 'lodash'
 import { chatIsActive, getChatStatus } from '../services/chatInstances/activity'
 import { AccessLevel } from '@shared/types'
 import { isPromptDraft } from '@shared/prompt'
+import { TokenLimitSchema } from '@shared/course'
 
 const courseRouter = express.Router()
 
@@ -327,17 +329,21 @@ courseRouter.put('/:id', async (req, res) => {
     throw ApplicationError.Forbidden('Only admins can change research course status')
   }
 
+  if (usageLimit !== undefined) {
+    if (!user.isAdmin) throw ApplicationError.Forbidden('Only admins can change the course token limit')
+    chatInstance.usageLimit = TokenLimitSchema.parse(usageLimit)
+  }
+
   if (activityPeriod !== undefined) {
     chatInstance.activityPeriod = activityPeriod
-  }
-  if (usageLimit !== undefined) {
-    chatInstance.usageLimit = usageLimit
   }
   if (saveDiscussions !== undefined) {
     chatInstance.saveDiscussions = saveDiscussions
   }
   if (activated !== undefined) {
     chatInstance.activated = activated
+    // Courses deactivated before limits were kept have 0; a limit set by an admin survives reactivation.
+    if (activated && !chatInstance.usageLimit) chatInstance.usageLimit = DEFAULT_TOKEN_LIMIT
   }
 
   await chatInstance.save()

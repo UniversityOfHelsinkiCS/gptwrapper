@@ -11,7 +11,6 @@ import { announceToScreenReader } from '../../common/accessibility/SnackbarAnnou
 import { Course } from '../../../types'
 import { useEditCourseMutation } from '../../../hooks/useCourseMutation'
 import { GreenButton, RedButton } from '../../ChatV2/general/Buttons'
-import { DEFAULT_TOKEN_LIMIT } from '@config'
 import DateRangeIcon from '@mui/icons-material/DateRange'
 
 export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
@@ -34,7 +33,7 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
 
   const periodInvalid = startDate > endDate
 
-  const handleSubmit = async (tokens?: number, activated?: boolean) => {
+  const handleSubmit = async (activated?: boolean) => {
     setError(null)
     if (periodInvalid) {
       if (focusFirstInvalidField(datesRef.current)) announceToScreenReader(t('accessibility:savingFailedFixFields'), { assertive: true })
@@ -50,10 +49,7 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
           },
         })
       } else {
-        await mutation.mutateAsync({
-          usageLimit: tokens ?? course.usageLimit,
-          activated,
-        })
+        await mutation.mutateAsync({ activated })
       }
       enqueueSnackbar(t('course:courseUpdated'), { variant: 'success' })
       const target = document.getElementsByName('course-activity-period-editor')[0] as HTMLElement | null
@@ -75,8 +71,8 @@ export const CourseActivityPeriodEditor = ({ course }: { course: Course }) => {
     }
   }
 
-  const handleActivate = () => window.confirm(t('course:activate')) && handleSubmit(DEFAULT_TOKEN_LIMIT, true)
-  const handleDeactivate = () => window.confirm(t('course:deActivate')) && handleSubmit(0, false)
+  const handleActivate = () => window.confirm(t('course:activate')) && handleSubmit(true)
+  const handleDeactivate = () => window.confirm(t('course:deActivate')) && handleSubmit(false)
 
   const courseEnded = Date.parse(course.activityPeriod?.endDate) < Date.now()
 

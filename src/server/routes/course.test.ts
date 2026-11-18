@@ -30,6 +30,7 @@ vi.mock('../services/chatInstances/access', async (importOriginal) => ({
 
 import { ChatInstance, Discussion, Enrolment, Responsibility } from '../db/models'
 import courseRouter from './course'
+import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { getEnrolledCourses, getTeachedCourses } from '../services/chatInstances/access'
 
 let currentUser: { id: string; isAdmin: boolean }
@@ -312,8 +313,8 @@ describe('PUT courses/:id', () => {
   const teacher = { id: 'teacher-1', isAdmin: false }
   const admin = { id: 'admin-1', isAdmin: true }
 
-  const mockCourse = () => {
-    const course = courseFixture({ saveDiscussions: false, save: vi.fn() }) as any
+  const mockCourse = (overrides = {}) => {
+    const course = courseFixture({ saveDiscussions: false, usageLimit: DEFAULT_TOKEN_LIMIT, save: vi.fn(), ...overrides }) as any
     vi.mocked(ChatInstance.findOne).mockResolvedValue(course as any)
     return course
   }
@@ -345,6 +346,52 @@ describe('PUT courses/:id', () => {
     const response = await putCourse({ activityPeriod })
     expect(response.status).toBe(200)
     expect(course.activityPeriod).toEqual(activityPeriod)
+  })
+
+  test('responsible teacher cannot change the token limit', async () => {
+    currentUser = teacher
+    setMembership({ responsible: true })
+    const course = mockCourse()
+    const response = await putCourse({ usageLimit: 5_000_000 })
+    expect(response.status).toBe(403)
+    expect(course.save).not.toHaveBeenCalled()
+    expect(course.usageLimit).toBe(DEFAULT_TOKEN_LIMIT)
+  })
+
+  test('admin can change the token limit', async () => {
+    currentUser = admin
+    const course = mockCourse()
+    const response = await putCourse({ usageLimit: 5_000_000 })
+    expect(response.status).toBe(200)
+    expect(course.save).toHaveBeenCalled()
+    expect(course.usageLimit).toBe(5_000_000)
+  })
+
+  test.each([0, -1, 1.5, '1000', 2_147_483_648])('admin cannot set token limit %s', async (usageLimit) => {
+    currentUser = admin
+    const course = mockCourse()
+    const response = await putCourse({ usageLimit })
+    expect(response.status).toBe(400)
+    expect(course.save).not.toHaveBeenCalled()
+  })
+
+  test('activation sets the default token limit on a course without one', async () => {
+    currentUser = teacher
+    setMembership({ responsible: true })
+    const course = mockCourse({ activated: false, usageLimit: 0 })
+    const response = await putCourse({ activated: true })
+    expect(response.status).toBe(200)
+    expect(course.usageLimit).toBe(DEFAULT_TOKEN_LIMIT)
+  })
+
+  test('deactivating and reactivating keeps a raised token limit', async () => {
+    currentUser = teacher
+    setMembership({ responsible: true })
+    const course = mockCourse({ usageLimit: 5_000_000 })
+    await putCourse({ activated: false })
+    await putCourse({ activated: true })
+    expect(course.activated).toBe(true)
+    expect(course.usageLimit).toBe(5_000_000)
   })
 })
 

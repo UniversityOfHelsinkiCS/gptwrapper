@@ -50,6 +50,7 @@ import { canManageCourse, formatDate, isCustomChatInstance } from './util'
 import { OutlineButtonBlue, BlueButton } from './general/Buttons'
 import { CourseActivityPeriodEditor } from '../Courses/Course/CourseActivityPeriodEditor'
 import { ResearchCourseToggle } from '../Courses/Course/ResearchCourseToggle'
+import { CourseTokenLimitEditor } from '../Courses/Course/CourseTokenLimitEditor'
 import DiscussionView from '../Courses/Course/Discussions'
 import PromptUsageHistogram from '../Courses/Course/PromptUsageHistogram'
 import { EnrolmentActionUserSearch, ResponsibilityActionUserSearch } from '../Admin/UserSearch'
@@ -445,6 +446,9 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
 
         {/* Research course toggle (admins) */}
         {isAdmin && <ResearchCourseToggle course={activeCourse} />}
+
+        {/* Token limit (admins) */}
+        {isAdmin && <CourseTokenLimitEditor key={`${activeCourse.courseId}:${activeCourse.usageLimit}`} course={activeCourse} />}
 
         {/* Personal usage card */}
         {currentCourseUsage &&

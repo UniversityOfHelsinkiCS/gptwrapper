@@ -89,9 +89,13 @@ const DiscussionList: React.FC<{ courseId?: string; onSelectUser: (userId: strin
       const { data: discussions } = await apiClient.get<Discussion[]>(`/courses/${courseId}/discussions`)
       const data = exportDiscussions(course, discussers, discussions)
       const date = new Date().toISOString().slice(0, 10)
-      const saved = await saveFileWithDialog(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), `${courseId}-conversations-${date}.json`, {
-        'application/json': ['.json'],
-      })
+      const saved = await saveFileWithDialog(
+        new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }),
+        `${courseId}-conversations-${date}.json`,
+        {
+          'application/json': ['.json'],
+        },
+      )
       if (saved) enqueueSnackbar(t('download:success'), { variant: 'success' })
     } catch {
       enqueueSnackbar(t('download:failure'), { variant: 'error' })
