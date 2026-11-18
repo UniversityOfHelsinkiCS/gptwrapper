@@ -47,7 +47,7 @@ describe('ModelSelector on a wide screen: "More models" opens a menu next to the
     const { menu, toggle, setModel } = openSelector()
 
     expect(within(menu).queryByTestId('gpt-6-luna-option')).toBeTruthy()
-    expect(screen.queryByTestId('gpt-5.5-option')).toBeNull()
+    expect(screen.queryByTestId('gpt-5.1-option')).toBeNull()
 
     expect(toggle.getAttribute('aria-haspopup')).toBe('menu')
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
@@ -56,10 +56,10 @@ describe('ModelSelector on a wide screen: "More models" opens a menu next to the
 
     const sideMenu = getSideMenu()
     expect(document.getElementById(toggle.getAttribute('aria-controls')!)?.contains(sideMenu)).toBe(true)
-    expect(within(menu).queryByTestId('gpt-5.5-option')).toBeNull()
+    expect(within(menu).queryByTestId('gpt-5.1-option')).toBeNull()
 
-    fireEvent.click(within(sideMenu).getByTestId('gpt-5.5-option'))
-    expect(setModel).toHaveBeenCalledWith('gpt-5.5')
+    fireEvent.click(within(sideMenu).getByTestId('gpt-5.1-option'))
+    expect(setModel).toHaveBeenCalledWith('gpt-5.1')
   })
 
   test('ArrowRight opens the side menu with focus inside it, ArrowLeft closes it', () => {
@@ -117,14 +117,14 @@ describe('ModelSelector on a wide screen: "More models" opens a menu next to the
   })
 
   test('when the current model is in More models, the side menu opens too, with focus on that model', async () => {
-    const { toggle } = openSelector({ currentModel: 'gpt-5.5' })
+    const { toggle } = openSelector({ currentModel: 'gpt-5.1' })
 
-    expect(toggle.getAttribute('aria-label')).toBe('More models, GPT-5.5 selected')
+    expect(toggle.getAttribute('aria-label')).toBe('More models, GPT-5.1 selected')
     // opens as the featured menu starts its grow animation
     const sideMenu = await screen.findByRole('menu', { name: 'More models' })
     expect(toggle.getAttribute('aria-expanded')).toBe('true')
 
-    const current = within(sideMenu).getByTestId('gpt-5.5-option')
+    const current = within(sideMenu).getByTestId('gpt-5.1-option')
     expect(current.getAttribute('aria-checked')).toBe('true')
     expect(document.activeElement).toBe(current)
 
@@ -145,7 +145,7 @@ describe('ModelSelector on a wide screen: "More models" opens a menu next to the
 
     const sideMenu = getSideMenu()
     expect(within(sideMenu).queryByTestId('gpt-5-mini-option')).toBeTruthy()
-    expect(within(sideMenu).queryByTestId('gpt-5.5-option')).toBeNull()
+    expect(within(sideMenu).queryByTestId('gpt-5.1-option')).toBeNull()
   })
 })
 
@@ -156,15 +156,15 @@ describe('ModelSelector on a narrow screen or embedded: "More models" expands in
     expect(toggle.getAttribute('aria-haspopup')).toBeNull()
     fireEvent.click(toggle)
     expect(toggle.getAttribute('aria-expanded')).toBe('true')
-    expect(within(menu).queryByTestId('gpt-5.5-option')).toBeTruthy()
+    expect(within(menu).queryByTestId('gpt-5.1-option')).toBeTruthy()
     expect(screen.getAllByRole('menu')).toHaveLength(1)
   })
 
   test('the section starts expanded when the current model is in it', () => {
-    const { menu, toggle } = openSelector({ currentModel: 'gpt-5.5', isMobile: true })
+    const { menu, toggle } = openSelector({ currentModel: 'gpt-5.1', isMobile: true })
 
     expect(toggle.getAttribute('aria-expanded')).toBe('true')
-    expect(within(menu).getByTestId('gpt-5.5-option').getAttribute('aria-checked')).toBe('true')
+    expect(within(menu).getByTestId('gpt-5.1-option').getAttribute('aria-checked')).toBe('true')
   })
 
   test('embedded mode expands inline even on a wide screen', () => {
@@ -172,7 +172,7 @@ describe('ModelSelector on a narrow screen or embedded: "More models" expands in
     const { menu, toggle } = openSelector()
 
     fireEvent.click(toggle)
-    expect(within(menu).queryByTestId('gpt-5.5-option')).toBeTruthy()
+    expect(within(menu).queryByTestId('gpt-5.1-option')).toBeTruthy()
     expect(screen.getAllByRole('menu')).toHaveLength(1)
   })
 })
