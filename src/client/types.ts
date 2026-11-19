@@ -3,6 +3,7 @@ import { Locale } from '@shared/lang'
 import { AccessLevel, ChatStatus, Locales, Statistic, Term } from '@shared/types'
 import type { PromptTool } from '@shared/promptTools'
 import type { UserPreferences } from '@shared/user'
+import type { UserStatusResponse } from '@shared/usage'
 
 /*
  * Important: This file contains types used in the client, but we should consider moving them to shared.
@@ -165,10 +166,8 @@ export type ChatInstanceUsage = {
   chatInstance: ChatInstance
 }
 
-export type UserStatus = {
-  usage: number
-  limit: number
-}
+/** `mode` tells whether `usage`/`limit` are weekly tokens or the weekly cost budget (€). */
+export type UserStatus = UserStatusResponse
 
 export interface Faculty {
   code: string

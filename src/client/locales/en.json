@@ -250,6 +250,7 @@
     "responseFailed": "Generating a response failed.",
     "latestResponseLabel": "Latest response",
     "usageWarning": "You are about to use {{tokenUsagePercentage}}% of your weekly CurreChat usage",
+    "budgetUsedUp": "You have used up your weekly CurreChat budget. Next reset: {{resetsAt}}.",
     "contextLimitWarning": "The conversation exceeds the context limit of {{contextLimit}} tokens for the selected model. Your conversation has {{tokenCount}} tokens. Clicking continue will truncate the oldest messages. It is recommended to start a new conversation.",
     "noPrompt": "No prompt",
     "showFullDescription": "Show full description",
@@ -367,6 +368,7 @@
   },
   "error": {
     "unexpected": "An unexpected error occurred",
+    "usageLimitReached": "You have reached your weekly CurreChat usage limit. It resets every Monday.",
     "sessionExpired": "Session expired",
     "pleaseReload": "Please reload the page",
     "noAccess": "No access",

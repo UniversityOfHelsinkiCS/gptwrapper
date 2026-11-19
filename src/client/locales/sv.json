@@ -257,6 +257,7 @@
     "responseFailed": "Det gick inte att generera svaret.",
     "latestResponseLabel": "Senaste svaret",
     "usageWarning": "Du håller på att använda {{tokenUsagePercentage}}% av din veckovisa CurreChat-användning",
+    "budgetUsedUp": "Du har använt upp din veckovisa CurreChat-användning. Nästa återställning: {{resetsAt}}.",
     "contextLimitWarning": "Samtalet överskrider kontextgränsen på {{contextLimit}} token för den valda modellen. Ditt samtal har {{tokenCount}} token. Att klicka på fortsätt kommer att trunkera de äldsta meddelandena. Det rekommenderas att starta ett nytt samtal.",
     "noPrompt": "Ingen prompt",
     "showFullDescription": "Visa hela beskrivningen",
@@ -347,6 +348,7 @@
   },
   "error": {
     "unexpected": "Ett oväntat fel inträffade",
+    "usageLimitReached": "Du har nått din veckovisa CurreChat-användningsgräns. Den återställs varje måndag.",
     "sessionExpired": "Sessionen har gått ut",
     "pleaseReload": "Vänligen ladda om sidan",
     "noAccess": "Ingen tillgång",

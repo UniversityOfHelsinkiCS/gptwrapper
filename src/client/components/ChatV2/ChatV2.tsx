@@ -4,15 +4,7 @@ import { enqueueSnackbar } from '../common/Snackbar'
 import { lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom'
-import {
-  DEFAULT_MODEL,
-  DEFAULT_MODEL_TEMPERATURE,
-  DEFAULT_STREAM_TIMEOUT,
-  FREE_MODEL,
-  isFreeModel,
-  ValidModelNameSchema,
-  getModelConfig,
-} from '../../../config'
+import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, DEFAULT_STREAM_TIMEOUT, isFreeModel, ValidModelNameSchema, getModelConfig } from '../../../config'
 import type { AssistantMessageV2 } from '@shared/agentChat'
 import type { MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
@@ -27,6 +19,7 @@ import { invalidateUserUsage } from '../../hooks/useUserUsage'
 import { useAnalyticsDispatch } from '../../stores/analytics'
 import sidebarOpen from '../../assets/sidebar-open.svg'
 import { ChatBox, type ChatBoxActions } from './ChatBox'
+import { useUsageLimit } from './useUsageLimit'
 import { findQuiz, quizAnswerMessage, quizResultAnnouncement, type QuizSelection } from './tools/quizAnswerContext'
 import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
 import { OutlineButtonBlack } from './general/Buttons'
@@ -134,7 +127,7 @@ const ChatV2Content = () => {
   const [storedAttachedFolders, setAttachedFolders] = useLocalStorageState<unknown>(`${localStoragePrefix}-attached-folders`, [])
   const attachedFolders = useMemo(() => parseStoredFolders(storedAttachedFolders), [storedAttachedFolders])
 
-  const tokenLimitExceeded = !!userStatus && userStatus.usage >= userStatus.limit
+  const { tokenLimitExceeded, budgetResetsAt } = useUsageLimit(userStatus, setActiveModel)
 
   // app states
   const [fileName, setFileName] = useState<string>('')
@@ -197,6 +190,9 @@ const ChatV2Content = () => {
     failedAnswer?: AssistantMessageV2,
   ) => {
     if (!userStatus) return
+
+    // The chat box shows why sending is blocked.
+    if (budgetResetsAt) return
 
     const acualModel = activeModel
     if (tokenLimitExceeded && !isFreeModel(acualModel)) {
@@ -336,6 +332,8 @@ const ChatV2Content = () => {
         console.error('API error:', res)
         handleCompletionStreamError(res, fileName)
         handleCancel('error')
+        // A 403 'Usage limit reached' means the status is stale: refetch it to show the blocked state.
+        refetchStatus()
         return
       }
 
@@ -497,10 +495,6 @@ const ChatV2Content = () => {
     // inside handleSendMessage would otherwise still see the errored message.
     handleSendMessage('', true, [], newMessages, undefined, failedAnswer)
   }
-
-  useEffect(() => {
-    if (tokenLimitExceeded) setActiveModel(FREE_MODEL)
-  }, [tokenLimitExceeded])
 
   // Handle layout shift when right menu opens (tool result becomes visible)
   const prevScrollYProportional = useRef(0)
@@ -777,6 +771,7 @@ const ChatV2Content = () => {
               <ChatBox
                 disabled={isStreaming}
                 isTokenLimitExceeded={tokenLimitExceeded}
+                budgetResetsAt={budgetResetsAt}
                 fileInputRef={fileInputRef}
                 fileName={fileName}
                 setFileName={setFileName}

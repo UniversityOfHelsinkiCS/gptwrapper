@@ -59,6 +59,7 @@ export type ChatBoxActions = {
 export const ChatBox = ({
   disabled,
   isTokenLimitExceeded,
+  budgetResetsAt = null,
   fileInputRef,
   fileName,
   messageWarning,
@@ -79,6 +80,8 @@ export const ChatBox = ({
 }: {
   disabled: boolean
   isTokenLimitExceeded: boolean
+  /** Set (ISO time of the next reset) when the weekly budget is used up under cost enforcement: sending is blocked. */
+  budgetResetsAt?: string | null
   fileInputRef: React.RefObject<HTMLInputElement | null>
   fileName: string
   messageWarning: { [key in WarningType]?: { message: string; ignored: boolean; tokenCount?: number; contextLimit?: number; tokenUsagePercentage?: number } }
@@ -123,9 +126,9 @@ export const ChatBox = ({
   }, [fileName])
 
   // A quiz answer can be sent without an explanation
-  const acuallyDisabled = disabled || (message.length === 0 && !quizPrompt)
+  const acuallyDisabled = disabled || !!budgetResetsAt || (message.length === 0 && !quizPrompt)
 
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   useKeyboardCommands({
     resetChat: handleReset,
@@ -216,6 +219,13 @@ export const ChatBox = ({
           boxShadow: 3,
         }}
       >
+        {budgetResetsAt && (
+          <Alert severity="warning" sx={{ my: '0.2rem' }} data-testid="budget-used-up">
+            {t('chat:budgetUsedUp', {
+              resetsAt: new Date(budgetResetsAt).toLocaleString(i18n.language, { dateStyle: 'full', timeStyle: 'short' }),
+            })}
+          </Alert>
+        )}
         {fileTypeAlertOpen && (
           <Alert severity="warning">
             <Typography>{t('chat:fileTypeNotSupported', { type: disallowedFileType })}</Typography>

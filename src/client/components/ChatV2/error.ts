@@ -11,7 +11,9 @@ export const handleCompletionStreamError = (err: any, file: string) => {
   const filename = err?.filename || err?.response?.data?.filename
   const numPages = err?.numPages || err?.response?.data?.numPages
 
-  if (error === 'Model maximum context reached' && file) {
+  if (error === 'Usage limit reached') {
+    enqueueSnackbar(t('error:usageLimitReached'), { variant: 'error' })
+  } else if (error === 'Model maximum context reached' && file) {
     enqueueSnackbar(t('error:tooLargeFile'), { variant: 'error' })
   } else if (error && typeof error === 'string' && file) {
     let translatedMessage = ''

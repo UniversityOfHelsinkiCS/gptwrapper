@@ -253,6 +253,7 @@
     "responseFailed": "Vastauksen generointi epäonnistui.",
     "latestResponseLabel": "Uusin vastaus",
     "usageWarning": "Olet käyttämässä {{tokenUsagePercentage}}% viikoittaisesta CurreChat-käytöstäsi.",
+    "budgetUsedUp": "Viikoittainen CurreChat-käyttösi on käytetty loppuun. Seuraava nollaus: {{resetsAt}}.",
     "contextLimitWarning": "Keskustelu ylittää valitun mallin kontekstirajan, joka on {{contextLimit}} tokenia. Keskustelussasi on {{tokenCount}} tokenia. Jatkaminen katkaisee vanhimmat viestit. Suositeltavaa on aloittaa uusi keskustelu.",
     "noPrompt": "Ei alustusta",
     "showFullDescription": "Näytä koko kuvaus",
@@ -378,6 +379,7 @@
   },
   "error": {
     "unexpected": "Odottomaton virhe tapahtui",
+    "usageLimitReached": "Viikoittainen CurreChat-käyttörajasi on täynnä. Se nollautuu joka maanantai.",
     "sessionExpired": "Istunto on vanhentunut",
     "pleaseReload": "Ole hyvä ja lataa sivu uudelleen",
     "noAccess": "Ei oikeuksia",
