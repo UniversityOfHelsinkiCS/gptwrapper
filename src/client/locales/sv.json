@@ -180,6 +180,8 @@
     },
     "moreModels": "Fler modeller",
     "moreModelsSelected": "Fler modeller, {{model}} valt",
+    "modelCost": "Kostar cirka {{multiplier}} gånger så mycket som {{model}}",
+    "modelCostSame": "Kostar ungefär lika mycket som {{model}}",
     "emptyReminder": "Observera att långa konversationer förbrukar fler tokens. Vi rekommenderar att du rensar konversationen när du byter samtalsämne.",
     "modelDisabled": "Språkmodellen är inte tillgänglig",
     "attachFile": "Bifoga fil",

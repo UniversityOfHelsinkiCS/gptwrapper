@@ -12,6 +12,7 @@ import useCurrentUser from '../../hooks/useCurrentUser'
 import { visuallyHidden } from '@mui/utils'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { focusIndicatorStyle } from '../../util/accessibility'
+import { modelPriceIndicator, PRICE_BASELINE_MODEL } from '@shared/usage'
 
 const tagChipSx = {
   height: 18,
@@ -22,6 +23,15 @@ const tagChipSx = {
   letterSpacing: '0.03em',
   '& .MuiChip-label': { px: 0.75 },
 }
+
+const priceIndicatorSx = {
+  fontSize: '0.75rem',
+  lineHeight: '18px',
+  whiteSpace: 'nowrap',
+  fontVariantNumeric: 'tabular-nums',
+  color: 'text.secondary',
+  '&::after': { content: 'attr(data-price)' },
+} as const
 
 const isPointerOver = (element: Element | null | undefined, { clientX, clientY }: React.MouseEvent) => {
   const rect = element?.getBoundingClientRect()
@@ -46,7 +56,7 @@ const ModelSelector = ({
   isTokenLimitExceeded: boolean
   isMobile: boolean
 }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [moreOpen, setMoreOpen] = React.useState(false)
   const menuPaperRef = React.useRef<HTMLDivElement>(null)
@@ -98,6 +108,12 @@ const ModelSelector = ({
     const description = descriptionKey && t(descriptionKey)
     const selfHostedLabel = tags.includes('local') && t('chat:selfHostedModel')
     const freeLabel = isFreeModel(name) && t('chat:freeModel')
+    const priceIndicator = modelPriceIndicator(name)
+    const multiplier = priceIndicator?.multiplier.toLocaleString(i18n.language)
+    const baselineName = getModelDisplayName(PRICE_BASELINE_MODEL)
+    const costLabel =
+      priceIndicator &&
+      (priceIndicator.multiplier === 1 ? t('chat:modelCostSame', { model: baselineName }) : t('chat:modelCost', { multiplier, model: baselineName }))
     return (
       <MenuItem
         key={name}
@@ -107,16 +123,31 @@ const ModelSelector = ({
         selected={active}
         role="menuitemradio"
         aria-checked={active}
-        aria-label={[displayName, description, selfHostedLabel, freeLabel].filter(Boolean).join(', ')}
+        aria-label={[displayName, description, selfHostedLabel, freeLabel, costLabel].filter(Boolean).join(', ')}
         sx={{ gap: 1, py: 1, pr: 1.75, pl: nested ? 3.5 : 1.75, alignItems: 'flex-start', mt: nested ? 0 : 1, ...focusIndicatorStyle() }}
       >
         <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.25, whiteSpace: 'normal' }}>
           <Typography sx={{ fontSize: '0.875rem', fontWeight: active ? 600 : 400 }}>{displayName}</Typography>
           {description && <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.3 }}>{description}</Typography>}
         </Box>
-        {selfHostedLabel && <Chip label={selfHostedLabel} size="small" variant="outlined" sx={tagChipSx} />}
-        {freeLabel && <Chip label={freeLabel} size="small" color="success" sx={tagChipSx} />}
-        {active && <CheckIcon sx={{ fontSize: 16, color: 'primary.main' }} />}
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5, flexShrink: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minHeight: 18 }}>
+            {selfHostedLabel && <Chip label={selfHostedLabel} size="small" variant="outlined" sx={tagChipSx} />}
+            {freeLabel && <Chip label={freeLabel} size="small" color="success" sx={tagChipSx} />}
+            {active && <CheckIcon sx={{ fontSize: 16, color: 'primary.main' }} />}
+          </Box>
+          {priceIndicator && (
+            // Drawn with ::after so the text is not part of the option's visible text, which axe's label-in-name check
+            // compares with the aria-label. The cost is in the aria-label as a sentence instead.
+            <Box
+              component="span"
+              aria-hidden
+              data-testid={`${name}-price`}
+              data-price={`${'●'.repeat(priceIndicator.dots)} ×${multiplier}`}
+              sx={priceIndicatorSx}
+            />
+          )}
+        </Box>
       </MenuItem>
     )
   }
