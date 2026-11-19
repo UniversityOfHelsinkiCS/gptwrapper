@@ -1,5 +1,6 @@
 import { AIMessage, ToolMessage } from '@langchain/core/messages'
 import type { ChatEvent } from '@shared/agentChat'
+import { addTokenUsage, emptyTokenUsage, type TokenUsage, tokenUsageFromMetadata } from '@shared/usage'
 import type { SubagentRunPayload, ToolProgressPayload } from './tools/types'
 
 /**
@@ -227,6 +228,8 @@ export const mapStreamChunks = (chunks: StreamChunk[], initialState: StreamState
 export type ModelCallSummary = {
   inputTokens: number
   outputTokens: number
+  /** The same call's tokens by type, cache reads and writes apart from uncached input. */
+  usage: TokenUsage
   toolCalls: string[]
 }
 
@@ -262,8 +265,9 @@ const modelCallOf = (data: unknown): ModelCallSummary | null => {
     (summary, message) => ({
       inputTokens: summary.inputTokens + (message.usage_metadata?.input_tokens ?? 0),
       outputTokens: summary.outputTokens + (message.usage_metadata?.output_tokens ?? 0),
+      usage: addTokenUsage(summary.usage, tokenUsageFromMetadata(message.usage_metadata)),
       toolCalls: [...summary.toolCalls, ...(message.tool_calls ?? []).map((call) => call.name)],
     }),
-    { inputTokens: 0, outputTokens: 0, toolCalls: [] },
+    { inputTokens: 0, outputTokens: 0, usage: emptyTokenUsage(), toolCalls: [] },
   )
 }

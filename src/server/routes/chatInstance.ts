@@ -281,6 +281,7 @@ chatInstanceRouter.delete('/usage/:id', async (req, res) => {
   await requireFullAccess(user, chatInstance)
 
   chatInstanceUsage.usageCount = 0
+  chatInstanceUsage.weeklyModelUsage = {}
 
   await chatInstanceUsage.save()
 

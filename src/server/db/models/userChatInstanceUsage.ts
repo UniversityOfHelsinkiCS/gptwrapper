@@ -1,5 +1,6 @@
 import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, NonAttribute } from 'sequelize'
 
+import type { ModelUsage } from '@shared/usage'
 import { sequelize } from '../connection'
 import ChatInstance from './chatInstance'
 
@@ -13,6 +14,12 @@ class UserChatInstanceUsage extends Model<InferAttributes<UserChatInstanceUsage>
   declare usageCount: CreationOptional<number>
 
   declare totalUsageCount: CreationOptional<number>
+
+  /** Tokens by model since the weekly reset. */
+  declare weeklyModelUsage: CreationOptional<ModelUsage>
+
+  /** Tokens by model, never reset. */
+  declare totalModelUsage: CreationOptional<ModelUsage>
 
   declare chatInstance?: NonAttribute<ChatInstance>
 }
@@ -42,6 +49,16 @@ UserChatInstanceUsage.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
+    },
+    weeklyModelUsage: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: {},
+    },
+    totalModelUsage: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: {},
     },
   },
   {

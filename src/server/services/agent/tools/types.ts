@@ -30,7 +30,8 @@ export type ToolContext<Config = unknown> = {
  *
  * A `subagent` is a tool that runs an agent of its own with `runSubagent`. Its tool schema must have a string
  * `task`, which the client shows on the subagent card. The client shows it as a subagent part with the
- * subagent's own parts nested in it, and its model calls are not charged to the user (see `runAgent`).
+ * subagent's own parts nested in it. Its model calls are left out of the token counters but recorded in the per-model
+ * usage under the subagent's own `model` (see `runAgent`).
  */
 export type ToolModule<Config = unknown> = PlainToolModule<Config> | SubagentToolModule<Config>
 
@@ -44,6 +45,8 @@ export type SubagentToolModule<Config = unknown> = ToolModuleBase<Config> & {
   kind: 'subagent'
   /** Text that replaces a subagent part of an earlier answer in the history sent to the model. */
   summarizeForHistory: (part: SubagentPart) => string
+  /** The model the subagent runs on in a chat with `chatModel`. Its model calls are recorded in usage under this model. */
+  model: (chatModel: ValidModelName) => ValidModelName
   /**
    * Most calls of this subagent in one run (plan section 6), `DEFAULT_SUBAGENT_CALLS_PER_RUN` by default. Further
    * calls end as an error the model reads, so it answers with what it has.

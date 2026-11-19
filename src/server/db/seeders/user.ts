@@ -13,6 +13,8 @@ const users: InferCreationAttributes<User>[] = [
     isPowerUser: true,
     totalUsage: BigInt(0),
     usage: 0,
+    weeklyModelUsage: {},
+    totalModelUsage: {},
     primaryEmail: 'test@example.com',
     studentNumber: '123456',
     termsAcceptedAt: null,

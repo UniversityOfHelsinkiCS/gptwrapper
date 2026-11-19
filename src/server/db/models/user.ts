@@ -1,5 +1,6 @@
 import { Model, type InferAttributes, type InferCreationAttributes, type CreationOptional, DataTypes } from 'sequelize'
 
+import type { ModelUsage } from '@shared/usage'
 import { sequelize } from '../connection'
 
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
@@ -18,6 +19,12 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare usage: CreationOptional<number>
 
   declare totalUsage: CreationOptional<bigint>
+
+  /** Tokens by model since the weekly reset. */
+  declare weeklyModelUsage: CreationOptional<ModelUsage>
+
+  /** Tokens by model, never reset. */
+  declare totalModelUsage: CreationOptional<ModelUsage>
 
   declare lastName: CreationOptional<string>
 
@@ -67,6 +74,16 @@ User.init(
     totalUsage: {
       type: DataTypes.BIGINT,
       defaultValue: 0,
+    },
+    weeklyModelUsage: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: {},
+    },
+    totalModelUsage: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: {},
     },
     lastName: {
       type: DataTypes.STRING,

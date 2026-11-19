@@ -8,6 +8,8 @@ import { AZURE_API_KEY, AZURE_RESOURCE, GOOGLE_CLOUD_PROJECT_ID, INFERENCE_API_T
 import { ChatGoogle } from '@langchain/google'
 import { ApiKey, User } from '../../db/models'
 import { checkUsage, getUserTokenLimit, incrementUsage } from 'src/server/services/chatInstances/usage'
+import { recordModelUsage } from 'src/server/services/chatInstances/modelUsage'
+import { tokenUsageFromMetadata } from '@shared/usage'
 import type { User as UserType } from '../../../shared/user'
 import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from "@langchain/core/messages"
 
@@ -396,6 +398,15 @@ api.post('/v1/chat/completions',
         logger.info(JSON.stringify(logData))
 
         await incrementUsage(user, tokens)
+
+        // Same fallback as the token count: without usage metadata, the answer's length counts as output.
+        const hasUsageMetadata = !!(full?.usage_metadata?.input_tokens || full?.usage_metadata?.output_tokens)
+        const tokenUsage = hasUsageMetadata ? tokenUsageFromMetadata(full?.usage_metadata) : { ...tokenUsageFromMetadata(undefined), output: textLength }
+        try {
+            await recordModelUsage({ userId: user.id, usage: { [matching.name]: tokenUsage } })
+        } catch (error) {
+            logger.error(`Failed to record model usage of user ${user.id}: ${error instanceof Error ? error.message : error}`)
+        }
 
         const hasToolCalls = (full?.tool_calls?.length ?? 0) > 0
         const finishReason = hasToolCalls ? "tool_calls" : "stop"

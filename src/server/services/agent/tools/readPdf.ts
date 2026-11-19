@@ -102,6 +102,7 @@ export const readPdf: SubagentToolModule = {
   access: 'admin',
   maturity: 'experimental',
   instructions,
+  model: pdfReaderModel,
 
   create: (ctx) =>
     tool(

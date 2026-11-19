@@ -15,11 +15,13 @@ import { ApplicationError } from '../../util/ApplicationError'
 import logger from '../../util/logger'
 import { getAccessLevel, requireActiveAccess } from '../chatInstances/access'
 import { checkCourseUsage, checkUsage, getCourseTokenLimit, getUsage, getUserTokenLimit, incrementCourseUsage, incrementUsage } from '../chatInstances/usage'
+import { recordModelUsage } from '../chatInstances/modelUsage'
 import { handleWarnings, modelConfigHasInstructions, prepareMessagesForLLM } from './prepareMessages'
 import { getAgentModel } from './agentModel'
 import { describeGenerationError } from './generationError'
 import { keepFailedRun, readMissedCallUpdate, readResumeState, takeFailedRun } from './resumableRuns'
 import { createStreamState, getMainAgentModelCall, getSubagentModelCall, mapStreamChunk, nextStreamState, type StreamChunk } from './mapStreamChunk'
+import { createRunUsage } from './runUsage'
 import type { ClientToolCaller } from './clientTools'
 import { fileToolsFor } from './tools/fileTools'
 import { readPdfFor } from './tools/readPdf'
@@ -172,9 +174,11 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
   let modelCalls = 0
   const toolCalls: string[] = []
   let response = ''
-  // Subagents' model calls are not charged to the user but logged per subagent tool.
+  // Subagents' model calls are not in the token counters but logged per subagent tool.
   const subagentNames = new Map<string, string>()
   const subagentUsage: Record<string, SubagentUsage> = {}
+  // Every model call, subagents' included, by the model that ran it.
+  const runUsage = createRunUsage(model)
 
   const keepAlive = setInterval(() => {
     emit({ type: 'processing' }).catch((error) => logger.error('Failed to write keep-alive', { error }))
@@ -206,12 +210,14 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
         inputTokens += call.inputTokens
         outputTokens += call.outputTokens
         toolCalls.push(...call.toolCalls)
+        runUsage.addMainCall(call.usage)
       }
 
       // TODO: check this
       const subagentCall = getSubagentModelCall(streamChunk, streamState)
       if (subagentCall) {
         const name = subagentNames.get(subagentCall.callId) ?? 'unknown'
+        runUsage.addSubagentCall(subagentNames.get(subagentCall.callId), subagentCall.usage)
         const usage = (subagentUsage[name] ??= { modelCalls: 0, inputTokens: 0, outputTokens: 0, toolCalls: [] })
         usage.modelCalls++
         usage.inputTokens += subagentCall.inputTokens
@@ -275,6 +281,12 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
     } else {
       await incrementUsage(chargeUser, totalTokens)
     }
+  }
+  // Recorded for free models too: the cost budget has no free models.
+  try {
+    await recordModelUsage({ userId: chargeUser.id, courseUsageId: course?.chatInstance.currentUserUsage?.id, usage: runUsage.usage })
+  } catch (error) {
+    logger.error('Failed to record model usage', { model, error: error instanceof Error ? error.message : error })
   }
 
   const streamingMs = firstTokenAt ? Date.now() - firstTokenAt : 0

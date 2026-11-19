@@ -7,7 +7,7 @@ import { run as runUpdater } from '../updater'
 import { inDevelopment } from '../../config'
 import { UPDATER_CRON_ENABLED } from './config'
 
-const resetUsage = async () => {
+export const resetUsage = async () => {
   logger.info('Resetting usage')
 
   await User.update(
@@ -37,6 +37,11 @@ const resetUsage = async () => {
       },
     },
   )
+
+  // Weekly usage by model; the totals keep it.
+  const notEmpty = literal(`weekly_model_usage <> '{}'::jsonb`)
+  await User.update({ weeklyModelUsage: {} }, { where: notEmpty })
+  await UserChatInstanceUsage.update({ weeklyModelUsage: {} }, { where: notEmpty })
 
   logger.info('Usage reset complete')
 }

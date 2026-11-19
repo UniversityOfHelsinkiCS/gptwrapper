@@ -84,6 +84,7 @@ adminRouter.delete('/usage/:userId', async (req, res) => {
   }
 
   user.usage = 0
+  user.weeklyModelUsage = {}
 
   await user.save()
 
@@ -306,7 +307,7 @@ adminRouter.get('/api-users', async (_req, res) => {
 adminRouter.delete('/courses/:courseId/usage', async (req, res) => {
   const chatInstance = await findCourse(req.params.courseId)
 
-  await UserChatInstanceUsage.update({ usageCount: 0 }, { where: { chatInstanceId: chatInstance.id } })
+  await UserChatInstanceUsage.update({ usageCount: 0, weeklyModelUsage: {} }, { where: { chatInstanceId: chatInstance.id } })
 
   res.status(204).send()
 })

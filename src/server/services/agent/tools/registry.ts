@@ -1,4 +1,5 @@
 import type { StructuredToolInterface } from '@langchain/core/tools'
+import type { ValidModelName } from '@config'
 import type { AssistantPart, HistoryAssistantMessage, SubagentPart, ToolPart } from '@shared/agentChat'
 import { documentSearch } from './documentSearch'
 import { fileTools } from './fileTools'
@@ -14,6 +15,12 @@ const TOOL_MODULES: ToolModule<any>[] = [documentSearch, mockSubagent, presentQu
 const toolModules = new Map(TOOL_MODULES.map((module) => [module.name, module]))
 
 export const getToolModule = (name: string): ToolModule | undefined => toolModules.get(name)
+
+/** The model a subagent tool runs on in a chat with `chatModel`; the chat model itself for a tool that is not a known subagent. */
+export const subagentModelOf = (toolName: string | undefined, chatModel: ValidModelName): ValidModelName => {
+  const module = toolName === undefined ? undefined : getToolModule(toolName)
+  return module?.kind === 'subagent' ? module.model(chatModel) : chatModel
+}
 
 export const listToolModules = (): ToolModule[] => [...toolModules.values()]
 
