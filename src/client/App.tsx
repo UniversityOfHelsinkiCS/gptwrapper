@@ -155,7 +155,7 @@ const Layout = ({ snackbarRootRef }: { snackbarRootRef: (node: HTMLElement | nul
   const headerRef = React.useRef<HTMLElement>(null)
 
   useEffect(() => {
-    if (user && !user.termsAcceptedAt) {
+    if (user && !user.termsAcceptedAt && !safeLocalStorage.getItem('adminLoggedInAs')) {
       setDisclaimerStatus(true)
     }
   }, [isSuccess])

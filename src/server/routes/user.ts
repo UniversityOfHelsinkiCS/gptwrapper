@@ -105,6 +105,12 @@ userRouter.post('/accept-terms', async (req, res) => {
   const { user } = request
   const { id } = user
 
+  // An admin logged in as another user must not accept the terms on their behalf.
+  if (request.hijackedBy) {
+    res.status(200).send()
+    return
+  }
+
   await User.update({ termsAcceptedAt: new Date() }, { where: { id } })
 
   res.status(200).send()
