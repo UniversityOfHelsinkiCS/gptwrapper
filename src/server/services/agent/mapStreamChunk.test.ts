@@ -5,6 +5,7 @@ import { load } from '@langchain/core/load'
 import { AIMessageChunk, ToolMessage } from '@langchain/core/messages'
 import { describe, expect, test } from 'vitest'
 import type { ChatEvent } from '@shared/agentChat'
+import { addTokenUsage, emptyTokenUsage } from '@shared/usage'
 import {
   createStreamState,
   getMainAgentModelCall,
@@ -53,9 +54,10 @@ const sumUsage = (tuples: StreamChunk[]) =>
         calls: sum.calls + 1,
         inputTokens: sum.inputTokens + call.inputTokens,
         outputTokens: sum.outputTokens + call.outputTokens,
+        usage: addTokenUsage(sum.usage, call.usage),
         toolCalls: [...sum.toolCalls, ...call.toolCalls],
       }),
-      { calls: 0, inputTokens: 0, outputTokens: 0, toolCalls: [] },
+      { calls: 0, inputTokens: 0, outputTokens: 0, usage: emptyTokenUsage(), toolCalls: [] },
     )
 
 describe('mapStreamChunk with captured Azure runs', () => {
@@ -99,7 +101,13 @@ describe('mapStreamChunk with captured Azure runs', () => {
   test('sums token usage over both model calls of a tool run', async () => {
     const usage = sumUsage(await loadFixture('azure-tool'))
 
-    expect(usage).toEqual({ calls: 2, inputTokens: 86 + 225, outputTokens: 105 + 135, toolCalls: ['document_search'] })
+    expect(usage).toEqual({
+      calls: 2,
+      inputTokens: 86 + 225,
+      outputTokens: 105 + 135,
+      usage: { input: 86 + 225, cachedInput: 0, cacheWrite: 0, output: 105 + 135 },
+      toolCalls: ['document_search'],
+    })
   })
 })
 
@@ -190,7 +198,13 @@ describe('mapStreamChunk with Gemini runs (synthetic Vertex replay)', () => {
   test('sums usage over both model calls, thinking tokens included', async () => {
     const usage = sumUsage(await loadFixture('vertex-replay-tool'))
 
-    expect(usage).toEqual({ calls: 2, inputTokens: 70 + 110, outputTokens: 73 + 11, toolCalls: ['document_search'] })
+    expect(usage).toEqual({
+      calls: 2,
+      inputTokens: 70 + 110,
+      outputTokens: 73 + 11,
+      usage: { input: 70 + 110, cachedInput: 0, cacheWrite: 0, output: 73 + 11 },
+      toolCalls: ['document_search'],
+    })
   })
 })
 
@@ -268,7 +282,26 @@ describe('mapStreamChunk tool events', () => {
     const subagentCall = new AIMessageChunk({ content: 'x', usage_metadata: { input_tokens: 5, output_tokens: 5, total_tokens: 10 } })
 
     expect(getMainAgentModelCall([['tools:t1'], 'updates', { model_request: { messages: [subagentCall] } }])).toBeNull()
-    expect(getMainAgentModelCall([[], 'updates', { model_request: { messages: [subagentCall] } }])).toEqual({ inputTokens: 5, outputTokens: 5, toolCalls: [] })
+    expect(getMainAgentModelCall([[], 'updates', { model_request: { messages: [subagentCall] } }])).toEqual({
+      inputTokens: 5,
+      outputTokens: 5,
+      usage: { input: 5, cachedInput: 0, cacheWrite: 0, output: 5 },
+      toolCalls: [],
+    })
+  })
+
+  test('splits cache reads and cache writes out of the input tokens, so no token is counted twice', () => {
+    const cached = new AIMessageChunk({
+      content: 'x',
+      usage_metadata: { input_tokens: 1000, output_tokens: 50, total_tokens: 1050, input_token_details: { cache_read: 600, cache_creation: 300 } },
+    })
+
+    expect(getMainAgentModelCall([[], 'updates', { model_request: { messages: [cached] } }])).toEqual({
+      inputTokens: 1000,
+      outputTokens: 50,
+      usage: { input: 100, cachedInput: 600, cacheWrite: 300, output: 50 },
+      toolCalls: [],
+    })
   })
 })
 
@@ -362,10 +395,10 @@ describe('mapStreamChunk subagents', () => {
       if (subCall) sub.push(subCall)
     }
 
-    expect(main).toEqual([{ inputTokens: 0, outputTokens: 0, toolCalls: ['researcher'] }])
+    expect(main).toEqual([{ inputTokens: 0, outputTokens: 0, usage: { input: 0, cachedInput: 0, cacheWrite: 0, output: 0 }, toolCalls: ['researcher'] }])
     expect(sub).toEqual([
-      { callId: 'call_sub', inputTokens: 10, outputTokens: 4, toolCalls: ['lookup'] },
-      { callId: 'call_sub', inputTokens: 20, outputTokens: 6, toolCalls: [] },
+      { callId: 'call_sub', inputTokens: 10, outputTokens: 4, usage: { input: 10, cachedInput: 0, cacheWrite: 0, output: 4 }, toolCalls: ['lookup'] },
+      { callId: 'call_sub', inputTokens: 20, outputTokens: 6, usage: { input: 20, cachedInput: 0, cacheWrite: 0, output: 6 }, toolCalls: [] },
     ])
   })
 })

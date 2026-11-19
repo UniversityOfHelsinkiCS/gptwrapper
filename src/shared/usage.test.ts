@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { assertModelPrices, getModelPrice, type ModelConfig, ModelProvider, models, validModels } from '@config'
-import { mergeUsage, usageCost } from './usage'
+import { mergeUsage, tokenUsageFromMetadata, usageCost } from './usage'
 
 const tokens = (input: number, cachedInput: number, cacheWrite: number, output: number) => ({ input, cachedInput, cacheWrite, output })
 
@@ -98,5 +98,22 @@ describe('model config', () => {
     const qwen = validModels.find((m) => m.name === 'Qwen3.5')
 
     expect(qwen?.tags).toContain('internal')
+  })
+})
+
+describe('tokenUsageFromMetadata', () => {
+  it('takes cache reads and cache writes out of the input tokens, so each token is counted once', () => {
+    expect(tokenUsageFromMetadata({ input_tokens: 1000, output_tokens: 40, input_token_details: { cache_read: 700, cache_creation: 200 } })).toEqual(
+      tokens(100, 700, 200, 40),
+    )
+  })
+
+  it('counts all input as uncached without cache details', () => {
+    expect(tokenUsageFromMetadata({ input_tokens: 12, output_tokens: 3 })).toEqual(tokens(12, 0, 0, 3))
+  })
+
+  it('is empty without metadata and never negative', () => {
+    expect(tokenUsageFromMetadata(undefined)).toEqual(tokens(0, 0, 0, 0))
+    expect(tokenUsageFromMetadata({ input_tokens: 5, input_token_details: { cache_read: 10 } })).toEqual(tokens(0, 10, 0, 0))
   })
 })

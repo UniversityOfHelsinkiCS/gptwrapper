@@ -6,7 +6,7 @@ vi.mock('../db/models', () => ({
   ApiKey: { findAll: vi.fn() },
   ChatInstance: { findAndCountAll: vi.fn(), findOne: vi.fn() },
   UserChatInstanceUsage: { findAll: vi.fn(), update: vi.fn() },
-  User: { findAll: vi.fn() },
+  User: { findAll: vi.fn(), findByPk: vi.fn() },
   Enrolment: { findAll: vi.fn() },
   Responsibility: { findAll: vi.fn() },
 }))
@@ -221,7 +221,7 @@ describe('DELETE /admin/courses/:courseId/usage', () => {
     const res = await api.fetch('/admin/courses/cur-1/usage', { method: 'DELETE' })
 
     expect(res.status).toBe(204)
-    expect(UserChatInstanceUsage.update).toHaveBeenCalledWith({ usageCount: 0 }, { where: { chatInstanceId: 'ci-1' } })
+    expect(UserChatInstanceUsage.update).toHaveBeenCalledWith({ usageCount: 0, weeklyModelUsage: {} }, { where: { chatInstanceId: 'ci-1' } })
   })
 
   test('returns 404 for an unknown course', async () => {
@@ -240,5 +240,45 @@ describe('DELETE /admin/courses/:courseId/usage', () => {
 
     expect(res.status).toBe(403)
     expect(UserChatInstanceUsage.update).not.toHaveBeenCalled()
+  })
+})
+
+describe('DELETE /admin/usage/:userId', () => {
+  const tokens = { input: 5, cachedInput: 0, cacheWrite: 0, output: 5 }
+  const userRow = () => ({ id: 'user-1', usage: 1234, weeklyModelUsage: { 'gpt-4o': tokens }, totalModelUsage: { 'gpt-4o': tokens }, save: vi.fn() })
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    currentUser = { id: 'admin-1', isAdmin: true }
+  })
+
+  test('resets the token usage and empties the weekly usage by model, keeping the total', async () => {
+    const user = userRow()
+    vi.mocked(User.findByPk).mockResolvedValue(user as any)
+
+    const res = await api.fetch('/admin/usage/user-1', { method: 'DELETE' })
+
+    expect(res.status).toBe(204)
+    expect(user.usage).toBe(0)
+    expect(user.weeklyModelUsage).toEqual({})
+    expect(user.totalModelUsage).toEqual({ 'gpt-4o': tokens })
+    expect(user.save).toHaveBeenCalled()
+  })
+
+  test('returns 404 for an unknown user', async () => {
+    vi.mocked(User.findByPk).mockResolvedValue(null)
+
+    const res = await api.fetch('/admin/usage/nope', { method: 'DELETE' })
+
+    expect(res.status).toBe(404)
+  })
+
+  test('rejects non-admins', async () => {
+    currentUser = { id: 'teacher-1', isAdmin: false }
+
+    const res = await api.fetch('/admin/usage/user-1', { method: 'DELETE' })
+
+    expect(res.status).toBe(403)
+    expect(User.findByPk).not.toHaveBeenCalled()
   })
 })

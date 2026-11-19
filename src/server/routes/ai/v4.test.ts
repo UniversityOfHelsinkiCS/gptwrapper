@@ -26,6 +26,8 @@ vi.mock('../../services/chatInstances/usage', async (importOriginal) => ({
   incrementUsage: vi.fn(),
 }))
 
+vi.mock('../../services/chatInstances/modelUsage', () => ({ recordModelUsage: vi.fn() }))
+
 // The real search needs the vector DB; the mock search (used with the mock model) is kept real.
 vi.mock('../../services/rag/search', () => ({ search: vi.fn() }))
 vi.mock('../../services/langchain/fileSearchResultsStore', () => ({ ToolResultStore: { saveResults: vi.fn() } }))
@@ -41,6 +43,8 @@ import { validModels } from '@config'
 import v4Router from './v4'
 import { ChatInstance, Discussion, Prompt, PromptUsage, UserChatInstanceUsage } from '../../db/models'
 import { getUsage, getUserTokenLimit, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
+import { recordModelUsage } from '../../services/chatInstances/modelUsage'
+import { mockSubagent } from '../../services/agent/tools/mockSubagent'
 import type { ChatEvent } from '../../../shared/agentChat'
 import { MOCK_FLAKY_ERROR, MOCK_FLAKY_PREFIX, MockModel } from '../../services/langchain/MockModel'
 import { ToolResultStore } from '../../services/langchain/fileSearchResultsStore'
@@ -123,6 +127,17 @@ describe('POST /ai/v4/stream', () => {
     expect(events.every((e) => e.type !== 'text.delta' || e.path.length === 0)).toBe(true)
     expect(events.at(-1)).toEqual({ type: 'usage', inputTokens: 0, outputTokens: 0 })
     expect(incrementUsage).toHaveBeenCalledWith(currentUser, 0)
+  })
+
+  test('records the usage by model for the user only, outside a course', async () => {
+    await (await stream({ message: 'say hello world' })).text()
+
+    expect(recordModelUsage).toHaveBeenCalledWith({
+      userId: 'user-1',
+      courseUsageId: undefined,
+      usage: { mock: { input: 0, cachedInput: 0, cacheWrite: 0, output: 0 } },
+    })
+    expect(UserChatInstanceUsage.findOrCreate).not.toHaveBeenCalled()
   })
 
   test('answers from the mock document search when the prompt has a RAG index', async () => {
@@ -277,6 +292,7 @@ describe('POST /ai/v4/stream', () => {
     expect(events).toContainEqual({ type: 'error', error: 'Error while generating response: Mock error injected', resumeId: expect.any(String) })
     expect(events.some((e) => e.type === 'usage')).toBe(false)
     expect(incrementUsage).not.toHaveBeenCalled()
+    expect(recordModelUsage).not.toHaveBeenCalled()
   })
 
   test('a failed run continues from the step that failed, without running its finished tool calls again', async () => {
@@ -413,6 +429,19 @@ describe('POST /ai/v4/stream in a course', () => {
     expect(incrementCourseUsage).toHaveBeenCalledWith(expect.objectContaining({ id: 'ci-1' }), 0)
     expect(PromptUsage.create).toHaveBeenCalledWith(expect.objectContaining({ chatInstanceId: 'ci-1', promptId: 'prompt-1', userId: 'user-1' }))
     expect(incrementUsage).not.toHaveBeenCalled()
+  })
+
+  test("records the usage by model for the user and the user's usage row of the course", async () => {
+    givenCourse()
+    vi.mocked(UserChatInstanceUsage.findOrCreate).mockResolvedValue([{ id: 'usage-1' }, false] as any)
+
+    await (await stream({ promptId: 'prompt-1', courseId: 'course-1' })).text()
+
+    expect(recordModelUsage).toHaveBeenCalledWith({
+      userId: 'user-1',
+      courseUsageId: 'usage-1',
+      usage: { mock: { input: 0, cachedInput: 0, cacheWrite: 0, output: 0 } },
+    })
   })
 
   test('saves the discussion when the course saves discussions', async () => {
@@ -556,6 +585,23 @@ describe('POST /ai/v4/stream with the mock subagent', () => {
     expect(JSON.parse(meta.subagentUsage as string)).toEqual({
       mock_subagent: { modelCalls: 2, inputTokens: 12, outputTokens: 7, toolCalls: ['mock_lookup'] },
     })
+  })
+
+  test("records the subagent's tokens under the subagent's model, apart from the chat model's", async () => {
+    // The mock subagent runs on the mock model; pretend it runs on another model to tell the two apart.
+    const model = vi.spyOn(mockSubagent, 'model').mockReturnValue('gpt-6-luna')
+    try {
+      await (await stream({ message: 'subagent' })).text()
+    } finally {
+      model.mockRestore()
+    }
+
+    expect(recordModelUsage).toHaveBeenCalledWith({
+      userId: 'user-1',
+      courseUsageId: undefined,
+      usage: { mock: { input: 0, cachedInput: 0, cacheWrite: 0, output: 0 }, 'gpt-6-luna': { input: 12, cachedInput: 0, cacheWrite: 0, output: 7 } },
+    })
+    expect(incrementUsage).toHaveBeenCalledWith(currentUser, 0)
   })
 
   test('sends earlier subagent parts to the model as a summary with an excerpt of its answer', async () => {

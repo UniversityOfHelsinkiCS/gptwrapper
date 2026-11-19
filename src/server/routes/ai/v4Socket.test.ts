@@ -33,6 +33,7 @@ vi.mock('../../services/chatInstances/usage', async (importOriginal) => ({
   incrementUsage: vi.fn(),
 }))
 
+vi.mock('../../services/chatInstances/modelUsage', () => ({ recordModelUsage: vi.fn() }))
 vi.mock('../../services/rag/search', () => ({ search: vi.fn() }))
 vi.mock('../../services/langchain/fileSearchResultsStore', () => ({ ToolResultStore: { saveResults: vi.fn() } }))
 vi.mock('../../util/logger', () => ({ default: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }))

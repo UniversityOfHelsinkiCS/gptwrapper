@@ -47,6 +47,8 @@ const usageFixture = () => ({
   userId: 'student-1',
   chatInstanceId: 'ci-1',
   usageCount: 500,
+  weeklyModelUsage: { 'gpt-4o': { input: 1, cachedInput: 0, cacheWrite: 0, output: 1 } } as Record<string, unknown>,
+  totalModelUsage: { 'gpt-4o': { input: 9, cachedInput: 0, cacheWrite: 0, output: 9 } },
   user: { id: 'student-1' },
   save: vi.fn(),
   toJSON() {
@@ -143,6 +145,15 @@ describe('DELETE /chatinstances/usage/:id', () => {
     expect(usage.save).toHaveBeenCalled()
   })
 
+  test('empties the weekly usage by model and keeps the total', async () => {
+    users.teacher()
+    const usage = usageFixture()
+    vi.mocked(UserChatInstanceUsage.findByPk).mockResolvedValue(usage as any)
+    await resetUsage()
+    expect(usage.weeklyModelUsage).toEqual({})
+    expect(usage.totalModelUsage).toEqual({ 'gpt-4o': { input: 9, cachedInput: 0, cacheWrite: 0, output: 9 } })
+  })
+
   test('admin resets the usage to 0', async () => {
     users.admin()
     const usage = usageFixture()
@@ -159,6 +170,7 @@ describe('DELETE /chatinstances/usage/:id', () => {
     const response = await resetUsage()
     expect(response.status).toBe(403)
     expect(usage.usageCount).toBe(500)
+    expect(usage.weeklyModelUsage).not.toEqual({})
     expect(usage.save).not.toHaveBeenCalled()
   })
 
