@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { assertModelPrices, getModelPrice, type ModelConfig, ModelProvider, models, validModels } from '@config'
-import { mergeUsage, tokenUsageFromMetadata, usageCost } from './usage'
+import { blendedPrice, mergeUsage, modelPriceIndicator, priceDots, priceMultiplier, roundPriceMultiplier, tokenUsageFromMetadata, usageCost } from './usage'
 
 const tokens = (input: number, cachedInput: number, cacheWrite: number, output: number) => ({ input, cachedInput, cacheWrite, output })
 
@@ -115,5 +115,42 @@ describe('tokenUsageFromMetadata', () => {
   it('is empty without metadata and never negative', () => {
     expect(tokenUsageFromMetadata(undefined)).toEqual(tokens(0, 0, 0, 0))
     expect(tokenUsageFromMetadata({ input_tokens: 5, input_token_details: { cache_read: 10 } })).toEqual(tokens(0, 10, 0, 0))
+  })
+})
+
+describe('price indicator', () => {
+  it('blends input, cached input and output prices 1 : 2 : 1', () => {
+    expect(blendedPrice({ input: 4, cachedInput: 2, output: 8 })).toBe(4)
+  })
+
+  it('compares configured models with GPT-6 Luna', () => {
+    expect(modelPriceIndicator('gpt-6-luna')).toEqual({ multiplier: 1, dots: 1 })
+    expect(modelPriceIndicator('gpt-5-mini')).toEqual({ multiplier: 3, dots: 2 })
+    expect(modelPriceIndicator('gpt-6.1-terra')).toEqual({ multiplier: 10, dots: 2 })
+    expect(modelPriceIndicator('gpt-5.1')).toEqual({ multiplier: 17, dots: 3 })
+    expect(modelPriceIndicator('gpt-6.1-sol')).toEqual({ multiplier: 20, dots: 3 })
+    expect(modelPriceIndicator('gemma-4-26B-A4B')).toEqual({ multiplier: 0.5, dots: 1 })
+  })
+
+  it('shows nothing for the mock or an unknown model', () => {
+    expect(modelPriceIndicator('mock')).toBeUndefined()
+    expect(modelPriceIndicator('no-such-model')).toBeUndefined()
+  })
+
+  it('rounds to a whole number from 1 up and to one decimal below 1', () => {
+    expect(roundPriceMultiplier(16.4)).toBe(16)
+    expect(roundPriceMultiplier(1.49)).toBe(1)
+    expect(roundPriceMultiplier(0.96)).toBe(1)
+    expect(roundPriceMultiplier(0.44)).toBe(0.4)
+  })
+
+  it('buckets the multiplier into dots: 1 up to 2×, 2 up to 10×, 3 up to 25×, 4 above', () => {
+    expect([0.4, 2, 3, 10, 11, 25, 26].map(priceDots)).toEqual([1, 1, 2, 2, 3, 3, 4])
+  })
+
+  it('reaches four dots with a price far above Luna', () => {
+    const multiplier = priceMultiplier({ input: 5, cachedInput: 0.5, output: 25 })
+    expect(multiplier).toBe(46)
+    expect(priceDots(multiplier)).toBe(4)
   })
 })

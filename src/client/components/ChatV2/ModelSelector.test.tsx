@@ -187,3 +187,34 @@ describe('ModelSelector hides internal models', () => {
     expect(within(getSideMenu()).queryByTestId('gpt-5.1-option')).toBeTruthy()
   })
 })
+
+describe('ModelSelector price indicator', () => {
+  test('each model shows dots and its multiplier (drawn from data-price), hidden from screen readers', () => {
+    const { menu, toggle } = openSelector()
+    fireEvent.click(toggle)
+
+    const luna = within(menu).getByTestId('gpt-6-luna-price')
+    expect(luna.getAttribute('data-price')).toBe('● ×1')
+    expect(luna.getAttribute('aria-hidden')).toBe('true')
+    expect(within(getSideMenu()).getByTestId('gpt-5.1-price').getAttribute('data-price')).toBe('●●● ×17')
+  })
+
+  test('the option label says the cost relative to GPT-6 Luna', () => {
+    const { menu, toggle } = openSelector()
+    fireEvent.click(toggle)
+
+    expect(within(menu).getByTestId('gpt-6-luna-option').getAttribute('aria-label')).toMatch(/, Cost about the same as GPT-6 Luna$/)
+    expect(within(getSideMenu()).getByTestId('gpt-5.1-option').getAttribute('aria-label')).toBe(
+      'GPT-5.1, Basic model — suitable for simple tasks, Cost about 17 times GPT-6 Luna',
+    )
+  })
+
+  test('the mock model has no indicator', () => {
+    const { toggle } = openSelector({ isMobile: true })
+    fireEvent.click(toggle)
+
+    const mock = screen.getByTestId('mock-option')
+    expect(screen.queryByTestId('mock-price')).toBeNull()
+    expect(mock.getAttribute('aria-label')).not.toMatch(/Cost/)
+  })
+})
