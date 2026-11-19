@@ -15,11 +15,11 @@ vi.mock('../../util/logger', () => ({
   default: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
 }))
 
-import { DEFAULT_TOKEN_LIMIT } from '../../../config'
+import { DEFAULT_TOKEN_LIMIT, WEEKLY_BUDGET } from '../../../config'
 import { ChatInstance, Enrolment, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import type { User as UserType } from '../../../shared/user'
 import { setMembership } from '../../tests/membership'
-import { checkUsage, COURSE_TOKEN_BONUS, getUserStatus, getUserTokenLimit } from './usage'
+import { checkUsage, COURSE_TOKEN_BONUS, getUserBudget, getUserStatus, getUserTokenLimit } from './usage'
 
 const ONGOING = { startDate: '2020-01-01', endDate: '2099-01-01' }
 const EXPIRED = { startDate: '1744-01-01', endDate: '1818-12-31' }
@@ -100,6 +100,72 @@ describe('getUserTokenLimit', () => {
     mockMemberships({ enrolled: [membership('c1')] })
 
     expect(await getUserTokenLimit({ ...user, isPowerUser: true })).toBe(DEFAULT_TOKEN_LIMIT * 10 + COURSE_TOKEN_BONUS)
+  })
+})
+
+describe('getUserBudget', () => {
+  const course = (id: string, budgetBonusPercent: number | null, activityPeriod = ONGOING, activated = true) => ({
+    chatInstanceId: id,
+    chatInstance: { id, courseId: `cur-${id}`, name: { en: id }, activityPeriod, activated, budgetBonusPercent },
+  })
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  test('is the base budget without any courses', async () => {
+    mockMemberships({})
+
+    expect(await getUserBudget(user)).toEqual({ limit: WEEKLY_BUDGET, base: WEEKLY_BUDGET, bonuses: [] })
+  })
+
+  test('adds up the bonuses: two +100% courses give 3× the base', async () => {
+    mockMemberships({ enrolled: [course('c1', 100)], teached: [course('c2', 100)] })
+
+    const budget = await getUserBudget(user)
+
+    expect(budget.limit).toBeCloseTo(3 * WEEKLY_BUDGET)
+    expect(budget.base).toBe(WEEKLY_BUDGET)
+    expect(budget.bonuses).toEqual([
+      { courseId: 'cur-c1', name: { en: 'c1' }, percent: 100 },
+      { courseId: 'cur-c2', name: { en: 'c2' }, percent: 100 },
+    ])
+  })
+
+  test('ignores inactive, out-of-period and null-bonus courses', async () => {
+    mockMemberships({
+      enrolled: [course('c1', 50), course('expired', 100, EXPIRED), course('not-activated', 100, ONGOING, false), course('no-bonus', null)],
+      teached: [course('not-started', 100, { startDate: '2098-01-01', endDate: '2099-01-01' })],
+    })
+
+    const budget = await getUserBudget(user)
+
+    expect(budget.limit).toBeCloseTo(1.5 * WEEKLY_BUDGET)
+    expect(budget.bonuses.map((bonus) => bonus.courseId)).toEqual(['cur-c1'])
+  })
+
+  test('counts a course the user both attends and teaches only once', async () => {
+    mockMemberships({ enrolled: [course('c1', 100)], teached: [course('c1', 100)] })
+
+    const budget = await getUserBudget(user)
+
+    expect(budget.limit).toBeCloseTo(2 * WEEKLY_BUDGET)
+    expect(budget.bonuses).toHaveLength(1)
+  })
+
+  test('has no power user multiplier', async () => {
+    mockMemberships({ enrolled: [course('c1', 100)] })
+
+    expect((await getUserBudget({ ...user, isPowerUser: true })).limit).toBeCloseTo(2 * WEEKLY_BUDGET)
+  })
+
+  test('a zero bonus is listed but does not raise the limit', async () => {
+    mockMemberships({ enrolled: [course('c1', 0)] })
+
+    const budget = await getUserBudget(user)
+
+    expect(budget.limit).toBe(WEEKLY_BUDGET)
+    expect(budget.bonuses).toHaveLength(1)
   })
 })
 

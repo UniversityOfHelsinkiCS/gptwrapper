@@ -31,6 +31,7 @@ vi.mock('./UsageSelector', () => ({ usagePercent: () => 0, gaugeColorKey: () => 
 vi.mock('../Courses/Course/CourseActivityPeriodEditor', () => ({ CourseActivityPeriodEditor: () => null }))
 vi.mock('../Courses/Course/ResearchCourseToggle', () => ({ ResearchCourseToggle: () => null }))
 vi.mock('../Courses/Course/CourseTokenLimitEditor', () => ({ CourseTokenLimitEditor: () => null }))
+vi.mock('../Courses/Course/CourseBudgetBonusEditor', () => ({ CourseBudgetBonusEditor: () => null }))
 vi.mock('../Courses/Course/Discussions', () => ({ default: () => null }))
 vi.mock('../Courses/Course/PromptUsageHistogram', () => ({ default: () => null }))
 // the search results are replaced by a single searched user rendered with the real action button

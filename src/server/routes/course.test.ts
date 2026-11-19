@@ -393,6 +393,56 @@ describe('PUT courses/:id', () => {
     expect(course.activated).toBe(true)
     expect(course.usageLimit).toBe(5_000_000)
   })
+
+  test('responsible teacher cannot change the budget bonus', async () => {
+    currentUser = teacher
+    setMembership({ responsible: true })
+    const course = mockCourse({ budgetBonusPercent: null })
+    const response = await putCourse({ budgetBonusPercent: 100 })
+    expect(response.status).toBe(403)
+    expect(course.save).not.toHaveBeenCalled()
+    expect(course.budgetBonusPercent).toBeNull()
+  })
+
+  test('responsible teacher cannot clear the budget bonus', async () => {
+    currentUser = teacher
+    setMembership({ responsible: true })
+    const course = mockCourse({ budgetBonusPercent: 50 })
+    const response = await putCourse({ budgetBonusPercent: null })
+    expect(response.status).toBe(403)
+    expect(course.budgetBonusPercent).toBe(50)
+  })
+
+  test('admin can set, change and clear the budget bonus', async () => {
+    currentUser = admin
+    const course = mockCourse({ budgetBonusPercent: null })
+
+    expect((await putCourse({ budgetBonusPercent: 100 })).status).toBe(200)
+    expect(course.budgetBonusPercent).toBe(100)
+
+    expect((await putCourse({ budgetBonusPercent: 25 })).status).toBe(200)
+    expect(course.budgetBonusPercent).toBe(25)
+
+    expect((await putCourse({ budgetBonusPercent: null })).status).toBe(200)
+    expect(course.budgetBonusPercent).toBeNull()
+    expect(course.save).toHaveBeenCalledTimes(3)
+  })
+
+  test('admin can set a zero budget bonus', async () => {
+    currentUser = admin
+    const course = mockCourse({ budgetBonusPercent: null })
+    expect((await putCourse({ budgetBonusPercent: 0 })).status).toBe(200)
+    expect(course.budgetBonusPercent).toBe(0)
+  })
+
+  test.each([-1, 1.5, '100', 10_001])('admin cannot set budget bonus %s', async (budgetBonusPercent) => {
+    currentUser = admin
+    const course = mockCourse({ budgetBonusPercent: null })
+    const response = await putCourse({ budgetBonusPercent })
+    expect(response.status).toBe(400)
+    expect(course.save).not.toHaveBeenCalled()
+    expect(course.budgetBonusPercent).toBeNull()
+  })
 })
 
 describe('courses/:id/discussions', () => {
