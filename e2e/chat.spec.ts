@@ -120,8 +120,12 @@ testMatrix.forEach((testConfig) => {
           await page.getByTestId('model-selector').first().click()
 
           await page.getByTestId('more-models-toggle').click()
-          for (const { name } of validModels) {
+          for (const { name } of validModels.filter((model) => !model.tags.includes('internal'))) {
             await expect(page.getByTestId(`${name}-option`).first()).toBeVisible()
+          }
+          // Internal (subagent) models are valid but not offered in the selector
+          for (const { name } of validModels.filter((model) => model.tags.includes('internal'))) {
+            await expect(page.getByTestId(`${name}-option`)).toHaveCount(0)
           }
         })
       }
