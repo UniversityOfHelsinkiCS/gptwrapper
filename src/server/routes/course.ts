@@ -12,7 +12,7 @@ import _ from 'lodash'
 import { chatIsActive, getChatStatus } from '../services/chatInstances/activity'
 import { AccessLevel } from '@shared/types'
 import { isPromptDraft } from '@shared/prompt'
-import { TokenLimitSchema } from '@shared/course'
+import { BudgetBonusPercentSchema, TokenLimitSchema } from '@shared/course'
 
 const courseRouter = express.Router()
 
@@ -308,9 +308,10 @@ courseRouter.get('/:id/discussers', checkDiscussionAccess, async (req, res) => {
 
 courseRouter.put('/:id', async (req, res) => {
   const { id } = req.params
-  const { activityPeriod, usageLimit, saveDiscussions, activated } = req.body as {
+  const { activityPeriod, usageLimit, budgetBonusPercent, saveDiscussions, activated } = req.body as {
     activityPeriod?: ActivityPeriod
     usageLimit?: number
+    budgetBonusPercent?: number | null
     saveDiscussions?: boolean
     activated?: boolean
   }
@@ -332,6 +333,11 @@ courseRouter.put('/:id', async (req, res) => {
   if (usageLimit !== undefined) {
     if (!user.isAdmin) throw ApplicationError.Forbidden('Only admins can change the course token limit')
     chatInstance.usageLimit = TokenLimitSchema.parse(usageLimit)
+  }
+
+  if (budgetBonusPercent !== undefined) {
+    if (!user.isAdmin) throw ApplicationError.Forbidden('Only admins can change the course budget bonus')
+    chatInstance.budgetBonusPercent = BudgetBonusPercentSchema.parse(budgetBonusPercent)
   }
 
   if (activityPeriod !== undefined) {

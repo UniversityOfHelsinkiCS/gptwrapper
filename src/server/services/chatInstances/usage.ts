@@ -1,6 +1,8 @@
 import { Tiktoken } from '@dqbd/tiktoken'
 
-import { DEFAULT_TOKEN_LIMIT } from '../../../config'
+import _ from 'lodash'
+
+import { DEFAULT_TOKEN_LIMIT, WEEKLY_BUDGET } from '../../../config'
 import type { User as UserType } from '../../../shared/user'
 import { ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../../db/models'
 import logger from '../../util/logger'
@@ -9,6 +11,7 @@ import { readMessageContent, type Message } from '../../../shared/chat'
 import { chatIsActive } from './activity'
 import { getAccessLevel } from './access'
 import { CourseUsage } from '@shared/types'
+import type { BudgetBonus, UserBudget } from '@shared/usage'
 
 export const getUsage = async (userId: string) => {
   const user = await User.findByPk(userId, {
@@ -23,7 +26,9 @@ export const getUsage = async (userId: string) => {
 }
 
 export const COURSE_TOKEN_BONUS = 100_000
-const countActiveCourseMemberships = async (user: UserType): Promise<number> => {
+
+/** The user's courses (enrolled or responsible, each once) that are activated and inside their activity period */
+const getActiveCourseMemberships = async (user: UserType): Promise<ChatInstance[]> => {
   const membershipQuery = {
     attributes: ['chatInstanceId'],
     where: { userId: user.id },
@@ -31,7 +36,7 @@ const countActiveCourseMemberships = async (user: UserType): Promise<number> => 
       {
         model: ChatInstance,
         as: 'chatInstance',
-        attributes: ['id', 'activityPeriod', 'activated'],
+        attributes: ['id', 'courseId', 'name', 'activityPeriod', 'activated', 'budgetBonusPercent'],
         where: { activated: true },
         required: true,
       },
@@ -45,7 +50,26 @@ const countActiveCourseMemberships = async (user: UserType): Promise<number> => 
 
   const activeChatInstances = [...enrolments, ...responsibilities].map((membership) => membership.chatInstance).filter(chatIsActive)
 
-  return new Set(activeChatInstances.map((chatInstance) => chatInstance.id)).size
+  return _.uniqBy(activeChatInstances, (chatInstance) => chatInstance.id)
+}
+
+const countActiveCourseMemberships = async (user: UserType): Promise<number> => (await getActiveCourseMemberships(user)).length
+
+/** The user's weekly budget in €: the base budget plus the bonuses of the user's active courses. Not enforced yet. */
+export const getUserBudget = async (user: UserType): Promise<UserBudget> => {
+  const courses = await getActiveCourseMemberships(user)
+
+  const bonuses: BudgetBonus[] = courses
+    .filter((chatInstance) => chatInstance.budgetBonusPercent != null)
+    .map((chatInstance) => ({
+      courseId: chatInstance.courseId ?? chatInstance.id,
+      name: chatInstance.name,
+      percent: chatInstance.budgetBonusPercent as number,
+    }))
+
+  const bonusPercent = _.sumBy(bonuses, (bonus) => bonus.percent)
+
+  return { limit: WEEKLY_BUDGET * (1 + bonusPercent / 100), base: WEEKLY_BUDGET, bonuses }
 }
 
 export const getUserTokenLimit = async (user: UserType): Promise<number> => {

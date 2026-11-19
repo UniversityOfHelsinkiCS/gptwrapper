@@ -1,4 +1,5 @@
 import { getModelPrice, type ModelPrice, models } from '@config'
+import type { Locales } from './types'
 
 /** Tokens of one model by type. `input` is uncached input only: cached reads and cache writes are counted separately. */
 export type TokenUsage = {
@@ -75,4 +76,18 @@ export const tokenUsageFromMetadata = (metadata: UsageMetadataLike | undefined):
     cacheWrite,
     output: metadata?.output_tokens ?? 0,
   }
+}
+
+/** A course that raises its members' weekly budget */
+export type BudgetBonus = {
+  courseId: string
+  name: Locales
+  percent: number
+}
+
+/** A user's weekly budget in €: `limit = base × (1 + Σ bonus percent / 100)` */
+export type UserBudget = {
+  limit: number
+  base: number
+  bonuses: BudgetBonus[]
 }

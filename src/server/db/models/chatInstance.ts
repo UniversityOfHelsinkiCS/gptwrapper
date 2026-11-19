@@ -18,6 +18,9 @@ class ChatInstance extends Model<InferAttributes<ChatInstance>, InferCreationAtt
 
   declare usageLimit: CreationOptional<number>
 
+  /** Weekly budget bonus in percent of the base budget for the course's members, set by admins. null = no bonus */
+  declare budgetBonusPercent: CreationOptional<number | null>
+
   declare resetCron: CreationOptional<string | null>
 
   /**
@@ -69,6 +72,11 @@ ChatInstance.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
+    },
+    budgetBonusPercent: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: null,
     },
     resetCron: {
       type: DataTypes.STRING,
