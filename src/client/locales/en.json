@@ -364,7 +364,14 @@
     "limitedUsage": ", the other models are not usable when the limit is reached",
     "usage": "Usage",
     "usageTitle": "Your token usage",
-    "tokens": "tokens"
+    "tokens": "tokens",
+    "budgetTitle": "Your weekly budget",
+    "budgetPillSuffix": "of your weekly budget used",
+    "budgetUsedPercent": "{{percent}}% used",
+    "budgetComposition": "Your budget consists of",
+    "budgetBase": "Base budget",
+    "budgetBonus": "{{name}} (+{{percent}}%)",
+    "budgetResets": "Resets {{resetsAt}}"
   },
   "error": {
     "unexpected": "An unexpected error occurred",

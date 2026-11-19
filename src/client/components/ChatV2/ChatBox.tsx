@@ -105,7 +105,7 @@ export const ChatBox = ({
   const { courseId } = useParams()
   const isEmbedded = useIsEmbedded()
   const { user } = useCurrentUser()
-  const { refetch: refetchStatus } = useUserStatus(courseId)
+  const { userStatus, refetch: refetchStatus } = useUserStatus(courseId)
 
   const [disallowedFileType, setDisallowedFileType] = useState<string>('')
   const [fileTypeAlertOpen, setFileTypeAlertOpen] = useState<boolean>(false)
@@ -206,7 +206,7 @@ export const ChatBox = ({
     <Box sx={{ mb: 1 }}>
       <Box sx={{ mb: 0.75, px: 0.5, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
         <ModelSelector currentModel={currentModel} setModel={setModel} isTokenLimitExceeded={isTokenLimitExceeded} isMobile={isMobile} />
-        <UsageSelector />
+        <UsageSelector userStatus={userStatus} />
       </Box>
       <Box
         sx={{

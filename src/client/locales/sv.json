@@ -344,7 +344,14 @@
     "limitedUsage": ", de andra modellerna är inte användbara när gränsen nås",
     "usage": "Användning",
     "usageTitle": "Din tokenanvändning",
-    "tokens": "tokens"
+    "tokens": "tokens",
+    "budgetTitle": "Din veckovisa användning",
+    "budgetPillSuffix": "av din veckovisa användning använt",
+    "budgetUsedPercent": "{{percent}}% använt",
+    "budgetComposition": "Din gräns består av",
+    "budgetBase": "Grundgräns",
+    "budgetBonus": "{{name}} (+{{percent}}%)",
+    "budgetResets": "Återställs {{resetsAt}}"
   },
   "error": {
     "unexpected": "Ett oväntat fel inträffade",

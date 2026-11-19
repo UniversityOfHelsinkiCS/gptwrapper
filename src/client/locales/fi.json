@@ -375,7 +375,14 @@
     "limitedUsage": ", muut kielimallit eivät ole käytettävissä rajan ylityttyä",
     "usage": "Käyttö",
     "usageTitle": "Tokenien käyttösi",
-    "tokens": "tokenia"
+    "tokens": "tokenia",
+    "budgetTitle": "Viikoittainen käyttösi",
+    "budgetPillSuffix": "viikoittaisesta käytöstäsi käytetty",
+    "budgetUsedPercent": "{{percent}}% käytetty",
+    "budgetComposition": "Käyttörajasi koostuu",
+    "budgetBase": "Perusraja",
+    "budgetBonus": "{{name}} (+{{percent}}%)",
+    "budgetResets": "Nollautuu {{resetsAt}}"
   },
   "error": {
     "unexpected": "Odottomaton virhe tapahtui",
