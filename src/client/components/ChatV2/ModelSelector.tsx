@@ -29,7 +29,10 @@ const isPointerOver = (element: Element | null | undefined, { clientX, clientY }
 }
 
 const filterAvailableModels = (models: ModelConfig[], isTokenLimitExceeded: boolean, isAdmin: boolean | undefined): ModelConfig[] => {
-  return models.filter((model) => !isTokenLimitExceeded || isFreeModel(model.name)).filter((model) => !isMockModel(model.name) || !inProduction || isAdmin)
+  return models
+    .filter((model) => !model.tags.includes('internal'))
+    .filter((model) => !isTokenLimitExceeded || isFreeModel(model.name))
+    .filter((model) => !isMockModel(model.name) || !inProduction || isAdmin)
 }
 
 const ModelSelector = ({
