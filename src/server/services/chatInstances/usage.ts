@@ -27,11 +27,18 @@ export const getUsage = async (userId: string) => {
 
 export const COURSE_TOKEN_BONUS = 100_000
 
-/** The user's courses (enrolled or responsible, each once) that are activated and inside their activity period */
-const getActiveCourseMemberships = async (user: UserType): Promise<ChatInstance[]> => {
+/**
+ * The courses (enrolled or responsible, each once) of each given user that are activated and inside their activity
+ * period, by user id. Two queries in all, however many users: use this instead of a per-user lookup for many users.
+ * Users without such courses are missing from the map.
+ */
+export const getActiveCourseMembershipsByUser = async (userIds: string[]): Promise<Map<string, ChatInstance[]>> => {
+  const byUser = new Map<string, ChatInstance[]>()
+  if (userIds.length === 0) return byUser
+
   const membershipQuery = {
-    attributes: ['chatInstanceId'],
-    where: { userId: user.id },
+    attributes: ['userId', 'chatInstanceId'],
+    where: { userId: userIds },
     include: [
       {
         model: ChatInstance,
@@ -48,17 +55,21 @@ const getActiveCourseMemberships = async (user: UserType): Promise<ChatInstance[
     Responsibility.findAll(membershipQuery) as Promise<(Responsibility & { chatInstance: ChatInstance })[]>,
   ])
 
-  const activeChatInstances = [...enrolments, ...responsibilities].map((membership) => membership.chatInstance).filter(chatIsActive)
+  for (const { userId, chatInstance } of [...enrolments, ...responsibilities]) {
+    if (!chatIsActive(chatInstance)) continue
+    const courses = byUser.get(userId) ?? []
+    if (!courses.some((course) => course.id === chatInstance.id)) courses.push(chatInstance)
+    byUser.set(userId, courses)
+  }
 
-  return _.uniqBy(activeChatInstances, (chatInstance) => chatInstance.id)
+  return byUser
 }
 
-const countActiveCourseMemberships = async (user: UserType): Promise<number> => (await getActiveCourseMemberships(user)).length
+/** The user's courses (enrolled or responsible, each once) that are activated and inside their activity period */
+const getActiveCourseMemberships = async (user: UserType): Promise<ChatInstance[]> => (await getActiveCourseMembershipsByUser([user.id])).get(user.id) ?? []
 
-/** The user's weekly budget in €: the base budget plus the bonuses of the user's active courses. Not enforced yet. */
-export const getUserBudget = async (user: UserType): Promise<UserBudget> => {
-  const courses = await getActiveCourseMemberships(user)
-
+/** Weekly budget in € given the user's active courses (from `getActiveCourseMembershipsByUser`) */
+export const budgetOfCourses = (courses: ChatInstance[]): UserBudget => {
   const bonuses: BudgetBonus[] = courses
     .filter((chatInstance) => chatInstance.budgetBonusPercent != null)
     .map((chatInstance) => ({
@@ -72,13 +83,17 @@ export const getUserBudget = async (user: UserType): Promise<UserBudget> => {
   return { limit: WEEKLY_BUDGET * (1 + bonusPercent / 100), base: WEEKLY_BUDGET, bonuses }
 }
 
-export const getUserTokenLimit = async (user: UserType): Promise<number> => {
+/** Old weekly token limit given the user's active courses (from `getActiveCourseMembershipsByUser`) */
+export const tokenLimitOfCourses = (user: Pick<UserType, 'isPowerUser'>, courses: ChatInstance[]): number => {
   const tierLimit = user.isPowerUser ? DEFAULT_TOKEN_LIMIT * 10 : DEFAULT_TOKEN_LIMIT
 
-  const activeCourseCount = await countActiveCourseMemberships(user)
-
-  return tierLimit + COURSE_TOKEN_BONUS * activeCourseCount
+  return tierLimit + COURSE_TOKEN_BONUS * courses.length
 }
+
+/** The user's weekly budget in €: the base budget plus the bonuses of the user's active courses. Not enforced yet. */
+export const getUserBudget = async (user: UserType): Promise<UserBudget> => budgetOfCourses(await getActiveCourseMemberships(user))
+
+export const getUserTokenLimit = async (user: UserType): Promise<number> => tokenLimitOfCourses(user, await getActiveCourseMemberships(user))
 
 export const checkUsage = (user: UserType, usage: number, tokenLimit: number): boolean => {
   return user.isAdmin || usage < tokenLimit

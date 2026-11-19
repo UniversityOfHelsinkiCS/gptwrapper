@@ -129,3 +129,22 @@ export const modelPriceIndicator = (modelName: string): { multiplier: number; do
   const multiplier = priceMultiplier(price)
   return { multiplier, dots: priceDots(multiplier) }
 }
+
+/** One user's weekly usage under the old token system next to the cost system (admin shadow comparison). */
+export type UsageComparisonRow = {
+  userId: string
+  username: string
+  firstNames: string | null
+  lastName: string | null
+  /** Old weekly tokens (`User.usage`), its limit and percent of the limit */
+  tokenUsage: number
+  tokenLimit: number
+  tokenPercent: number
+  /** Weekly cost in € (`usageCost(weeklyModelUsage)`), the budget and percent of the budget limit */
+  cost: number
+  budget: UserBudget
+  costPercent: number
+}
+
+/** Response of `GET /api/admin/usage-comparison`: users with usage this week, sorted by `costPercent` descending */
+export type UsageComparisonResponse = UsageComparisonRow[]

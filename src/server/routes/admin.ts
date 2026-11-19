@@ -9,8 +9,10 @@ import { adminMiddleware } from '../middleware/adminMiddleware'
 import { generateTerms, getTermsOf } from '../util/util'
 import { LANGUAGES } from '../../shared/lang'
 import { resetUsage } from '../util/cron'
+import { getUsageComparison } from '../services/chatInstances/usageComparison'
 import logger from '../util/logger'
 import type { RequestWithUser } from '../types'
+import type { UsageComparisonResponse } from '../../shared/usage'
 import type { ApiUser, ChatInstanceSearchResponse, ChatInstanceSearchResult, CourseParticipant, CourseParticipantsResponse } from '../../shared/types'
 
 const adminRouter = express.Router()
@@ -75,6 +77,13 @@ adminRouter.get('/users/:search', async (req, res) => {
   })
 
   res.send(matches)
+})
+
+// This week's usage of each user under the old token system and the cost system, for tuning the budget before the switch.
+adminRouter.get('/usage-comparison', async (_req, res) => {
+  const comparison: UsageComparisonResponse = await getUsageComparison()
+
+  res.send(comparison)
 })
 
 // Runs the weekly reset (the Monday cron) for all users now.
