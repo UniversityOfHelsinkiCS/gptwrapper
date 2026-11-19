@@ -20,6 +20,7 @@ import { AdminPanelSettings, BarChart, Key, Logout } from '@mui/icons-material'
 import apiClient from '../util/apiClient'
 import { useIsEmbedded } from '../contexts/EmbeddedContext'
 import { isManagementPage } from './BackToChatButton'
+import safeLocalStorage from '../util/safeLocalStorage'
 
 export default function GlobalMenu({
   openDisclaimer,
@@ -56,7 +57,7 @@ export default function GlobalMenu({
   const handleLanguageChange = (newLanguage: keyof Locale) => {
     if (i18n.language === newLanguage) return
     i18n.changeLanguage(newLanguage)
-    localStorage.setItem('lang', newLanguage)
+    safeLocalStorage.setItem('lang', newLanguage)
   }
 
   const languageButtonSx = (lang: string) => ({

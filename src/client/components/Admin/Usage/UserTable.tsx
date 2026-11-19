@@ -11,6 +11,7 @@ import { useDeleteChatInstanceUsageMutation } from '../../../hooks/useChatInstan
 import useResetUsageMutation from '../../../hooks/useResetUsageMutation'
 import apiClient from '../../../util/apiClient'
 import { SearchResultsAnnouncer } from '../../common/accessibility/StatusAnnouncer'
+import safeLocalStorage from '../../../util/safeLocalStorage'
 
 type Usage = Omit<ChatInstanceUsage, 'chatInstance'> & {
   chatInstance?: ChatInstance
@@ -19,7 +20,7 @@ type Usage = Omit<ChatInstanceUsage, 'chatInstance'> & {
 const sortUsage = (a: Usage, b: Usage) => b.usageCount - a.usageCount
 
 const handleLoginAs = (user: User) => () => {
-  localStorage.setItem('adminLoggedInAs', user.id)
+  safeLocalStorage.setItem('adminLoggedInAs', user.id)
   window.location.reload()
 }
 

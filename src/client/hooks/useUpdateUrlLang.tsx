@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import useCurrentUser from '../hooks/useCurrentUser'
 import { useCallback, useEffect } from 'react'
 import { LANGUAGES, LanguageSchema, type Locale } from '@shared/lang'
+import safeLocalStorage from '../util/safeLocalStorage'
 
 export const useUpdateUrlLang = () => {
   const { i18n } = useTranslation()
@@ -16,7 +17,7 @@ export const useUpdateUrlLang = () => {
         console.error('Invalid language', newLang)
         return
       }
-      localStorage.setItem('lang', newLang)
+      safeLocalStorage.setItem('lang', newLang)
       i18n.changeLanguage(newLang)
 
       //we dont want ?lang=?? to stick around since it makes it annoying to navigate so clear the param
@@ -30,7 +31,7 @@ export const useUpdateUrlLang = () => {
   )
 
   useEffect(() => {
-    const updatedLangFromLocal = LanguageSchema.safeParse(localStorage.getItem('lang'))
+    const updatedLangFromLocal = LanguageSchema.safeParse(safeLocalStorage.getItem('lang'))
     const langParam = LanguageSchema.safeParse(params.get('lang'))
 
     if (langParam.success) {
@@ -49,7 +50,7 @@ export const useUpdateUrlLang = () => {
   }, [user])
 
   // useEffect(() => {
-  //   if (i18n.language !== localStorage.getItem('lang')) {
+  //   if (i18n.language !== safeLocalStorage.getItem('lang')) {
   //     setLang(i18n.language)
   //   }
   // }, [i18n.language])

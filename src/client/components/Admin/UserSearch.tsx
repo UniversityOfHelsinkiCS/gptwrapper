@@ -9,10 +9,11 @@ import type { User } from '../../types'
 import useResponsibilityUserSearch from '../../hooks/useResponsibilityUserSearch'
 import useEnrolmentUserSearch from '../../hooks/useEnrolmentUserSearch'
 import { SearchResultsAnnouncer } from '../common/accessibility/StatusAnnouncer'
+import safeLocalStorage from '../../util/safeLocalStorage'
 
 const handleLoginAs = (user: User) => () => {
-  localStorage.setItem('adminLoggedInAs', user.id)
-  localStorage.setItem('adminLoggedInAsUser', JSON.stringify(user))
+  safeLocalStorage.setItem('adminLoggedInAs', user.id)
+  safeLocalStorage.setItem('adminLoggedInAsUser', JSON.stringify(user))
   window.location.reload()
 }
 

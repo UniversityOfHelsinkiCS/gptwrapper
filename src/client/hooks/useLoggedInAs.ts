@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
+import safeLocalStorage from '../util/safeLocalStorage'
 
 export const useLoggedInAs = () => {
   const [isLoggedInAs, setIsLoggedInAs] = useState(false)
 
   useEffect(() => {
-    const loggedInAs = localStorage.getItem('adminLoggedInAs')
+    const loggedInAs = safeLocalStorage.getItem('adminLoggedInAs')
     if (!loggedInAs) return
 
     setIsLoggedInAs(true)
@@ -12,7 +13,7 @@ export const useLoggedInAs = () => {
 
   const exitLoggedInAs = () => {
     setIsLoggedInAs(false)
-    localStorage.removeItem('adminLoggedInAs')
+    safeLocalStorage.removeItem('adminLoggedInAs')
     window.location.reload()
   }
 

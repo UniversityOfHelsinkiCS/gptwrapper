@@ -16,6 +16,7 @@ import { PromptEditorFormContext, usePromptEditorState } from './context'
 import { PromptEditorForm } from './PromptEditorForm'
 import { Prompt, PromptEditorFormContextValue, PromptEditorFormState } from 'src/client/types'
 import { switchFocusIndicatorStyle } from 'src/client/util/accessibility'
+import safeLocalStorage from '../../util/safeLocalStorage'
 
 export const PromptEditorV2 = ({
   personal,
@@ -89,7 +90,7 @@ export const PromptEditorV2 = ({
   const nameTaken = rejectedNames.includes(form.name) || existingPrompts.some((prompt) => prompt.name === form.name && prompt.id !== previewPrompt?.id)
 
   const clearCachedForm = () => {
-    localStorage.removeItem(cacheKey)
+    safeLocalStorage.removeItem(cacheKey)
     setForm(initialForm)
   }
 

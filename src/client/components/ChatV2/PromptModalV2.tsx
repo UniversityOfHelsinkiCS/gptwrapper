@@ -49,6 +49,7 @@ import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer.tsx'
 import { getApiErrorMessage } from '../../util/apiClient'
 import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer.ts'
 import { requestFocusAfterNavigate } from '../../util/accessibility'
+import safeLocalStorage from '../../util/safeLocalStorage'
 
 const SECTION_LABEL_SX = {
   fontSize: '0.75rem',
@@ -368,7 +369,7 @@ const PromptModalV2 = () => {
     if (!shouldClose) return false
 
     setHasChanges(false)
-    localStorage.removeItem(cacheKey)
+    safeLocalStorage.removeItem(cacheKey)
     setCacheKey('')
     return true
   }

@@ -6,6 +6,7 @@ import useUserSearch from '../../hooks/useUserSearch'
 import apiClient from '../../util/apiClient'
 import { User } from 'src/client/types'
 import { useTranslation } from 'react-i18next'
+import safeLocalStorage from '../../util/safeLocalStorage'
 
 const testResponsesApi = async () => {
   await apiClient.post('/test/responses-api-minimal')
@@ -21,8 +22,8 @@ const handleLoginAs = (user: User | undefined | null, loginUnavailableMessage: s
     return
   }
 
-  localStorage.setItem('adminLoggedInAs', user.id)
-  localStorage.setItem('adminLoggedInAsUser', JSON.stringify(user))
+  safeLocalStorage.setItem('adminLoggedInAs', user.id)
+  safeLocalStorage.setItem('adminLoggedInAsUser', JSON.stringify(user))
   window.location.reload()
 }
 
@@ -94,10 +95,16 @@ export default function Testing() {
 
         <Box sx={{ maxWidth: 360, width: '100%', display: 'flex', flexDirection: 'column', gap: 1 }}>
           <BlueButton onClick={() => {}} disabled>
-            {t('admin:testingLoginAs')}{'\u00a0'}<strong>{t('admin:testingFakeStudent')}</strong>{'\u00a0'}{`(${t('admin:testingNotWorkingYet')})`}
+            {t('admin:testingLoginAs')}
+            {'\u00a0'}
+            <strong>{t('admin:testingFakeStudent')}</strong>
+            {'\u00a0'}
+            {`(${t('admin:testingNotWorkingYet')})`}
           </BlueButton>
           <BlueButton onClick={() => handleLoginAs(ahslaaks, t('admin:testingLoginUnavailable'))}>
-            {t('admin:testingLoginAs')}{'\u00a0'}<strong>{testTeacherUsername}</strong>
+            {t('admin:testingLoginAs')}
+            {'\u00a0'}
+            <strong>{testTeacherUsername}</strong>
           </BlueButton>
         </Box>
       </Box>

@@ -50,6 +50,7 @@ import {
   type UniversityPromptLanguage,
   type UniversityPromptLanguageBody,
 } from '../../hooks/useUniversityPromptAdmin'
+import safeLocalStorage from '../../util/safeLocalStorage'
 
 const languageLabels: Record<UniversityPromptLanguage, string> = {
   fi: 'Suomi (FI)',
@@ -205,7 +206,7 @@ const UniversityPromptDialog = ({ open, onClose, group }: { open: boolean; onClo
 
   const hasChanges = JSON.stringify(toCached(base)) !== JSON.stringify(draft)
 
-  const clearDraft = () => localStorage.removeItem(cacheKey)
+  const clearDraft = () => safeLocalStorage.removeItem(cacheKey)
 
   const [error, setError] = useFormError()
 

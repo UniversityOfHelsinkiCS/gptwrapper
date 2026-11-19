@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { usePromptEditorState } from '../Prompt/context'
 import { requestFocusAfterNavigate } from '../../util/accessibility'
+import safeLocalStorage from '../../util/safeLocalStorage'
 
 const ModalTitle = () => {
   const { t } = useTranslation()
@@ -48,7 +49,7 @@ const TemplateModal: React.FC<{ open: boolean; root: string; children: React.Rea
       if (!shouldClose) return
 
       setHasChanges(false)
-      localStorage.removeItem(cacheKey)
+      safeLocalStorage.removeItem(cacheKey)
       setCacheKey('')
     }
 
