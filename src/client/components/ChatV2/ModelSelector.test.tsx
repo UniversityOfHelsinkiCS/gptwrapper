@@ -91,8 +91,8 @@ describe('ModelSelector on a wide screen: "More models" opens a menu next to the
     const { menu, toggle, setModel } = openSelector()
     fireEvent.click(toggle)
 
-    fireEvent.click(within(menu).getByTestId('gpt-6.1-sol-option'))
-    expect(setModel).toHaveBeenCalledWith('gpt-6.1-sol')
+    fireEvent.click(within(menu).getByTestId('gpt-6.2-sol-option'))
+    expect(setModel).toHaveBeenCalledWith('gpt-6.2-sol')
     expect(screen.getByTestId('model-selector').getAttribute('aria-expanded')).toBe('false')
   })
 
