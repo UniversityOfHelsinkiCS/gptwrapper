@@ -31,7 +31,19 @@ export enum ModelProvider {
 
 export type ModelDescriptionKey = 'chat:modelDescriptions.premium' | 'chat:modelDescriptions.balanced' | 'chat:modelDescriptions.fastAndCheap'
 
-export type ModelTag = 'free' | 'local' | 'open' | 'more'
+/** `internal`: enabled, but hidden from the model selector (models used by subagent tools). */
+export type ModelTag = 'free' | 'local' | 'open' | 'more' | 'internal'
+
+/**
+ * Price in € per 1M tokens. `cacheWrite` is for providers that price writing to the prompt cache separately;
+ * without it cache writes are charged at the `input` price.
+ */
+export type ModelPrice = {
+  input: number
+  cachedInput: number
+  cacheWrite?: number
+  output: number
+}
 
 /**
  * Reasoning ("thinking") settings of a model. `modelGenerators.ts` translates them per provider: Azure/OpenAI
@@ -45,6 +57,9 @@ export type ModelReasoning = {
 
 export type ModelConfig = {
   name: string
+  /** Disabled models can't be selected or requested, but keep their price for usage recorded on them earlier. */
+  enabled: boolean
+  price: ModelPrice
   displayName: string
   /** Total context window (input + output) as documented by the provider. */
   context: number
@@ -65,12 +80,20 @@ export type ModelConfig = {
 }
 
 /**
+ * Every model, enabled or not. Disable a model with `enabled: false` instead of commenting it out, so usage recorded on
+ * it keeps its price.
+ *
  * name: the acual model name, which configures the model to be used and is also the azure deployment name.
  * displayName: the human-readable name shown to users.
+ *
+ * GPT-6 prices are the lower end of Azure's ranges: the higher end is for input over 272k tokens, which the context
+ * settings below never reach.
  */
-export const validModels: ModelConfig[] = [
+export const models: ModelConfig[] = [
   {
     name: 'gpt-6-luna',
+    enabled: true,
+    price: { input: 0.108, cachedInput: 0.011, cacheWrite: 0.135, output: 0.539 },
     displayName: 'GPT-6 Luna',
     // Window is 1_050_000, but input over 272k is billed at 2x; 400k - 128k output keeps input at 272k.
     context: 400_000,
@@ -83,6 +106,8 @@ export const validModels: ModelConfig[] = [
   },
   {
     name: 'gpt-5-mini',
+    enabled: true,
+    price: { input: 0.25, cachedInput: 0.03, output: 1.98 },
     displayName: 'GPT-5 mini',
     context: 400_000,
     outputLimit: 128_000,
@@ -94,6 +119,9 @@ export const validModels: ModelConfig[] = [
   },
   {
     name: 'gemma-4-26B-A4B',
+    enabled: true,
+    // TODO: nominal price for the self-hosted model.
+    price: { input: 0.05, cachedInput: 0.05, output: 0.2 },
     displayName: 'Gemma 4',
     context: 16_384,
     outputLimit: 8_192,
@@ -106,6 +134,8 @@ export const validModels: ModelConfig[] = [
   },
   {
     name: 'gpt-4o-mini',
+    enabled: true,
+    price: { input: 1.09, cachedInput: 0.28, output: 4.35 },
     displayName: 'GPT-4o mini',
     context: 128_000,
     outputLimit: 16_384,
@@ -115,6 +145,8 @@ export const validModels: ModelConfig[] = [
   },
   {
     name: 'gpt-4o',
+    enabled: true,
+    price: { input: 2.4687, cachedInput: 1.2344, output: 9.8748 },
     displayName: 'GPT-4o',
     context: 128_000,
     outputLimit: 16_384,
@@ -124,6 +156,8 @@ export const validModels: ModelConfig[] = [
   },
   {
     name: 'gpt-5.1',
+    enabled: true,
+    price: { input: 1.24, cachedInput: 0.13, output: 9.88 },
     displayName: 'GPT-5.1',
     context: 400_000,
     outputLimit: 128_000,
@@ -134,6 +168,8 @@ export const validModels: ModelConfig[] = [
   },
   {
     name: 'gpt-4.1',
+    enabled: true,
+    price: { input: 1.98, cachedInput: 0.5, output: 7.9 },
     displayName: 'GPT-4.1',
     context: 1_047_576,
     outputLimit: 32_768,
@@ -143,6 +179,8 @@ export const validModels: ModelConfig[] = [
   },
   {
     name: 'gpt-6.1-sol',
+    enabled: true,
+    price: { input: 2.16, cachedInput: 0.11, cacheWrite: 2.7, output: 10.78 },
     displayName: 'GPT-6.1 Sol',
     // Window is 1_050_000, but input over 272k is billed at 2x; 400k - 128k output keeps input at 272k.
     context: 400_000,
@@ -169,6 +207,8 @@ export const validModels: ModelConfig[] = [
   },
   {
     name: 'gpt-6.1-terra',
+    enabled: true,
+    price: { input: 1.08, cachedInput: 0.06, cacheWrite: 1.35, output: 5.39 },
     displayName: 'GPT-6.1 Terra',
     // Window is 1_050_000, but input over 272k is billed at 2x; 400k - 128k output keeps input at 272k.
     context: 400_000,
@@ -191,6 +231,9 @@ export const validModels: ModelConfig[] = [
   // },
   {
     name: 'Mistral-Large-3-1',
+    enabled: true,
+    // TODO: not in Azure's price list; Terra's price as an overestimate.
+    price: { input: 1.08, cachedInput: 0.06, output: 5.39 },
     displayName: 'Mistral Large 3',
     context: 128_000,
     outputLimit: 4_096,
@@ -212,18 +255,24 @@ export const validModels: ModelConfig[] = [
   //   tags: [],
   //   reasoning: { effort: 'low', showSummary: true },
   // },
-  // {
-  //   name: 'Qwen3.5',
-  //   displayName: 'Qwen 3.5 4B',
-  //   context: 128_000,
-  //   outputLimit: 16_384,
-  //   descriptionKey: 'chat:modelDescriptions.fastAndCheap',
-  //   provider: ModelProvider.Toska,
-  //   service: 'v1',
-  //   tags: ['local', 'open']
-  // },
+  {
+    name: 'Qwen3.5',
+    enabled: true,
+    // TODO: nominal price for the self-hosted model.
+    price: { input: 0.05, cachedInput: 0.05, output: 0.2 },
+    displayName: 'Qwen 3.5 4B',
+    context: 128_000,
+    outputLimit: 16_384,
+    descriptionKey: 'chat:modelDescriptions.fastAndCheap',
+    provider: ModelProvider.Toska,
+    service: 'v1',
+    // Subagent model (PDF_READER_MODEL), not offered in the model selector.
+    tags: ['local', 'open', 'internal'],
+  },
   {
     name: 'mock',
+    enabled: true,
+    price: { input: 0, cachedInput: 0, output: 0 },
     displayName: 'Mock',
     context: 2048,
     outputLimit: 1024,
@@ -232,7 +281,37 @@ export const validModels: ModelConfig[] = [
     // The mock reasons only for messages starting with `think`.
     reasoning: { effort: 'low', showSummary: true },
   },
-] as const
+]
+
+/** The enabled models: the ones that can be selected and requested. */
+export const validModels: ModelConfig[] = models.filter((model) => model.enabled)
+
+/**
+ * Throws when a model's price is not a valid non-negative number, or when a model other than the mock has no input or
+ * output price (a model added without a price would otherwise be free).
+ */
+export const assertModelPrices = (configs: ModelConfig[]): void => {
+  for (const { name, price } of configs) {
+    if (Object.values(price).some((value) => typeof value !== 'number' || !Number.isFinite(value) || value < 0)) {
+      throw new Error(`Model ${name} has an invalid price`)
+    }
+    if (name !== 'mock' && (price.input <= 0 || price.output <= 0)) throw new Error(`Model ${name} has no price`)
+  }
+}
+
+assertModelPrices(models)
+
+/** Price of any model, enabled or not. */
+export const getModelPrice = (modelName: string): ModelPrice | undefined => models.find((model) => model.name === modelName)?.price
+
+/** Base weekly usage budget of a user in €. Course bonuses add percentages of it. */
+export const WEEKLY_BUDGET = Number(process.env.WEEKLY_BUDGET) || 2.5
+
+/**
+ * How many uncached input, cached input and output tokens a typical chat uses relative to each other. Used to blend a
+ * model's prices into one number for the price indicator in the model selector, not for charging.
+ */
+export const PRICE_BLEND_WEIGHTS = { input: 1, cachedInput: 2, output: 1 } as const
 
 /** Max input tokens: the context window minus the space reserved for output. */
 export const inputLimit = (model: Pick<ModelConfig, 'context' | 'outputLimit'>): number => model.context - model.outputLimit
@@ -263,10 +342,10 @@ export const FREE_MODEL = ValidModelNameSchema.parse(process.env.FREE_MODEL || '
 if (!isFreeModel(FREE_MODEL)) throw new Error(`FREE_MODEL ${FREE_MODEL} must be tagged 'free'`)
 
 /**
- * Model of the `read_pdf` subagent, independent of the chat model: by default the local Toska model, whose tokens
- * cost nothing. Chats with the mock model use the mock model for the subagent too (tests).
+ * Model of the `read_pdf` subagent, independent of the chat model: by default the cheap local Qwen. Chats with the
+ * mock model use the mock model for the subagent too (tests). Each subagent tool has its own model setting.
  */
-export const PDF_READER_MODEL = ValidModelNameSchema.parse(process.env.PDF_READER_MODEL || 'gemma-4-26B-A4B')
+export const PDF_READER_MODEL = ValidModelNameSchema.parse(process.env.PDF_READER_MODEL || 'Qwen3.5')
 
 export const DEFAULT_ASSISTANT_INSTRUCTIONS = '' // 11th August 2025 we decided it should be empty
 
