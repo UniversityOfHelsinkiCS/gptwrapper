@@ -150,6 +150,19 @@ export const validModels: ModelConfig[] = [
     instructions: formatInstructions,
     provider: ModelProvider.Azure,
     descriptionKey: 'chat:modelDescriptions.premium',
+    tags: ['more'],
+    // medium is the deployment's default effort (Azure echoes it when no effort is sent); the config only adds the reasoning summary.
+    reasoning: { effort: 'medium', showSummary: true },
+  },
+  {
+    name: 'gpt-6.2-sol',
+    displayName: 'GPT-6.2 Sol',
+    // Window is 1_050_000, but input over 272k is billed at 2x; 400k - 128k output keeps input at 272k.
+    context: 400_000,
+    outputLimit: 128_000,
+    instructions: formatInstructions,
+    provider: ModelProvider.Azure,
+    descriptionKey: 'chat:modelDescriptions.premium',
     tags: [],
     // medium is the deployment's default effort (Azure echoes it when no effort is sent); the config only adds the reasoning summary.
     reasoning: { effort: 'medium', showSummary: true },
