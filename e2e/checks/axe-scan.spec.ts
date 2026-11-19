@@ -186,6 +186,30 @@ test.describe('axe wcag scan for chat', () => {
     await expect(page.getByTestId('send-chat-message')).toBeDisabled()
     await scan(page, testInfo.title)
   })
+
+  test('scan chat with the weekly budget gauge', async ({ page }, testInfo) => {
+    // The cost mode status is faked: one budget gauge instead of the per-course token gauges
+    const budget = { limit: 5, base: 2.5, bonuses: [{ courseId: 'otm-1', name: { fi: 'Biologia', en: 'Biology', sv: 'Biologi' }, percent: 100 }] }
+    await page.route(/\/api\/users\/status(\/(?!all$)[^/]+)?$/, (route) =>
+      route.fulfill({ json: { mode: 'cost', usage: 2, limit: 5, budget, resetsAt: '2026-11-23T00:01:00.000Z' } }),
+    )
+
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+
+    const pill = page.getByRole('button', { name: 'Usage 40% of your weekly budget used' })
+    await pill.click()
+    const popover = page.getByRole('dialog', { name: 'Your weekly budget' })
+    await expect(popover).toContainText('Biology (+100%)')
+    await expect(popover).not.toContainText('€')
+
+    // An open popover is reported as content outside landmarks, so scan with it closed
+    await page.keyboard.press('Escape')
+    await expect(popover).toBeHidden()
+    await expect(pill).toBeFocused()
+    await page.mouse.move(0, 0)
+    await scan(page, testInfo.title)
+  })
 })
 
 test.describe('axe wcag scan for chat with a thinking block', () => {
