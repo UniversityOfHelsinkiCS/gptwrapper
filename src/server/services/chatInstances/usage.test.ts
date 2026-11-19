@@ -19,12 +19,13 @@ import { DEFAULT_TOKEN_LIMIT, WEEKLY_BUDGET } from '../../../config'
 import { ChatInstance, Enrolment, Responsibility, UserChatInstanceUsage } from '../../db/models'
 import type { User as UserType } from '../../../shared/user'
 import { setMembership } from '../../tests/membership'
-import { checkUsage, COURSE_TOKEN_BONUS, getUserBudget, getUserStatus, getUserTokenLimit } from './usage'
+import { checkUsage, COURSE_TOKEN_BONUS, getActiveCourseMembershipsByUser, getUserBudget, getUserStatus, getUserTokenLimit } from './usage'
 
 const ONGOING = { startDate: '2020-01-01', endDate: '2099-01-01' }
 const EXPIRED = { startDate: '1744-01-01', endDate: '1818-12-31' }
 
-const membership = (id: string, activityPeriod = ONGOING, activated = true) => ({
+const membership = (id: string, activityPeriod = ONGOING, activated = true, userId = 'u1') => ({
+  userId,
   chatInstanceId: id,
   chatInstance: { id, activityPeriod, activated },
 })
@@ -105,6 +106,7 @@ describe('getUserTokenLimit', () => {
 
 describe('getUserBudget', () => {
   const course = (id: string, budgetBonusPercent: number | null, activityPeriod = ONGOING, activated = true) => ({
+    userId: 'u1',
     chatInstanceId: id,
     chatInstance: { id, courseId: `cur-${id}`, name: { en: id }, activityPeriod, activated, budgetBonusPercent },
   })
@@ -166,6 +168,47 @@ describe('getUserBudget', () => {
 
     expect(budget.limit).toBe(WEEKLY_BUDGET)
     expect(budget.bonuses).toHaveLength(1)
+  })
+})
+
+describe('getActiveCourseMembershipsByUser', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  const courseIds = (byUser: Map<string, { id: string }[]>, userId: string) => byUser.get(userId)?.map((course) => course.id)
+
+  test('looks up the memberships of all users with one enrolment and one responsibility query', async () => {
+    mockMemberships({
+      enrolled: [membership('c1', ONGOING, true, 'u1'), membership('c2', ONGOING, true, 'u2'), membership('c1', ONGOING, true, 'u2')],
+      teached: [membership('c3', ONGOING, true, 'u1')],
+    })
+
+    const byUser = await getActiveCourseMembershipsByUser(['u1', 'u2', 'u3'])
+
+    expect(Enrolment.findAll).toHaveBeenCalledTimes(1)
+    expect(Responsibility.findAll).toHaveBeenCalledTimes(1)
+    expect(vi.mocked(Enrolment.findAll).mock.calls[0][0]?.where).toEqual({ userId: ['u1', 'u2', 'u3'] })
+    expect(courseIds(byUser, 'u1')).toEqual(['c1', 'c3'])
+    expect(courseIds(byUser, 'u2')).toEqual(['c2', 'c1'])
+    expect(byUser.has('u3')).toBe(false)
+  })
+
+  test('counts a course once per user and leaves out inactive courses', async () => {
+    mockMemberships({
+      enrolled: [membership('c1', ONGOING, true, 'u1'), membership('expired', EXPIRED, true, 'u1'), membership('c1', ONGOING, true, 'u2')],
+      teached: [membership('c1', ONGOING, true, 'u1'), membership('off', ONGOING, false, 'u2')],
+    })
+
+    const byUser = await getActiveCourseMembershipsByUser(['u1', 'u2'])
+
+    expect(courseIds(byUser, 'u1')).toEqual(['c1'])
+    expect(courseIds(byUser, 'u2')).toEqual(['c1'])
+  })
+
+  test('makes no queries without users', async () => {
+    expect((await getActiveCourseMembershipsByUser([])).size).toBe(0)
+    expect(Enrolment.findAll).not.toHaveBeenCalled()
   })
 })
 

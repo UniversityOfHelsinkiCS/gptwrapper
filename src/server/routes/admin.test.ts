@@ -9,6 +9,8 @@ vi.mock('../db/models', () => ({
   User: { findAll: vi.fn(), findByPk: vi.fn(), update: vi.fn(), count: vi.fn() },
   Enrolment: { findAll: vi.fn() },
   Responsibility: { findAll: vi.fn() },
+  Prompt: {},
+  RagIndex: {},
 }))
 
 vi.mock('../db/connection', () => ({
@@ -26,7 +28,11 @@ vi.mock('@sentry/node', () => ({
   captureException: vi.fn(),
 }))
 
+import { DEFAULT_TOKEN_LIMIT, getModelPrice, WEEKLY_BUDGET } from '@config'
 import { ApiKey, ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../db/models'
+import { COURSE_TOKEN_BONUS } from '../services/chatInstances/usage'
+import { PRICE_BASELINE_MODEL } from '../../shared/usage'
+import type { UsageComparisonRow } from '../../shared/usage'
 import adminRouter from './admin'
 
 let currentUser: { id: string; isAdmin: boolean }
@@ -323,5 +329,93 @@ describe('DELETE /admin/usage', () => {
     expect(res.status).toBe(403)
     expect(User.update).not.toHaveBeenCalled()
     expect(UserChatInstanceUsage.update).not.toHaveBeenCalled()
+  })
+})
+
+describe('GET /admin/usage-comparison', () => {
+  const ONGOING = { startDate: '2020-01-01', endDate: '2099-01-01' }
+  const outputPrice = getModelPrice(PRICE_BASELINE_MODEL)!.output
+  /** Weekly model usage that costs `euros` */
+  const usageCosting = (euros: number) => ({ [PRICE_BASELINE_MODEL]: { input: 0, cachedInput: 0, cacheWrite: 0, output: (euros / outputPrice) * 1_000_000 } })
+
+  const userRow = (id: string, usage: number, weeklyModelUsage: object, isPowerUser = false) => ({
+    id,
+    username: id,
+    firstNames: 'F',
+    lastName: 'L',
+    isPowerUser,
+    usage,
+    weeklyModelUsage,
+  })
+  const membership = (userId: string, id: string, budgetBonusPercent: number | null) => ({
+    userId,
+    chatInstanceId: id,
+    chatInstance: { id, courseId: `cur-${id}`, name: { en: id }, activityPeriod: ONGOING, activated: true, budgetBonusPercent },
+  })
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    currentUser = { id: 'admin-1', isAdmin: true }
+    vi.mocked(User.findAll).mockResolvedValue([
+      userRow('cheap', DEFAULT_TOKEN_LIMIT / 2, usageCosting(WEEKLY_BUDGET / 4)),
+      userRow('bonus', DEFAULT_TOKEN_LIMIT, usageCosting(WEEKLY_BUDGET * 1.5)),
+      userRow('over', 0, usageCosting(WEEKLY_BUDGET * 1.2), true),
+    ] as any)
+    vi.mocked(Enrolment.findAll).mockResolvedValue([membership('bonus', 'c1', 100)] as any)
+    vi.mocked(Responsibility.findAll).mockResolvedValue([membership('bonus', 'c2', null)] as any)
+  })
+
+  test('compares the old token % with the new cost % per user, highest cost % first', async () => {
+    const res = await api.fetch('/admin/usage-comparison')
+    const body: UsageComparisonRow[] = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(body.map((row) => row.userId)).toEqual(['over', 'bonus', 'cheap'])
+
+    const [over, bonus, cheap] = body
+
+    expect(cheap.tokenLimit).toBe(DEFAULT_TOKEN_LIMIT)
+    expect(cheap.tokenPercent).toBeCloseTo(50)
+    expect(cheap.cost).toBeCloseTo(WEEKLY_BUDGET / 4)
+    expect(cheap.costPercent).toBeCloseTo(25)
+    expect(cheap.budget).toEqual({ limit: WEEKLY_BUDGET, base: WEEKLY_BUDGET, bonuses: [] })
+
+    // Two active courses: two token bonuses, but only the +100% course raises the budget.
+    expect(bonus.tokenLimit).toBe(DEFAULT_TOKEN_LIMIT + 2 * COURSE_TOKEN_BONUS)
+    expect(bonus.tokenPercent).toBeCloseTo((DEFAULT_TOKEN_LIMIT / (DEFAULT_TOKEN_LIMIT + 2 * COURSE_TOKEN_BONUS)) * 100)
+    expect(bonus.budget.limit).toBeCloseTo(2 * WEEKLY_BUDGET)
+    expect(bonus.budget.bonuses).toEqual([{ courseId: 'cur-c1', name: { en: 'c1' }, percent: 100 }])
+    expect(bonus.costPercent).toBeCloseTo(75)
+
+    // The power user multiplier raises the old limit only.
+    expect(over.tokenLimit).toBe(DEFAULT_TOKEN_LIMIT * 10)
+    expect(over.tokenPercent).toBe(0)
+    expect(over.costPercent).toBeCloseTo(120)
+  })
+
+  test('looks up the memberships of all users at once', async () => {
+    await api.fetch('/admin/usage-comparison')
+
+    expect(Enrolment.findAll).toHaveBeenCalledTimes(1)
+    expect(Responsibility.findAll).toHaveBeenCalledTimes(1)
+    expect(vi.mocked(Enrolment.findAll).mock.calls[0][0]?.where).toEqual({ userId: ['cheap', 'bonus', 'over'] })
+  })
+
+  test('returns an empty list without usage this week', async () => {
+    vi.mocked(User.findAll).mockResolvedValue([])
+
+    const res = await api.fetch('/admin/usage-comparison')
+
+    expect(await res.json()).toEqual([])
+    expect(Enrolment.findAll).not.toHaveBeenCalled()
+  })
+
+  test('rejects non-admins', async () => {
+    currentUser = { id: 'teacher-1', isAdmin: false }
+
+    const res = await api.fetch('/admin/usage-comparison')
+
+    expect(res.status).toBe(403)
+    expect(User.findAll).not.toHaveBeenCalled()
   })
 })
