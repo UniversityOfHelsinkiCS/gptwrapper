@@ -1,4 +1,4 @@
-import { DEFAULT_VERTEX_LOCATION, ModelConfig, ModelProvider, validModels } from '@config'
+import { DEFAULT_VERTEX_LOCATION, getUsageEnforcement, ModelConfig, ModelProvider, validModels } from '@config'
 import express from 'express'
 import { randomBytes } from 'node:crypto'
 import logger from '../../util/logger'
@@ -9,6 +9,7 @@ import { ChatGoogle } from '@langchain/google'
 import { ApiKey, User } from '../../db/models'
 import { checkUsage, getUserTokenLimit, incrementUsage } from 'src/server/services/chatInstances/usage'
 import { recordModelUsage } from 'src/server/services/chatInstances/modelUsage'
+import { getBudgetUsage, isBudgetExhausted } from 'src/server/services/chatInstances/costBudget'
 import { tokenUsageFromMetadata } from '@shared/usage'
 import type { User as UserType } from '../../../shared/user'
 import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from "@langchain/core/messages"
@@ -180,10 +181,26 @@ api.post('/v1/chat/completions',
             return
         }
 
-        const userLimit = await getUserTokenLimit(user)
+        const enforcement = getUsageEnforcement()
 
-        if (UNLIMITED_MODELS.has(model)) {
-            if (!checkUsage(user, user.usage ?? 0, userLimit + 1000000)) {
+        if (enforcement === 'cost') {
+            // Every model counts against the weekly budget; admins are not limited.
+            const budgetUsage = await getBudgetUsage(user)
+            if (!user.isAdmin && isBudgetExhausted(budgetUsage)) {
+                logger.info(`RATELIMIT: ${user.id}, cost ${budgetUsage.cost} of budget ${budgetUsage.budget.limit}, ${model} over weekly budget`)
+                res.status(403).send({
+                    error: {
+                        "code": "usage_limit_reached",
+                        "type": "insufficient_quota",
+                        "param": null,
+                        "message": "Usage limit reached, the weekly budget resets every monday"
+                    }
+                })
+                return
+            }
+        }
+        else if (UNLIMITED_MODELS.has(model)) {
+            if (!checkUsage(user, user.usage ?? 0, await getUserTokenLimit(user) + 1000000)) {
                 logger.info(`RATELIMIT: ${user.id}, ${user.usage}, ${model} limited for "unlimited" model`)
                 res.status(429).send({
                     error: {
@@ -197,7 +214,7 @@ api.post('/v1/chat/completions',
             }
         }
         else if (VERY_UNLIMITED_MODELS.has(model)) {
-            if (!checkUsage(user, user.usage ?? 0, userLimit + 20000000)) {
+            if (!checkUsage(user, user.usage ?? 0, await getUserTokenLimit(user) + 20000000)) {
                 logger.info(`RATELIMIT: ${user.id}, ${user.usage}, ${model} limited for "very unlimited" model`)
                 res.status(429).send({
                     error: {
@@ -211,7 +228,7 @@ api.post('/v1/chat/completions',
             }
         }
         else {
-            if (!checkUsage(user, user.usage ?? 0, userLimit)) {
+            if (!checkUsage(user, user.usage ?? 0, await getUserTokenLimit(user))) {
                 logger.info(`RATELIMIT: ${user.id}, ${user.usage}, ${model} limited for normal models`)
                 res.status(429).send({
                     error: {
@@ -405,7 +422,9 @@ api.post('/v1/chat/completions',
         try {
             await recordModelUsage({ userId: user.id, usage: { [matching.name]: tokenUsage } })
         } catch (error) {
-            logger.error(`Failed to record model usage of user ${user.id}: ${error instanceof Error ? error.message : error}`)
+            // Under cost enforcement this usage goes unbilled.
+            const unbilled = enforcement === 'cost' ? ', usage not billed' : ''
+            logger.error(`Failed to record model usage of user ${user.id}${unbilled}: ${error instanceof Error ? error.message : error}`)
         }
 
         const hasToolCalls = (full?.tool_calls?.length ?? 0) > 0

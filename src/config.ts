@@ -307,6 +307,27 @@ export const getModelPrice = (modelName: string): ModelPrice | undefined => mode
 /** Base weekly usage budget of a user in €. Course bonuses add percentages of it. */
 export const WEEKLY_BUDGET = Number(process.env.WEEKLY_BUDGET) || 2.5
 
+export const USAGE_ENFORCEMENT_MODES = ['tokens', 'cost'] as const
+
+/** Which usage system blocks users: the old weekly token limit or the weekly cost budget. */
+export type UsageEnforcement = (typeof USAGE_ENFORCEMENT_MODES)[number]
+
+export const parseUsageEnforcement = (value: string | undefined): UsageEnforcement => {
+  if (value === undefined || value === '') return 'tokens'
+  const mode = USAGE_ENFORCEMENT_MODES.find((m) => m === value)
+  if (!mode) throw new Error(`Invalid USAGE_ENFORCEMENT ${value}, expected one of ${USAGE_ENFORCEMENT_MODES.join(', ')}`)
+  return mode
+}
+
+/**
+ * The enforcing usage system, from `USAGE_ENFORCEMENT` (default `tokens`). Server only: the client learns it from the
+ * user status response. Read at call time so tests can switch it with `vi.stubEnv`.
+ */
+export const getUsageEnforcement = (): UsageEnforcement => parseUsageEnforcement(process.env.USAGE_ENFORCEMENT)
+
+// Fail at startup on an unknown value.
+getUsageEnforcement()
+
 /**
  * How many uncached input, cached input and output tokens a typical chat uses relative to each other. Used to blend a
  * model's prices into one number for the price indicator in the model selector, not for charging.

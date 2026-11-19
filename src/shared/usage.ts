@@ -148,3 +148,25 @@ export type UsageComparisonRow = {
 
 /** Response of `GET /api/admin/usage-comparison`: users with usage this week, sorted by `costPercent` descending */
 export type UsageComparisonResponse = UsageComparisonRow[]
+
+/** User status under `USAGE_ENFORCEMENT=tokens`: weekly tokens of the general chat or of the requested course. */
+export type TokenUserStatus = {
+  mode: 'tokens'
+  usage: number
+  limit: number
+}
+
+/** User status under `USAGE_ENFORCEMENT=cost`: the weekly cost and budget in €, the same in every chat. */
+export type CostUserStatus = {
+  mode: 'cost'
+  /** Weekly cost in € */
+  usage: number
+  /** Weekly budget limit in € (`budget.limit`) */
+  limit: number
+  budget: UserBudget
+  /** ISO time of the next weekly usage reset */
+  resetsAt: string
+}
+
+/** Response of `GET /api/users/status` and `GET /api/users/status/:courseId` */
+export type UserStatusResponse = TokenUserStatus | CostUserStatus

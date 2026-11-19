@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { MemorySaver } from '@langchain/langgraph'
 import { createAgent } from 'langchain'
 import type { z } from 'zod/v4'
-import { DEFAULT_TOKEN_LIMIT, inProduction, isFreeModel, isMockModel, type ValidModelName, validModels } from '@config'
+import { DEFAULT_TOKEN_LIMIT, getUsageEnforcement, inProduction, isFreeModel, isMockModel, type ValidModelName, validModels } from '@config'
 import type { AiApiWarning } from '@shared/aiApi'
 import type { ChatEvent, PostStreamSchemaV4 } from '@shared/agentChat'
 import { isPromptDraft } from '@shared/prompt'
@@ -16,7 +16,8 @@ import logger from '../../util/logger'
 import { getAccessLevel, requireActiveAccess } from '../chatInstances/access'
 import { checkCourseUsage, checkUsage, getCourseTokenLimit, getUsage, getUserTokenLimit, incrementCourseUsage, incrementUsage } from '../chatInstances/usage'
 import { recordModelUsage } from '../chatInstances/modelUsage'
-import { handleWarnings, modelConfigHasInstructions, prepareMessagesForLLM } from './prepareMessages'
+import { getBudgetUsage, isBudgetExhausted } from '../chatInstances/costBudget'
+import { handleWarnings, modelConfigHasInstructions, prepareMessagesForLLM, type UsageWarningLimit } from './prepareMessages'
 import { getAgentModel } from './agentModel'
 import { describeGenerationError } from './generationError'
 import { keepFailedRun, readMissedCallUpdate, readResumeState, takeFailedRun } from './resumableRuns'
@@ -96,13 +97,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
 
   const { prompt, systemMessage, enabledTools } = await resolvePrompt(user, generationInfo, course, meta)
 
-  const isFree = isFreeModel(model)
-  const tokenLimit = course ? getCourseTokenLimit(course.chatInstance) : isFree ? DEFAULT_TOKEN_LIMIT : await getUserTokenLimit(user)
-  const usageAllowed = course ? checkCourseUsage(user, course.chatInstance, tokenLimit) : isFree || checkUsage(user, await getUsage(user.id), tokenLimit)
-
-  if (!usageAllowed && !isFree) {
-    throw ApplicationError.Forbidden('Usage limit reached')
-  }
+  const usageLimit = await checkUsageLimit(user, chargeUser, model, course)
 
   // The mock model always has the mock subagent and the quiz, for its `subagent` and `quiz` prefixes (e2e tests),
   // whatever the prompt has. Other models only get the prompt's tools.
@@ -132,7 +127,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
       ...prepareMessagesForLLM(history),
     ],
     options.ignoredWarnings,
-    tokenLimit,
+    usageLimit,
   )
   meta.inputTokenCount = inputTokenCount
 
@@ -269,7 +264,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
   await emit({ type: 'usage', inputTokens, outputTokens })
 
   const totalTokens = inputTokens + outputTokens
-  if (!isFree) {
+  if (!isFreeModel(model)) {
     if (course) {
       await incrementCourseUsage(course.chatInstance, totalTokens)
       await PromptUsage.create({
@@ -286,7 +281,9 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
   try {
     await recordModelUsage({ userId: chargeUser.id, courseUsageId: course?.chatInstance.currentUserUsage?.id, usage: runUsage.usage })
   } catch (error) {
-    logger.error('Failed to record model usage', { model, error: error instanceof Error ? error.message : error })
+    // Under cost enforcement this usage goes unbilled.
+    const message = getUsageEnforcement() === 'cost' ? 'Failed to record model usage, usage not billed' : 'Failed to record model usage'
+    logger.error(message, { model, userId: chargeUser.id, error: error instanceof Error ? error.message : error })
   }
 
   const streamingMs = firstTokenAt ? Date.now() - firstTokenAt : 0
@@ -310,6 +307,32 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
 
 /** Model calls of one subagent tool in a run, summed over its calls. Logged in `chatCompletionMeta.subagentUsage`. */
 type SubagentUsage = { modelCalls: number; inputTokens: number; outputTokens: number; toolCalls: string[] }
+
+/**
+ * Throws 403 when the user may not run: under `USAGE_ENFORCEMENT=tokens` the token limit of the course or the general
+ * chat (free models exempt), under `cost` the weekly budget of the charged user on every model (admins exempt).
+ * Returns the limit the pre-send usage warning compares with.
+ */
+const checkUsageLimit = async (user: User, chargeUser: User, model: ValidModelName, course: CourseContext | null): Promise<UsageWarningLimit> => {
+  if (getUsageEnforcement() === 'cost') {
+    const budgetUsage = await getBudgetUsage(chargeUser)
+    if (!chargeUser.isAdmin && isBudgetExhausted(budgetUsage)) {
+      logger.info('Usage limit reached', { userId: chargeUser.id, cost: budgetUsage.cost, limit: budgetUsage.budget.limit })
+      throw ApplicationError.Forbidden('Usage limit reached')
+    }
+    return { budget: budgetUsage.budget.limit }
+  }
+
+  const isFree = isFreeModel(model)
+  const tokenLimit = course ? getCourseTokenLimit(course.chatInstance) : isFree ? DEFAULT_TOKEN_LIMIT : await getUserTokenLimit(user)
+  const usageAllowed = course ? checkCourseUsage(user, course.chatInstance, tokenLimit) : isFree || checkUsage(user, await getUsage(user.id), tokenLimit)
+
+  if (!usageAllowed && !isFree) {
+    throw ApplicationError.Forbidden('Usage limit reached')
+  }
+
+  return tokenLimit
+}
 
 const ensureModelAllowedForUser = (model: ValidModelName, isAdmin: boolean) => {
   if (inProduction && isMockModel(model) && !isAdmin) {

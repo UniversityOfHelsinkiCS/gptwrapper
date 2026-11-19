@@ -7,6 +7,7 @@ import { run as runUpdater } from '../updater'
 import { inDevelopment } from '../../config'
 import { UPDATER_CRON_ENABLED } from './config'
 import type { ResetAllUsageResponse } from '../../shared/usage'
+import { USAGE_RESET_CRON } from './usageReset'
 
 /** Resets this week's usage of all users (general and course chat). Totals are kept. Returns how many rows had usage. */
 export const resetUsage = async (): Promise<ResetAllUsageResponse> => {
@@ -58,7 +59,7 @@ export const resetUsage = async (): Promise<ResetAllUsageResponse> => {
 const setupCron = async () => {
   logger.info('Starting cron jobs')
 
-  cron.schedule('1 0 * * 1', resetUsage) // Reset usage every Monday 00:01
+  cron.schedule(USAGE_RESET_CRON, resetUsage) // Reset usage every Monday 00:01
 
   if (inDevelopment) {
     await runUpdater()

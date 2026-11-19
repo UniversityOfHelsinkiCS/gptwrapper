@@ -9,6 +9,9 @@ import { getLastRestart } from '../util/lastRestart'
 import { ApplicationError } from '../util/ApplicationError'
 import { UserPreferencesSchema } from '../../shared/user'
 import { CourseUsage } from '@shared/types'
+import type { UserStatusResponse } from '@shared/usage'
+import { getUsageEnforcement } from '@config'
+import { getCostUserStatus } from '../services/chatInstances/costBudget'
 
 const userRouter = express.Router()
 
@@ -54,13 +57,16 @@ userRouter.get('/status', async (req, res) => {
   const { user } = request
   const { id } = user
 
+  if (getUsageEnforcement() === 'cost') {
+    res.send(await getCostUserStatus(user))
+    return
+  }
+
   const usage = await getUsage(id)
   const limit = await getUserTokenLimit(user)
 
-  res.send({
-    usage,
-    limit,
-  })
+  const status: UserStatusResponse = { mode: 'tokens', usage, limit }
+  res.send(status)
   return
 })
 
@@ -91,12 +97,16 @@ userRouter.get('/status/:courseId', async (req, res) => {
   const request = req as any as RequestWithUser
   const { user } = request
 
+  // The cost budget is the same in every chat, so the course does not matter.
+  if (getUsageEnforcement() === 'cost') {
+    res.send(await getCostUserStatus(user))
+    return
+  }
+
   const { usage, limit } = await getUserStatus(user, courseId)
 
-  res.send({
-    usage,
-    limit,
-  })
+  const status: UserStatusResponse = { mode: 'tokens', usage, limit }
+  res.send(status)
   return
 })
 

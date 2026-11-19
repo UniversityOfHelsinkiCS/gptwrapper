@@ -90,7 +90,7 @@ export const tokenLimitOfCourses = (user: Pick<UserType, 'isPowerUser'>, courses
   return tierLimit + COURSE_TOKEN_BONUS * courses.length
 }
 
-/** The user's weekly budget in €: the base budget plus the bonuses of the user's active courses. Not enforced yet. */
+/** The user's weekly budget in €: the base budget plus the bonuses of the user's active courses. Enforced under `USAGE_ENFORCEMENT=cost`. */
 export const getUserBudget = async (user: UserType): Promise<UserBudget> => budgetOfCourses(await getActiveCourseMemberships(user))
 
 export const getUserTokenLimit = async (user: UserType): Promise<number> => tokenLimitOfCourses(user, await getActiveCourseMemberships(user))

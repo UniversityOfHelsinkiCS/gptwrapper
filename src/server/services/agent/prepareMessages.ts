@@ -24,11 +24,28 @@ export const prepareMessagesForLLM = (messages: ChatMessage[]): ChatMessage[] =>
 export const modelConfigHasInstructions = (modelConfig: ModelConfig): modelConfig is ModelConfig & { instructions: string } =>
   'instructions' in modelConfig && typeof modelConfig.instructions === 'string'
 
+/**
+ * What the usage warning compares the input with: the weekly token limit (`USAGE_ENFORCEMENT=tokens`), or the weekly
+ * budget limit in € (`cost`).
+ */
+export type UsageWarningLimit = number | { budget: number }
+
+/** Percentage of the weekly limit the input is estimated to use, or null when the model is exempt (free under tokens). */
+const usagePercentage = (modelConfig: (typeof validModels)[number], tokenCount: number, limit: UsageWarningLimit): number | null => {
+  if (typeof limit === 'object') {
+    // Only uncached input at its price: the cheapest estimate that still scales with the conversation.
+    const estimatedCost = (tokenCount * modelConfig.price.input) / 1_000_000
+    return Math.round((estimatedCost / limit.budget) * 100)
+  }
+  if (isFreeModel(modelConfig.name)) return null
+  return Math.round((tokenCount / limit) * 100)
+}
+
 export const handleWarnings = (
   modelConfig: (typeof validModels)[number],
   messages: Message[],
   ignoredWarnings?: WarningType[],
-  tokenLimit: number = DEFAULT_TOKEN_LIMIT,
+  limit: UsageWarningLimit = DEFAULT_TOKEN_LIMIT,
 ): { warnings: AiApiWarning[]; messages: Message[]; inputTokenCount: number } => {
   const encoding = getEncoding(modelConfig.name)
   const tokenCount = calculateUsage(messages, encoding)
@@ -36,12 +53,10 @@ export const handleWarnings = (
   let messagesToReturn = messages
   const warnings: AiApiWarning[] = []
 
-  // Warn about usage if over 10% of limit
-  const tokenUsagePercentage = Math.round((tokenCount / tokenLimit) * 100)
+  // Warn about usage if over 10% of the weekly limit
+  const tokenUsagePercentage = usagePercentage(modelConfig, tokenCount, limit)
 
-  const isFree = isFreeModel(modelConfig.name)
-
-  if (!isFree && tokenUsagePercentage > 10 && !ignoredWarnings?.includes('usage')) {
+  if (tokenUsagePercentage !== null && tokenUsagePercentage > 10 && !ignoredWarnings?.includes('usage')) {
     warnings.push({
       warningType: 'usage',
       warning: `You are about to use ${tokenUsagePercentage}% of your weekly CurreChat usage`,
