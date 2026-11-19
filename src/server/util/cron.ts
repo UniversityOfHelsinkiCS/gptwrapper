@@ -6,9 +6,17 @@ import { User, UserChatInstanceUsage } from '../db/models'
 import { run as runUpdater } from '../updater'
 import { inDevelopment } from '../../config'
 import { UPDATER_CRON_ENABLED } from './config'
+import type { ResetAllUsageResponse } from '../../shared/usage'
 
-export const resetUsage = async () => {
-  logger.info('Resetting usage')
+/** Resets this week's usage of all users (general and course chat). Totals are kept. Returns how many rows had usage. */
+export const resetUsage = async (): Promise<ResetAllUsageResponse> => {
+  const notEmpty = literal(`weekly_model_usage <> '{}'::jsonb`)
+  const [users, courseUsages] = await Promise.all([
+    User.count({ where: { [Op.or]: [{ usage: { [Op.gt]: 0 } }, notEmpty] } }),
+    UserChatInstanceUsage.count({ where: { [Op.or]: [{ usageCount: { [Op.gt]: 0 } }, notEmpty] } }),
+  ])
+
+  logger.info('Resetting usage', { users, courseUsages })
 
   await User.update(
     {
@@ -39,11 +47,12 @@ export const resetUsage = async () => {
   )
 
   // Weekly usage by model; the totals keep it.
-  const notEmpty = literal(`weekly_model_usage <> '{}'::jsonb`)
   await User.update({ weeklyModelUsage: {} }, { where: notEmpty })
   await UserChatInstanceUsage.update({ weeklyModelUsage: {} }, { where: notEmpty })
 
   logger.info('Usage reset complete')
+
+  return { users, courseUsages }
 }
 
 const setupCron = async () => {

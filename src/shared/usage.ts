@@ -12,6 +12,9 @@ export type TokenUsage = {
 /** Token usage by model name. Stored as token counts; the cost is always computed from the current config prices. */
 export type ModelUsage = Record<string, TokenUsage>
 
+/** Response of the admin reset of all weekly usage: how many users and course usage rows had usage this week. */
+export type ResetAllUsageResponse = { users: number; courseUsages: number }
+
 const TOKEN_TYPES = ['input', 'cachedInput', 'cacheWrite', 'output'] as const
 
 export const emptyTokenUsage = (): TokenUsage => ({ input: 0, cachedInput: 0, cacheWrite: 0, output: 0 })

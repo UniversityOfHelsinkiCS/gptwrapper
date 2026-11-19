@@ -8,6 +8,9 @@ import { ApplicationError } from '../util/ApplicationError'
 import { adminMiddleware } from '../middleware/adminMiddleware'
 import { generateTerms, getTermsOf } from '../util/util'
 import { LANGUAGES } from '../../shared/lang'
+import { resetUsage } from '../util/cron'
+import logger from '../util/logger'
+import type { RequestWithUser } from '../types'
 import type { ApiUser, ChatInstanceSearchResponse, ChatInstanceSearchResult, CourseParticipant, CourseParticipantsResponse } from '../../shared/types'
 
 const adminRouter = express.Router()
@@ -72,6 +75,20 @@ adminRouter.get('/users/:search', async (req, res) => {
   })
 
   res.send(matches)
+})
+
+// Runs the weekly reset (the Monday cron) for all users now.
+adminRouter.delete('/usage', async (req, res) => {
+  const { user, hijackedBy } = req as RequestWithUser
+  logger.info('Admin resets the weekly usage of all users', {
+    adminId: user.id,
+    adminUsername: user.username,
+    loggedInAsBy: hijackedBy?.username,
+  })
+
+  const result = await resetUsage()
+
+  res.send(result)
 })
 
 adminRouter.delete('/usage/:userId', async (req, res) => {
