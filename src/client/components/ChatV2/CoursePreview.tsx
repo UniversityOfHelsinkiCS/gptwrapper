@@ -51,6 +51,7 @@ import { OutlineButtonBlue, BlueButton } from './general/Buttons'
 import { CourseActivityPeriodEditor } from '../Courses/Course/CourseActivityPeriodEditor'
 import { ResearchCourseToggle } from '../Courses/Course/ResearchCourseToggle'
 import { CourseTokenLimitEditor } from '../Courses/Course/CourseTokenLimitEditor'
+import { CourseBudgetBonusEditor } from '../Courses/Course/CourseBudgetBonusEditor'
 import DiscussionView from '../Courses/Course/Discussions'
 import PromptUsageHistogram from '../Courses/Course/PromptUsageHistogram'
 import { EnrolmentActionUserSearch, ResponsibilityActionUserSearch } from '../Admin/UserSearch'
@@ -449,6 +450,9 @@ const CoursePreview = ({ course, refetchCourses, titleId }: { course: Course; re
 
         {/* Token limit (admins) */}
         {isAdmin && <CourseTokenLimitEditor key={`${activeCourse.courseId}:${activeCourse.usageLimit}`} course={activeCourse} />}
+
+        {/* Budget bonus (admins) */}
+        {isAdmin && <CourseBudgetBonusEditor key={`${activeCourse.courseId}:${activeCourse.budgetBonusPercent}`} course={activeCourse} />}
 
         {/* Personal usage card */}
         {currentCourseUsage &&

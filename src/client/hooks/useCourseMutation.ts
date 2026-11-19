@@ -8,6 +8,7 @@ import apiClient from '../util/apiClient'
 interface UpdatedCourseData {
   activityPeriod: ActivityPeriod
   usageLimit: number
+  budgetBonusPercent: number | null
   saveDiscussions: boolean
   activated: boolean
 }

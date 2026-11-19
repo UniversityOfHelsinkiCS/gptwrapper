@@ -105,6 +105,7 @@ export interface ChatInstance {
   name: Locales
   description: string
   usageLimit: number
+  budgetBonusPercent?: number | null
   resetCron?: string
   courseId?: string
   prompts: Prompt[]
