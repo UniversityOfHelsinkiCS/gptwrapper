@@ -176,3 +176,14 @@ describe('ModelSelector on a narrow screen or embedded: "More models" expands in
     expect(screen.getAllByRole('menu')).toHaveLength(1)
   })
 })
+
+describe('ModelSelector hides internal models', () => {
+  test('a model tagged internal is in neither menu', () => {
+    const { menu, toggle } = openSelector()
+    fireEvent.click(toggle)
+
+    expect(within(menu).queryByTestId('Qwen3.5-option')).toBeNull()
+    expect(within(getSideMenu()).queryByTestId('Qwen3.5-option')).toBeNull()
+    expect(within(getSideMenu()).queryByTestId('gpt-5.1-option')).toBeTruthy()
+  })
+})
