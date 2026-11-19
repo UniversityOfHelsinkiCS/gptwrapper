@@ -7,6 +7,7 @@ import useCurrentUser from '../../../hooks/useCurrentUser'
 import FacultyTable from './FacultyTable'
 import UserTable from './UserTable'
 import ResetAllUsageButton from './ResetAllUsageButton'
+import UsageComparisonTable from './UsageComparisonTable'
 
 const Usage = () => {
   const [value, setValue] = useState(0)
@@ -25,9 +26,11 @@ const Usage = () => {
       <Tabs sx={{ borderBottom: 1, borderColor: 'divider' }} value={value} onChange={(_, newValue) => setValue(newValue)}>
         <Tab label={t('admin:faculties')} />
         <Tab label={t('admin:users')} />
+        <Tab label={t('admin:usageComparison')} />
       </Tabs>
       {value === 0 && <FacultyTable />}
       {value === 1 && <UserTable />}
+      {value === 2 && <UsageComparisonTable />}
     </Box>
   )
 }
