@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('node-cron', () => ({ default: { schedule: vi.fn() } }))
 vi.mock('../db/models', () => ({
-  User: { update: vi.fn() },
-  UserChatInstanceUsage: { update: vi.fn() },
+  User: { update: vi.fn(), count: vi.fn() },
+  UserChatInstanceUsage: { update: vi.fn(), count: vi.fn() },
 }))
 vi.mock('../updater', () => ({ run: vi.fn() }))
 vi.mock('./logger', () => ({ default: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }))
@@ -34,5 +34,12 @@ describe('resetUsage', () => {
 
     expect(updatedValues(User.update)).toContainEqual(expect.objectContaining({ usage: 0 }))
     expect(updatedValues(UserChatInstanceUsage.update)).toContainEqual({ usageCount: 0 })
+  })
+
+  test('returns how many users and course usage rows had usage before the reset', async () => {
+    vi.mocked(User.count).mockResolvedValue(4 as any)
+    vi.mocked(UserChatInstanceUsage.count).mockResolvedValue(9 as any)
+
+    expect(await resetUsage()).toEqual({ users: 4, courseUsages: 9 })
   })
 })

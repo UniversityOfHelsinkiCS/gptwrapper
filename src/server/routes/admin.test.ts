@@ -5,8 +5,8 @@ import { startTestServer } from '../tests/testServer'
 vi.mock('../db/models', () => ({
   ApiKey: { findAll: vi.fn() },
   ChatInstance: { findAndCountAll: vi.fn(), findOne: vi.fn() },
-  UserChatInstanceUsage: { findAll: vi.fn(), update: vi.fn() },
-  User: { findAll: vi.fn(), findByPk: vi.fn() },
+  UserChatInstanceUsage: { findAll: vi.fn(), update: vi.fn(), count: vi.fn() },
+  User: { findAll: vi.fn(), findByPk: vi.fn(), update: vi.fn(), count: vi.fn() },
   Enrolment: { findAll: vi.fn() },
   Responsibility: { findAll: vi.fn() },
 }))
@@ -280,5 +280,48 @@ describe('DELETE /admin/usage/:userId', () => {
 
     expect(res.status).toBe(403)
     expect(User.findByPk).not.toHaveBeenCalled()
+  })
+})
+
+describe('DELETE /admin/usage', () => {
+  const updatedFields = (model: { update: unknown }) => vi.mocked(model.update as typeof User.update).mock.calls.flatMap(([values]) => Object.keys(values))
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    currentUser = { id: 'admin-1', isAdmin: true }
+    vi.mocked(User.count).mockResolvedValue(12 as any)
+    vi.mocked(UserChatInstanceUsage.count).mockResolvedValue(30 as any)
+  })
+
+  test('resets the weekly usage of all users and courses, keeping the totals', async () => {
+    const res = await api.fetch('/admin/usage', { method: 'DELETE' })
+
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual({ users: 12, courseUsages: 30 })
+
+    expect(User.update).toHaveBeenCalledWith(expect.objectContaining({ usage: 0 }), expect.anything())
+    expect(User.update).toHaveBeenCalledWith({ weeklyModelUsage: {} }, expect.anything())
+    expect(UserChatInstanceUsage.update).toHaveBeenCalledWith({ usageCount: 0 }, expect.anything())
+    expect(UserChatInstanceUsage.update).toHaveBeenCalledWith({ weeklyModelUsage: {} }, expect.anything())
+
+    // Not filtered by user or course: every row with usage is reset.
+    for (const [, options] of [...vi.mocked(User.update).mock.calls, ...vi.mocked(UserChatInstanceUsage.update).mock.calls]) {
+      expect(JSON.stringify(options.where)).not.toMatch(/userId|chatInstanceId|"id"/)
+    }
+
+    // The old general total accumulates the weekly usage at reset; no total is emptied.
+    expect(updatedFields(User)).not.toContain('totalModelUsage')
+    expect(updatedFields(UserChatInstanceUsage)).not.toContain('totalModelUsage')
+    expect(updatedFields(UserChatInstanceUsage)).not.toContain('totalUsageCount')
+  })
+
+  test('rejects non-admins', async () => {
+    currentUser = { id: 'teacher-1', isAdmin: false }
+
+    const res = await api.fetch('/admin/usage', { method: 'DELETE' })
+
+    expect(res.status).toBe(403)
+    expect(User.update).not.toHaveBeenCalled()
+    expect(UserChatInstanceUsage.update).not.toHaveBeenCalled()
   })
 })
