@@ -170,6 +170,22 @@ test.describe('axe wcag scan for chat', () => {
     await expect(page.getByTestId('assistant-message')).toContainText('mocktest axe chat prompt')
     await scan(page, testInfo.title)
   })
+
+  test('scan chat with the weekly budget used up', async ({ page }, testInfo) => {
+    // The dev server enforces tokens; the cost mode status is faked to show the blocked chat box.
+    const budget = { limit: 2.5, base: 2.5, bonuses: [] }
+    await page.route(/\/api\/users\/status(\/(?!all$)[^/]+)?$/, (route) =>
+      route.fulfill({ json: { mode: 'cost', usage: 2.6, limit: 2.5, budget, resetsAt: '2026-11-23T00:01:00.000Z' } }),
+    )
+
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+
+    await expect(page.getByTestId('budget-used-up')).toBeVisible()
+    await page.getByTestId('chat-input').fill('hello')
+    await expect(page.getByTestId('send-chat-message')).toBeDisabled()
+    await scan(page, testInfo.title)
+  })
 })
 
 test.describe('axe wcag scan for chat with a thinking block', () => {

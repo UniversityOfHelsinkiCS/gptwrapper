@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { AIMessageChunk } from '@langchain/core/messages'
 import { startTestServer } from '../../tests/testServer'
 
@@ -28,11 +28,17 @@ vi.mock('../../services/chatInstances/usage', () => ({
 
 vi.mock('../../services/chatInstances/modelUsage', () => ({ recordModelUsage: vi.fn() }))
 
+vi.mock('../../services/chatInstances/costBudget', async (importOriginal) => ({
+  getBudgetUsage: vi.fn(),
+  isBudgetExhausted: (await importOriginal<typeof import('../../services/chatInstances/costBudget')>()).isBudgetExhausted,
+}))
+
 vi.mock('../../util/logger', () => ({ default: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }))
 
 import { ApiKey, User } from '../../db/models'
 import { checkUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { recordModelUsage } from '../../services/chatInstances/modelUsage'
+import { getBudgetUsage } from '../../services/chatInstances/costBudget'
 import { api as externalApi } from './openai'
 
 const api = startTestServer('/external', externalApi)
@@ -108,5 +114,50 @@ describe('POST /external/v1/chat/completions usage', () => {
 
     expect(res.status).toBe(401)
     expect(recordModelUsage).not.toHaveBeenCalled()
+  })
+})
+
+describe('POST /external/v1/chat/completions under USAGE_ENFORCEMENT=cost', () => {
+  const budget = { limit: 2.5, base: 2.5, bonuses: [] }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubEnv('USAGE_ENFORCEMENT', 'cost')
+    vi.mocked(ApiKey.findOne).mockResolvedValue({ userId: user.id, name: 'key' } as any)
+    vi.mocked(User.findByPk).mockResolvedValue({ toJSON: () => user } as any)
+    vi.mocked(getBudgetUsage).mockResolvedValue({ cost: 1, budget })
+    upstream.chunks = [new AIMessageChunk({ content: 'Hello', usage_metadata: { input_tokens: 10, output_tokens: 2, total_tokens: 12 } })]
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  test('answers under the budget, without the token limit check', async () => {
+    const res = await complete('gpt-6-luna')
+
+    expect(res.status).toBe(200)
+    expect(getBudgetUsage).toHaveBeenCalledWith(expect.objectContaining({ id: 'api-user' }))
+    expect(checkUsage).not.toHaveBeenCalled()
+    expect(recordModelUsage).toHaveBeenCalled()
+  })
+
+  test('refuses with 403 at the budget limit, on an otherwise unlimited model too', async () => {
+    vi.mocked(getBudgetUsage).mockResolvedValue({ cost: 2.5, budget })
+
+    const res = await complete('gpt-6-luna')
+
+    expect(res.status).toBe(403)
+    expect((await res.json()).error.code).toBe('usage_limit_reached')
+    expect(recordModelUsage).not.toHaveBeenCalled()
+  })
+
+  test('lets an admin over the budget through', async () => {
+    vi.mocked(User.findByPk).mockResolvedValue({ toJSON: () => ({ ...user, isAdmin: true }) } as any)
+    vi.mocked(getBudgetUsage).mockResolvedValue({ cost: 10, budget })
+
+    const res = await complete('gpt-6-luna')
+
+    expect(res.status).toBe(200)
   })
 })

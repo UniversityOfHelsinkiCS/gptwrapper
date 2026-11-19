@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { startTestServer } from '../../tests/testServer'
 import { setMembership } from '../../tests/membership'
 
@@ -28,6 +28,11 @@ vi.mock('../../services/chatInstances/usage', async (importOriginal) => ({
 
 vi.mock('../../services/chatInstances/modelUsage', () => ({ recordModelUsage: vi.fn() }))
 
+vi.mock('../../services/chatInstances/costBudget', async (importOriginal) => ({
+  getBudgetUsage: vi.fn(),
+  isBudgetExhausted: (await importOriginal<typeof import('../../services/chatInstances/costBudget')>()).isBudgetExhausted,
+}))
+
 // The real search needs the vector DB; the mock search (used with the mock model) is kept real.
 vi.mock('../../services/rag/search', () => ({ search: vi.fn() }))
 vi.mock('../../services/langchain/fileSearchResultsStore', () => ({ ToolResultStore: { saveResults: vi.fn() } }))
@@ -44,6 +49,7 @@ import v4Router from './v4'
 import { ChatInstance, Discussion, Prompt, PromptUsage, UserChatInstanceUsage } from '../../db/models'
 import { getUsage, getUserTokenLimit, incrementCourseUsage, incrementUsage } from '../../services/chatInstances/usage'
 import { recordModelUsage } from '../../services/chatInstances/modelUsage'
+import { getBudgetUsage } from '../../services/chatInstances/costBudget'
 import { mockSubagent } from '../../services/agent/tools/mockSubagent'
 import type { ChatEvent } from '../../../shared/agentChat'
 import { MOCK_FLAKY_ERROR, MOCK_FLAKY_PREFIX, MockModel } from '../../services/langchain/MockModel'
@@ -67,12 +73,21 @@ beforeEach(() => {
 /** The /stream route reads its JSON payload out of a multipart `data` field. The real MockModel answers. */
 const stream = ({
   message = 'say hello world',
+  model = 'mock',
   promptId,
   courseId,
   history = [],
   quizAnswer,
   resumeRunId,
-}: { message?: string; promptId?: string; courseId?: string; history?: unknown[]; quizAnswer?: unknown; resumeRunId?: string } = {}) => {
+}: {
+  message?: string
+  model?: string
+  promptId?: string
+  courseId?: string
+  history?: unknown[]
+  quizAnswer?: unknown
+  resumeRunId?: string
+} = {}) => {
   const form = new FormData()
   form.append(
     'data',
@@ -80,7 +95,7 @@ const stream = ({
       options: {
         chatMessages: [...history, { role: 'user', content: message, ...(quizAnswer ? { quizAnswer } : {}) }],
         generationInfo: {
-          model: 'mock',
+          model,
           promptInfo: promptId ? { type: 'saved', id: promptId, name: 'Essay helper' } : { type: 'custom', systemMessage: 'You are helpful' },
         },
         ...(resumeRunId ? { resumeRunId } : {}),
@@ -760,5 +775,68 @@ describe('POST /ai/v4/stream with the mock quiz', () => {
   test('rejects a quiz answer without a selection', async () => {
     const response = await stream({ message: 'x', history: quizHistory, quizAnswer: { callId: 'mock_quiz_id', selected: [] } })
     expect(response.status).toBe(400)
+  })
+})
+
+describe('POST /ai/v4/stream under USAGE_ENFORCEMENT=cost', () => {
+  const budget = { limit: 2.5, base: 2.5, bonuses: [] }
+
+  beforeEach(() => {
+    vi.stubEnv('USAGE_ENFORCEMENT', 'cost')
+    vi.mocked(getBudgetUsage).mockResolvedValue({ cost: 1, budget })
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  const overBudget = () => vi.mocked(getBudgetUsage).mockResolvedValue({ cost: 2.5, budget })
+
+  test('chats under the budget, without the token limit checks', async () => {
+    const response = await stream()
+
+    expect(response.status).toBe(200)
+    expect(textOf(await readEvents(response))).toBe('hello world')
+    expect(getBudgetUsage).toHaveBeenCalledWith(currentUser)
+    expect(getUsage).not.toHaveBeenCalled()
+    expect(getUserTokenLimit).not.toHaveBeenCalled()
+  })
+
+  test('refuses at the budget limit on a model that is free under tokens', async () => {
+    overBudget()
+
+    const response = await stream({ model: 'gpt-6-luna' })
+
+    expect(response.status).toBe(403)
+    expect(await response.json()).toEqual(expect.objectContaining({ error: 'Usage limit reached' }))
+    expect(recordModelUsage).not.toHaveBeenCalled()
+  })
+
+  test('refuses at the budget limit in a course chat, whatever the course token limit', async () => {
+    givenCourse({ usageLimit: 10_000_000 })
+    overBudget()
+
+    const response = await stream({ promptId: 'prompt-1', courseId: 'course-1' })
+
+    expect(response.status).toBe(403)
+  })
+
+  test('still chats at the budget limit as an admin', async () => {
+    currentUser = { id: 'admin-1', isAdmin: true }
+    overBudget()
+
+    const response = await stream()
+
+    expect(response.status).toBe(200)
+    expect(textOf(await readEvents(response))).toBe('hello world')
+  })
+
+  test('warns when the input is estimated to cost over 10% of the budget, also on a model free under tokens', async () => {
+    vi.mocked(getBudgetUsage).mockResolvedValue({ cost: 0, budget: { ...budget, limit: 0.000_001 } })
+
+    const response = await stream({ model: 'gpt-6-luna' })
+
+    expect(response.status).toBe(201)
+    expect(await response.json()).toEqual({ warnings: [expect.objectContaining({ warningType: 'usage' })] })
   })
 })

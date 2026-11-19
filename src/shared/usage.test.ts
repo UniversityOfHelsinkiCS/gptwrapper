@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
 
-import { assertModelPrices, getModelPrice, type ModelConfig, ModelProvider, models, validModels } from '@config'
+import { assertModelPrices, getModelPrice, type ModelConfig, ModelProvider, models, parseUsageEnforcement, validModels } from '@config'
 import { blendedPrice, mergeUsage, modelPriceIndicator, priceDots, priceMultiplier, roundPriceMultiplier, tokenUsageFromMetadata, usageCost } from './usage'
 
 const tokens = (input: number, cachedInput: number, cacheWrite: number, output: number) => ({ input, cachedInput, cacheWrite, output })
@@ -152,5 +152,21 @@ describe('price indicator', () => {
     const multiplier = priceMultiplier({ input: 5, cachedInput: 0.5, output: 25 })
     expect(multiplier).toBe(46)
     expect(priceDots(multiplier)).toBe(4)
+  })
+})
+
+describe('parseUsageEnforcement', () => {
+  it('defaults to tokens', () => {
+    expect(parseUsageEnforcement(undefined)).toBe('tokens')
+    expect(parseUsageEnforcement('')).toBe('tokens')
+  })
+
+  it('accepts tokens and cost', () => {
+    expect(parseUsageEnforcement('tokens')).toBe('tokens')
+    expect(parseUsageEnforcement('cost')).toBe('cost')
+  })
+
+  it('throws on an unknown value', () => {
+    expect(() => parseUsageEnforcement('euros')).toThrow(/USAGE_ENFORCEMENT/)
   })
 })

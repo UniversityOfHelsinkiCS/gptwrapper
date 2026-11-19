@@ -34,7 +34,7 @@ beforeAll(async () => {
 })
 afterEach(cleanup)
 
-const renderChatBox = ({ quizPrompt = null }: { quizPrompt?: QuizPrompt | null } = {}) => {
+const renderChatBox = ({ quizPrompt = null, budgetResetsAt = null }: { quizPrompt?: QuizPrompt | null; budgetResetsAt?: string | null } = {}) => {
   const handleSubmit = vi.fn()
   const actionsRef = createRef<ChatBoxActions>()
   const fileInputRef = createRef<HTMLInputElement>()
@@ -44,6 +44,7 @@ const renderChatBox = ({ quizPrompt = null }: { quizPrompt?: QuizPrompt | null }
         <ChatBox
           disabled={false}
           isTokenLimitExceeded={false}
+          budgetResetsAt={budgetResetsAt}
           fileInputRef={fileInputRef}
           fileName=""
           messageWarning={{}}
@@ -138,5 +139,23 @@ describe('ChatBox', () => {
     expect(input().value).toBe('')
     expect(document.activeElement).toBe(other)
     other.remove()
+  })
+
+  test('with the weekly budget used up, Send stays disabled and the chat box says when the budget resets', () => {
+    const resetsAt = '2026-11-23T00:01:00.000Z'
+    const { handleSubmit } = renderChatBox({ budgetResetsAt: resetsAt })
+
+    const formatted = new Date(resetsAt).toLocaleString('en', { dateStyle: 'full', timeStyle: 'short' })
+    expect(screen.getByTestId('budget-used-up').textContent).toBe(`You have used up your weekly CurreChat budget. Next reset: ${formatted}.`)
+
+    fireEvent.change(input(), { target: { value: 'hello' } })
+    expect(sendButton().disabled).toBe(true)
+    fireEvent.keyDown(input(), { key: 'Enter' })
+    expect(handleSubmit).not.toHaveBeenCalled()
+  })
+
+  test('without a used-up budget, no budget message is shown', () => {
+    renderChatBox()
+    expect(screen.queryByTestId('budget-used-up')).toBeNull()
   })
 })
