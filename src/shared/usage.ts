@@ -1,4 +1,4 @@
-import { getModelPrice, type ModelPrice, models } from '@config'
+import { getModelPrice, type ModelPrice, models, PRICE_BLEND_WEIGHTS } from '@config'
 import type { Locales } from './types'
 
 /** Tokens of one model by type. `input` is uncached input only: cached reads and cache writes are counted separately. */
@@ -90,4 +90,39 @@ export type UserBudget = {
   limit: number
   base: number
   bonuses: BudgetBonus[]
+}
+
+/** The model the price indicator compares other models with (×1). */
+export const PRICE_BASELINE_MODEL = 'gpt-6-luna'
+
+/** A model's input, cached input and output prices blended into one €/1M number with `PRICE_BLEND_WEIGHTS`. */
+export const blendedPrice = (price: ModelPrice): number => {
+  const { input, cachedInput, output } = PRICE_BLEND_WEIGHTS
+  return (price.input * input + price.cachedInput * cachedInput + price.output * output) / (input + cachedInput + output)
+}
+
+/** Multiplier rounded for display: a whole number from 1 up, one decimal below 1. */
+export const roundPriceMultiplier = (multiplier: number): number => (multiplier >= 1 ? Math.round(multiplier) : Math.round(multiplier * 10) / 10)
+
+/** How expensive a price is relative to the baseline model, rounded for display. */
+export const priceMultiplier = (price: ModelPrice): number => {
+  const baseline = getModelPrice(PRICE_BASELINE_MODEL)
+  if (!baseline) throw new Error(`Price baseline model ${PRICE_BASELINE_MODEL} is not configured`)
+  return roundPriceMultiplier(blendedPrice(price) / blendedPrice(baseline))
+}
+
+/** Number of dots (1–4) for a rounded price multiplier: 1 up to 2×, 2 up to 10×, 3 up to 25×, 4 above. */
+export const priceDots = (multiplier: number): number => {
+  if (multiplier <= 2) return 1
+  if (multiplier <= 10) return 2
+  if (multiplier <= 25) return 3
+  return 4
+}
+
+/** Price indicator of a configured model, or undefined for an unknown model or the mock. */
+export const modelPriceIndicator = (modelName: string): { multiplier: number; dots: number } | undefined => {
+  const price = getModelPrice(modelName)
+  if (!price || modelName === 'mock') return undefined
+  const multiplier = priceMultiplier(price)
+  return { multiplier, dots: priceDots(multiplier) }
 }
