@@ -1,6 +1,6 @@
 import * as React from 'react'
 import Menu from '@mui/material/Menu'
-import { useTheme } from '@mui/material'
+import { Box, useTheme } from '@mui/material'
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
 import ListItemText from '@mui/material/ListItemText'
@@ -21,6 +21,7 @@ import apiClient from '../util/apiClient'
 import { useIsEmbedded } from '../contexts/EmbeddedContext'
 import { isManagementPage } from './BackToChatButton'
 import safeLocalStorage from '../util/safeLocalStorage'
+import { SHORT_VIEWPORT } from '../theme'
 
 export default function GlobalMenu({
   openDisclaimer,
@@ -71,8 +72,8 @@ export default function GlobalMenu({
   }
 
   return (
-    <div
-      style={
+    <Box
+      sx={
         inSidebar
           ? { position: 'fixed', bottom: 20, left: 0, width: 'var(--sidebar-width-collapsed)', display: 'flex', justifyContent: 'center' }
           : {
@@ -80,6 +81,7 @@ export default function GlobalMenu({
               zIndex: 999,
               top: isMobile ? 10 : 20,
               right: isMobile ? 15 : 'calc(20px + var(--global-menu-right-offset, 0px))',
+              [SHORT_VIEWPORT]: { position: 'absolute' },
             }
       }
     >
@@ -256,7 +258,7 @@ export default function GlobalMenu({
           {t('sv')}
         </MenuItem>
       </Menu>
-    </div>
+    </Box>
   )
 }
 

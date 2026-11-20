@@ -25,6 +25,8 @@ declare module '@mui/material/styles' {
 export const monospaceFonts = "'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace"
 export const monospaceStyle = { fontFamily: monospaceFonts, fontSize: 'inherit' } as const
 
+export const SHORT_VIEWPORT = '@media (max-height: 30rem)'
+
 export const focusIndicatorColors = { light: '#005fcc', dark: '#66b2ff' } as const
 
 export const focusIndicator = `var(--focus-indicator, ${focusIndicatorColors.light})`

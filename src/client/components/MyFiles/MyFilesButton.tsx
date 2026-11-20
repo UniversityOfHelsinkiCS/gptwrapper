@@ -35,9 +35,16 @@ const MyFilesButton = ({ user, collapsed = false }: { user?: User | null; collap
           </TextButton>
         </Tooltip>
       ) : (
-        <TextButton startIcon={<FolderOutlined />} onClick={handleOpen} aria-haspopup="dialog" size="large" data-testid="my-files-button">
-          {t('myFiles:title')}
-          <ExperimentalChip />
+        <TextButton
+          startIcon={<FolderOutlined />}
+          onClick={handleOpen}
+          aria-haspopup="dialog"
+          size="large"
+          data-testid="my-files-button"
+          sx={{ flexWrap: 'wrap', justifyContent: 'flex-start', rowGap: 0.5 }}
+        >
+          <span style={{ marginRight: 8 }}>{t('myFiles:title')}</span>
+          <ExperimentalChip sx={{ ml: 0 }} />
         </TextButton>
       )}
       {mounted && (

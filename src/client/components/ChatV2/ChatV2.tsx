@@ -62,6 +62,7 @@ import { AttachFolders, parseStoredFolders } from '../MyFiles/AttachFolders'
 import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
 import { executeFileTool } from '../../util/myFiles/agentTools'
 import type { ClientTools } from './chatTransport'
+import { SHORT_VIEWPORT } from '../../theme'
 
 const QUIZ_ANNOUNCEMENT_DELAY_FROM_CHAT_BOX = 700
 
@@ -579,6 +580,26 @@ const ChatV2Content = () => {
     }
   }, [rightPanelCollapsed])
 
+  // Browsers scroll a focused element clear of these, see scroll-padding in GlobalStyles.tsx (WCAG 2.4.11)
+  useEffect(() => {
+    if (!showFloatingButtons) return
+    document.documentElement.style.setProperty('--floating-top', bannerBelowFloatingButtonsSx.pt)
+    return () => {
+      document.documentElement.style.removeProperty('--floating-top')
+    }
+  }, [showFloatingButtons])
+
+  const measureChatBoxHeight = useCallback((node: HTMLDivElement | null) => {
+    if (!node || typeof ResizeObserver === 'undefined') return
+    const root = document.documentElement
+    const observer = new ResizeObserver(() => root.style.setProperty('--chatbox-height', `${node.offsetHeight}px`))
+    observer.observe(node)
+    return () => {
+      observer.disconnect()
+      root.style.removeProperty('--chatbox-height')
+    }
+  }, [])
+
   const noAccess = chatInstanceLoadError?.response?.status === 403 || isUrlPromptUnavailable
 
   useEffect(() => {
@@ -673,6 +694,7 @@ const ChatV2Content = () => {
                 alignItems: 'center',
                 gap: 1,
                 zIndex: 999,
+                [SHORT_VIEWPORT]: { position: 'absolute' },
               }}
             >
               <OutlineButtonBlack onClick={() => setSideBarOpen(true)} data-testid="left-panel-open">
@@ -739,10 +761,12 @@ const ChatV2Content = () => {
             />
           </Box>
           <Box
+            ref={measureChatBoxHeight}
             sx={{
               width: '100%',
               position: 'sticky',
               bottom: 0,
+              [SHORT_VIEWPORT]: { position: 'static' },
             }}
           >
             <Box

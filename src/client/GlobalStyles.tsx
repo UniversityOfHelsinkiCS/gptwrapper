@@ -1,5 +1,5 @@
 import { GlobalStyles, useTheme } from '@mui/material'
-import { focusIndicatorColors } from './theme'
+import { SHORT_VIEWPORT, focusIndicatorColors } from './theme'
 
 export default function Styles() {
   const theme = useTheme()
@@ -16,6 +16,14 @@ export default function Styles() {
           '--loader-color': theme.palette.text.primary,
           '--focus-indicator': focusIndicatorColors[theme.palette.mode],
           backgroundColor: theme.palette.background.default,
+        },
+        html: {
+          scrollPaddingTop: 'var(--floating-top, 0px)',
+          scrollPaddingBottom: 'var(--chatbox-height, 0px)',
+          [SHORT_VIEWPORT]: {
+            scrollPaddingTop: 0,
+            scrollPaddingBottom: 0,
+          },
         },
         '*::-webkit-scrollbar': {
           width: 'var(--sb-size)',

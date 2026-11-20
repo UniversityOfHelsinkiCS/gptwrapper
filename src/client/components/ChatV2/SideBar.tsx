@@ -76,6 +76,7 @@ const SideBar = ({
           zIndex: 999,
           // embedded chat narrows the collapsed sidebar and its buttons with this variable
           ...(!open && { '& .MuiButton-root': { px: 'var(--sidebar-collapsed-button-padding, .8rem)' } }),
+          ...(open && { pr: { xs: '1.5rem', md: 0 } }),
         }}
         className="scrollable-styled"
       >
