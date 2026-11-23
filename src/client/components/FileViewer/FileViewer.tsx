@@ -13,7 +13,7 @@ import { MarkdownContent } from '../ChatV2/MarkdownContent'
 import { ExperimentalChip } from '../MyFiles/ExperimentalChip'
 import { MAX_VIEWER_TEXT_BYTES, viewerFileKind } from './fileKind'
 import type { ViewerTarget } from './FileViewerContext'
-import { pdfPageOf, selectionToQuote, type PendingQuote } from './selectionQuote'
+import { pdfPageOf, selectionToQuote, type AddQuoteOptions, type PendingQuote } from './selectionQuote'
 import { usePdfViewer } from './usePdfViewer'
 import { PDF_VIEWER_SCOPE_CLASS } from '../../util/pdfjs'
 
@@ -52,8 +52,15 @@ const useFileText = (store: MyFilesStore, path: string, enabled: boolean): Conte
   return content
 }
 
+/** The selection actions: the quick actions send the quote right away with a fixed message, "Ask…" waits for a question. */
+const SELECTION_ACTIONS = ['explain', 'summarize', 'translate', 'ask'] as const
+type SelectionAction = (typeof SELECTION_ACTIONS)[number]
+
 /** Keeps a click on a selection action from collapsing the selection it acts on. */
 const keepSelection = (event: MouseEvent) => event.preventDefault()
+
+/** About how wide the floating toolbar is with its four actions, to keep it inside the content box. */
+const FLOATING_TOOLBAR_WIDTH = 360
 
 /** Where the floating selection toolbar goes, relative to the content box: just below the end of the selection. */
 const floatingPosition = (selection: Selection, content: HTMLElement): { top: number; left: number } => {
@@ -65,7 +72,7 @@ const floatingPosition = (selection: Selection, content: HTMLElement): { top: nu
   // Kept inside the content box, which for a PDF is the visible area of its scroll container.
   return {
     top: Math.max(0, Math.min(end.bottom - base.top + 6, base.height - 48)),
-    left: Math.max(0, Math.min(end.right - base.left, base.width - 120)),
+    left: Math.max(0, Math.min(end.right - base.left, base.width - FLOATING_TOOLBAR_WIDTH)),
   }
 }
 
@@ -108,19 +115,22 @@ const useSelectionQuote = (contentRef: RefObject<HTMLElement | null>, path: stri
  * wrapping monospace block, PDFs in pdf.js's viewer (with page and zoom controls in the toolbar). The whole panel is one
  * labelled, focusable region; it scrolls under a sticky toolbar, except a PDF, which scrolls in its own container.
  * `target.page` opens a PDF at that page, also when the same file is opened again with another page.
- * With `onAddQuote`, selected text can be added to the chat as a quote ("Ask…"), from a toolbar floating next to a
- * mouse selection or from the viewer toolbar (the keyboard and screen reader path).
+ * With `onAddQuote`, selected text can be added to the chat as a quote ("Ask…") or sent right away with a fixed
+ * message (Explain, Summarize, Translate; disabled with `quickActionsDisabled`, while a response streams), from a
+ * toolbar floating next to a mouse selection or from the viewer toolbar (the keyboard and screen reader path).
  */
 const FileViewer = ({
   store,
   target,
   onClose,
   onAddQuote,
+  quickActionsDisabled = false,
 }: {
   store: MyFilesStore
   target: ViewerTarget
   onClose: () => void
-  onAddQuote?: (pending: PendingQuote) => void
+  onAddQuote?: (pending: PendingQuote, options?: AddQuoteOptions) => void
+  quickActionsDisabled?: boolean
 }) => {
   const { t } = useTranslation()
   const titleId = useId()
@@ -149,11 +159,26 @@ const FileViewer = ({
     regionRef.current?.scrollTo?.({ top: 0 })
   }, [target.path])
 
-  const ask = () => {
+  const act = (action: SelectionAction) => {
     if (!selected || !onAddQuote) return
+    if (action !== 'ask' && quickActionsDisabled) return
     hideFloating()
-    onAddQuote(selected)
+    if (action === 'ask') onAddQuote(selected)
+    else onAddQuote(selected, { message: quickMessages[action], send: true })
   }
+
+  const quickMessages = {
+    explain: t('fileViewer:explainMessage'),
+    summarize: t('fileViewer:summarizeMessage'),
+    translate: t('fileViewer:translateMessage'),
+  }
+  const actionLabels: Record<SelectionAction, string> = {
+    explain: t('fileViewer:explain'),
+    summarize: t('fileViewer:summarize'),
+    translate: t('fileViewer:translate'),
+    ask: t('fileViewer:ask'),
+  }
+  const actionDisabled = (action: SelectionAction) => !selected || (action !== 'ask' && quickActionsDisabled)
 
   const message = (text: string, error = false) => (
     <Typography color={error ? 'error' : 'text.secondary'} sx={{ p: 2 }} data-testid="file-viewer-message">
@@ -222,17 +247,22 @@ const FileViewer = ({
           </Box>
         )}
         {onAddQuote && (
-          <Button
-            size="small"
-            variant="outlined"
-            disabled={!selected}
-            onMouseDown={keepSelection}
-            onClick={ask}
-            data-testid="file-viewer-ask"
-            sx={{ ml: 'auto', flexShrink: 0 }}
-          >
-            {t('fileViewer:ask')}
-          </Button>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, ml: 'auto' }}>
+            {SELECTION_ACTIONS.map((action) => (
+              <Button
+                key={action}
+                size="small"
+                variant="outlined"
+                disabled={actionDisabled(action)}
+                onMouseDown={keepSelection}
+                onClick={() => act(action)}
+                data-testid={`file-viewer-${action}`}
+                sx={{ flexShrink: 0 }}
+              >
+                {actionLabels[action]}
+              </Button>
+            ))}
+          </Box>
         )}
         <IconButton onClick={onClose} aria-label={t('fileViewer:closeNamed', params)} data-testid="file-viewer-close" sx={{ ml: onAddQuote ? 0 : 'auto' }}>
           <Close />
@@ -297,11 +327,30 @@ const FileViewer = ({
             aria-label={t('fileViewer:selectionActions')}
             elevation={4}
             data-testid="file-viewer-selection-toolbar"
-            sx={{ position: 'absolute', top: floating.top, left: floating.left, zIndex: 2, p: 0.5, userSelect: 'none' }}
+            sx={{
+              position: 'absolute',
+              top: floating.top,
+              left: floating.left,
+              zIndex: 2,
+              p: 0.5,
+              display: 'flex',
+              flexWrap: 'wrap',
+              maxWidth: '100%',
+              userSelect: 'none',
+            }}
           >
-            <Button size="small" onMouseDown={keepSelection} onClick={ask} data-testid="file-viewer-selection-ask">
-              {t('fileViewer:ask')}
-            </Button>
+            {SELECTION_ACTIONS.map((action) => (
+              <Button
+                key={action}
+                size="small"
+                disabled={actionDisabled(action)}
+                onMouseDown={keepSelection}
+                onClick={() => act(action)}
+                data-testid={`file-viewer-selection-${action}`}
+              >
+                {actionLabels[action]}
+              </Button>
+            ))}
           </Paper>
         )}
       </Box>

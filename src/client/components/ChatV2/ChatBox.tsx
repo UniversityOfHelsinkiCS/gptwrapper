@@ -23,7 +23,7 @@ import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import { quoteFileName, type Quote } from '@shared/quote'
 import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
-import type { PendingQuote } from '../FileViewer/selectionQuote'
+import type { AddQuoteOptions, PendingQuote } from '../FileViewer/selectionQuote'
 
 const skipLinkSx = {
   ...visuallyHidden,
@@ -60,9 +60,11 @@ export type ChatBoxActions = {
   submit: () => void
   /**
    * Shows a quote from the file viewer as a chip above the input (replacing an earlier one), moves focus to the input
-   * and announces it. The next message is sent with it. Quick actions (05) extend this with `{ message, send }`.
+   * and announces it. The next message is sent with it ("Ask…").
+   * With `{ message, send: true }` (a quick action) the quote is sent right away with `message` instead, unless a
+   * response is streaming or the budget is used up. The typed draft and a pending chip stay as they are.
    */
-  addQuote: (pending: PendingQuote) => void
+  addQuote: (pending: PendingQuote, options?: AddQuoteOptions) => void
   /** Removes the pending quote without announcing it (a new conversation). */
   clearQuote: () => void
 }
@@ -217,7 +219,13 @@ export const ChatBox = ({
     send({ focusInput: true })
   }
 
-  const addQuote = (pending: PendingQuote) => {
+  const addQuote = (pending: PendingQuote, { message: quickMessage, send: sendNow }: AddQuoteOptions = {}) => {
+    if (sendNow) {
+      if (disabled || budgetResetsAt || !quickMessage) return
+      handleSubmit(quickMessage, [pending.quote])
+      refetchStatus()
+      return
+    }
     setPendingQuote(pending)
     textFieldRef.current?.focus()
     announceToScreenReader(t('fileViewer:quoteAdded'))

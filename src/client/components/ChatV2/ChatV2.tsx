@@ -55,7 +55,7 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { AttachFolders, parseStoredFolders } from '../MyFiles/AttachFolders'
 import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
 import { FileViewerProvider, useFileViewer } from '../FileViewer/FileViewerContext'
-import type { PendingQuote } from '../FileViewer/selectionQuote'
+import type { AddQuoteOptions, PendingQuote } from '../FileViewer/selectionQuote'
 import { executeFileTool } from '../../util/myFiles/agentTools'
 import type { ClientTools } from './chatTransport'
 import { SHORT_VIEWPORT } from '../../theme'
@@ -472,18 +472,24 @@ const ChatV2Content = () => {
   const handleQuizSelect = useCallback((selection: QuizSelection) => setQuizSelection({ ...selection, messageIndex: messages.length - 1 }), [messages.length])
   const handleQuizSubmit = useCallback(() => chatBoxRef.current?.submit(), [])
 
-  /** A quote from the file viewer goes to the chat box (the composer). On narrow screens the viewer covers the chat, so it closes. */
+  /**
+   * A quote from the file viewer goes to the chat box (the composer), as a chip or sent right away (a quick action).
+   * On narrow screens the viewer covers the chat, so it closes.
+   */
   const addQuote = useCallback(
-    (pending: PendingQuote) => {
+    (pending: PendingQuote, options?: AddQuoteOptions) => {
       if (isMobile) fileViewer?.close()
-      chatBoxRef.current?.addQuote(pending)
+      chatBoxRef.current?.addQuote(pending, options)
     },
     [isMobile, fileViewer],
   )
 
-  /** Sends the chat box text: as the explanation of the quiz answer while an option is picked, otherwise as a message (with its quotes). */
+  /**
+   * Sends the chat box text: as the explanation of the quiz answer while an option is picked, otherwise as a message
+   * (with its quotes). A message with quotes is never a quiz answer (a quick action can be sent while an option is picked).
+   */
   const handleChatBoxSubmit = (message: string, quotes?: Quote[]) => {
-    if (!openQuizSelection || !openQuiz) {
+    if (quotes || !openQuizSelection || !openQuiz) {
       handleSendMessage(message, false, [], undefined, undefined, undefined, quotes)
       return
     }
@@ -849,7 +855,7 @@ const ChatV2Content = () => {
         (isMobile ? (
           <Drawer anchor="right" open onClose={closeViewer} sx={{ '& .MuiDrawer-paper': { width: '100%', maxWidth: '100%' } }}>
             <Suspense fallback={null}>
-              <FileViewer store={myFilesStore} target={viewerTarget} onClose={closeViewer} onAddQuote={addQuote} />
+              <FileViewer store={myFilesStore} target={viewerTarget} onClose={closeViewer} onAddQuote={addQuote} quickActionsDisabled={isStreaming} />
             </Suspense>
           </Drawer>
         ) : (
@@ -858,7 +864,7 @@ const ChatV2Content = () => {
             sx={{ flex: 3, minWidth: 0, height: '100vh', position: 'sticky', top: 0, borderLeft: '1px solid', borderLeftColor: 'divider' }}
           >
             <Suspense fallback={null}>
-              <FileViewer store={myFilesStore} target={viewerTarget} onClose={closeViewer} onAddQuote={addQuote} />
+              <FileViewer store={myFilesStore} target={viewerTarget} onClose={closeViewer} onAddQuote={addQuote} quickActionsDisabled={isStreaming} />
             </Suspense>
           </Box>
         ))}

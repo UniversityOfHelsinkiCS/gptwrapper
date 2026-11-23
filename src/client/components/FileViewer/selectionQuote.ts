@@ -6,6 +6,9 @@ export interface PendingQuote {
   truncated: boolean
 }
 
+/** How a quote goes to the chat: as a chip waiting for a typed question ("Ask…"), or sent right away with `message` (a quick action). */
+export type AddQuoteOptions = { message?: string; send?: boolean }
+
 const HEADING_SELECTOR = 'h1, h2, h3, h4, h5, h6'
 
 /** The text of the last heading in `container` that comes before `node` (or contains it), if any. */
