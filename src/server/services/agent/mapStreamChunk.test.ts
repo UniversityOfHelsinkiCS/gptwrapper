@@ -11,6 +11,7 @@ import {
   getMainAgentModelCall,
   getSubagentModelCall,
   INITIAL_STREAM_STATE,
+  isMainAgentModelChunk,
   mapStreamChunk,
   mapStreamChunks,
   namespaceToPath,
@@ -288,6 +289,15 @@ describe('mapStreamChunk tool events', () => {
       usage: { input: 5, cachedInput: 0, cacheWrite: 0, output: 5 },
       toolCalls: [],
     })
+  })
+
+  test("tells the main agent's model token chunks apart from tool results and subagent chunks", () => {
+    const token = new AIMessageChunk({ content: 'x' })
+
+    expect(isMainAgentModelChunk([[], 'messages', [token, {}]])).toBe(true)
+    expect(isMainAgentModelChunk([['tools:t1'], 'messages', [token, {}]])).toBe(false)
+    expect(isMainAgentModelChunk([[], 'messages', [new ToolMessage({ content: 'result', tool_call_id: 'c1' }), {}]])).toBe(false)
+    expect(isMainAgentModelChunk([[], 'updates', { model_request: { messages: [token] } }])).toBe(false)
   })
 
   test('splits cache reads and cache writes out of the input tokens, so no token is counted twice', () => {

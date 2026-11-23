@@ -602,6 +602,27 @@ describe('POST /ai/v4/stream with the mock subagent', () => {
     })
   })
 
+  test('charges and logs the model calls that finished before a run failed', async () => {
+    const meta: Record<string, unknown> = {}
+    const request = PostStreamSchemaV4.parse({
+      options: {
+        chatMessages: [{ role: 'user', content: `${MOCK_FLAKY_PREFIX} charge-test` }],
+        generationInfo: { model: 'mock', promptInfo: { type: 'custom', systemMessage: 'You are helpful' } },
+      },
+    })
+
+    await runAgent({ user: currentUser as any, request, meta, signal: new AbortController().signal, onStart: () => {}, emit: async () => {} })
+
+    // The main agent's first call (to the subagent) and the subagent's calls finished; the next main call failed.
+    expect(incrementUsage).toHaveBeenCalledWith(currentUser, 0)
+    expect(recordModelUsage).toHaveBeenCalledWith({
+      userId: 'user-1',
+      courseUsageId: undefined,
+      usage: { mock: { input: 12, cachedInput: 0, cacheWrite: 0, output: 7 } },
+    })
+    expect(meta).toMatchObject({ runOutcome: 'failed', modelCalls: 1, tokenCount: 0, toolCalls: JSON.stringify(['mock_subagent']) })
+  })
+
   test("records the subagent's tokens under the subagent's model, apart from the chat model's", async () => {
     // The mock subagent runs on the mock model; pretend it runs on another model to tell the two apart.
     const model = vi.spyOn(mockSubagent, 'model').mockReturnValue('gpt-6-luna')
