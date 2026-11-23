@@ -1215,6 +1215,7 @@
     "truncated": "truncated",
     "removeQuote": "Remove the quote by pressing Delete or Backspace",
     "showMore": "Show more",
+    "openQuoteSource": "Open {{source}} in the file viewer",
     "showLess": "Show less",
     "pdfPage": "Page {{page}}",
     "pdfPages": "PDF pages",

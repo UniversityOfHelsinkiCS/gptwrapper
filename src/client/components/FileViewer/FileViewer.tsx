@@ -218,13 +218,31 @@ const FileViewer = ({
     }
     applyPendingScroll()
   }, [isPdf, positionKey, target, applyPendingScroll])
+
+  // Opening a file (or the open one at another position) moves focus to it, so keyboard and screen reader users land
+  // in the viewer. A hidden viewer cannot take focus: it is focused when it is shown.
+  const pendingFocus = useRef(false)
+  const applyPendingFocus = useCallback(() => {
+    const region = regionRef.current
+    if (!pendingFocus.current || !region) return
+    region.focus({ preventScroll: true })
+    if (document.activeElement === region) pendingFocus.current = false
+  }, [])
+  useEffect(() => {
+    pendingFocus.current = true
+    applyPendingFocus()
+  }, [target, applyPendingFocus])
+
   useEffect(() => {
     const region = regionRef.current
     if (!region || typeof ResizeObserver === 'undefined') return
-    const observer = new ResizeObserver(applyPendingScroll)
+    const observer = new ResizeObserver(() => {
+      applyPendingFocus()
+      applyPendingScroll()
+    })
     observer.observe(region)
     return () => observer.disconnect()
-  }, [applyPendingScroll])
+  }, [applyPendingFocus, applyPendingScroll])
 
   const saveScrollTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => () => clearTimeout(saveScrollTimer.current), [])
@@ -238,9 +256,7 @@ const FileViewer = ({
     saveScrollTimer.current = setTimeout(() => writeReadingPosition(key, { scroll }), SAVE_SCROLL_DELAY_MS)
   }
 
-  // Opening a file moves focus to it, so keyboard and screen reader users land in the viewer.
   useEffect(() => {
-    regionRef.current?.focus({ preventScroll: true })
     regionRef.current?.scrollTo?.({ top: 0 })
   }, [target.path])
 

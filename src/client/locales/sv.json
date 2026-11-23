@@ -1191,6 +1191,7 @@
     "truncated": "förkortat",
     "removeQuote": "Ta bort citatet genom att trycka på Delete eller Backspace",
     "showMore": "Visa mer",
+    "openQuoteSource": "Öppna {{source}} i filvisaren",
     "showLess": "Visa mindre",
     "pdfPage": "Sida {{page}}",
     "pdfPages": "PDF-sidor",

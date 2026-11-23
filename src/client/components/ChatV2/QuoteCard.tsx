@@ -1,15 +1,38 @@
-import { Box, Button, Tooltip, Typography } from '@mui/material'
-import { useCallback, useId, useLayoutEffect, useRef, useState } from 'react'
+import { Box, Button, Link, Tooltip, Typography } from '@mui/material'
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { quoteFileName, type Quote } from '@shared/quote'
+import { useFileViewer } from '../FileViewer/FileViewerContext'
+import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
 
 const CLAMPED_LINES = 6
 
 const clampSx = { display: '-webkit-box', WebkitLineClamp: CLAMPED_LINES, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as const
 
+/** Whether the quoted file can be opened: the viewer is available here and the file is still in My files. */
+const useCanOpenSource = (path: string) => {
+  const store = useMyFilesStore()
+  const open = useFileViewer()?.open
+  const [exists, setExists] = useState(false)
+  useEffect(() => {
+    setExists(false)
+    if (!store || !open) return
+    let cancelled = false
+    store.stat(path).then(
+      (entry) => !cancelled && setExists(entry?.kind === 'file'),
+      () => {},
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [store, open, path])
+  return exists && open ? open : null
+}
+
 /**
  * A quote sent with a user message, above its text: the source file (and PDF page or heading) with the full path in a tooltip, and
- * the quoted text clamped to a few lines with "Show more" when it is longer.
+ * the quoted text clamped to a few lines with "Show more" when it is longer. When the file is still in My files, the source is a
+ * button that opens it in the viewer at the quoted page or heading.
  */
 export const QuoteCard = ({ quote }: { quote: Quote }) => {
   const { t } = useTranslation()
@@ -17,6 +40,7 @@ export const QuoteCard = ({ quote }: { quote: Quote }) => {
   const textRef = useRef<HTMLElement | null>(null)
   const [expanded, setExpanded] = useState(false)
   const [overflowing, setOverflowing] = useState(false)
+  const openSource = useCanOpenSource(quote.path)
 
   // Only offer "Show more" when the clamp actually hides text, at the bubble's current width.
   const measure = useCallback(() => {
@@ -36,12 +60,32 @@ export const QuoteCard = ({ quote }: { quote: Quote }) => {
 
   return (
     <Box component="figure" data-testid="quote-card" sx={{ m: 0, mb: 1.5, pl: 1.5, borderLeft: '3px solid', borderLeftColor: 'divider', whiteSpace: 'normal' }}>
-      <Tooltip title={quote.path} describeChild>
+      {openSource ? (
         <Typography component="figcaption" variant="body2" fontWeight={600} data-testid="quote-card-source" sx={{ mb: 0.5 }}>
-          <span aria-hidden>📄 </span>
-          {source}
+          <Tooltip title={quote.path} describeChild>
+            <Link
+              component="button"
+              type="button"
+              variant="body2"
+              aria-label={t('fileViewer:openQuoteSource', { source, interpolation: { escapeValue: false } })}
+              // A new target each time, so opening the same file again jumps to this quote's page or heading.
+              onClick={() => openSource({ path: quote.path, page: quote.page, heading: quote.heading })}
+              data-testid="quote-card-open"
+              sx={{ fontWeight: 600, textAlign: 'left', verticalAlign: 'baseline' }}
+            >
+              <span aria-hidden>📄 </span>
+              {source}
+            </Link>
+          </Tooltip>
         </Typography>
-      </Tooltip>
+      ) : (
+        <Tooltip title={quote.path} describeChild>
+          <Typography component="figcaption" variant="body2" fontWeight={600} data-testid="quote-card-source" sx={{ mb: 0.5 }}>
+            <span aria-hidden>📄 </span>
+            {source}
+          </Typography>
+        </Tooltip>
+      )}
       <Box
         component="blockquote"
         id={textId}

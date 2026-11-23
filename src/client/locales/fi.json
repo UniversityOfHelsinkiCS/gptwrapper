@@ -1216,6 +1216,7 @@
     "truncated": "lyhennetty",
     "removeQuote": "Poista lainaus painamalla Delete tai Backspace",
     "showMore": "Näytä lisää",
+    "openQuoteSource": "Avaa {{source}} tiedostonäkymään",
     "showLess": "Näytä vähemmän",
     "pdfPage": "Sivu {{page}}",
     "pdfPages": "PDF-sivut",
