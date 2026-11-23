@@ -41,9 +41,13 @@ export const PromptStateProvider: React.FC<{
   const urlPromptId = searchParams.get('promptId')
   const { courseId } = useParams()
 
-  const { data: course, refetch: refetchCourse } = useCourse(courseId)
+  const { data: course, refetch: refetchCourse, isFetching: isCourseFetching } = useCourse(courseId)
 
-  const { data: myPrompts, refetch } = useQuery<Prompt[]>({
+  const {
+    data: myPrompts,
+    refetch,
+    isFetching: isMyPromptsFetching,
+  } = useQuery<Prompt[]>({
     queryKey: ['/prompts/my-prompts'],
     initialData: [],
   })
@@ -91,7 +95,8 @@ export const PromptStateProvider: React.FC<{
       handleChangePrompt(urlPrompt)
     }
 
-    if (course && activePrompt && !universityPromptsPending && !universityPromptsFailed) {
+    const listsSettled = !isCourseFetching && !isMyPromptsFetching && !universityPromptsPending && !universityPromptsFailed
+    if (course && activePrompt && listsSettled) {
       const freshPrompt =
         universityPrompts.find((p) => p.id === activePrompt.id) ||
         course.prompts?.find((p) => p.id === activePrompt.id) ||
@@ -103,7 +108,18 @@ export const PromptStateProvider: React.FC<{
         setActivePrompt(freshPrompt)
       }
     }
-  }, [urlPrompt, course, activePrompt, myPrompts, universityPrompts, universityPromptsPending, universityPromptsFailed, handleChangePrompt])
+  }, [
+    urlPrompt,
+    course,
+    activePrompt,
+    myPrompts,
+    universityPrompts,
+    universityPromptsPending,
+    universityPromptsFailed,
+    isCourseFetching,
+    isMyPromptsFetching,
+    handleChangePrompt,
+  ])
 
   // Just the analytics dispatch.
   useEffect(() => {

@@ -249,6 +249,8 @@ teacherTest.describe('axe wcag scan for chat with tool parts', () => {
   teacherTest.afterAll(writeAxeReport)
 
   teacherTest('scan chat answer with two document searches', async ({ page }, testInfo) => {
+    // Creates a RAG prompt, runs a chat turn and scans, which takes close to the default timeout
+    teacherTest.slow()
     const promptName = `axe-rag-prompt-${testInfo.workerIndex}`
 
     await page.goto('/general')
