@@ -1167,6 +1167,15 @@
     "folderFiles": "Filer",
     "yourFolders": "Dina mappar",
     "defaultFolders": "Standardmappar",
-    "defaultFolderHint": "Enskilda filer som du lägger till"
+    "defaultFolderHint": "Enskilda filer som du lägger till",
+    "open": "Öppna",
+    "openNamed": "Öppna {{name}}"
+  },
+  "fileViewer": {
+    "closeNamed": "Stäng {{name}}",
+    "tooLarge": "Filen är för stor för att visas.",
+    "unsupported": "Den här typen av fil kan inte visas.",
+    "image": "Bild (visas inte)",
+    "imageAlt": "Bild (visas inte): {{alt}}"
   }
 }

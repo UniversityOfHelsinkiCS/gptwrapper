@@ -1192,6 +1192,15 @@
     "folderFiles": "Tiedostot",
     "yourFolders": "Omat kansiot",
     "defaultFolders": "Oletuskansiot",
-    "defaultFolderHint": "Yksittäin lisätyt tiedostot"
+    "defaultFolderHint": "Yksittäin lisätyt tiedostot",
+    "open": "Avaa",
+    "openNamed": "Avaa {{name}}"
+  },
+  "fileViewer": {
+    "closeNamed": "Sulje {{name}}",
+    "tooLarge": "Tiedosto on liian suuri näytettäväksi.",
+    "unsupported": "Tämän tyyppistä tiedostoa ei voi näyttää.",
+    "image": "Kuva (ei näytetä)",
+    "imageAlt": "Kuva (ei näytetä): {{alt}}"
   }
 }

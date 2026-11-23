@@ -22,6 +22,7 @@ import {
 import { visuallyHidden } from '@mui/utils'
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type DragEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { focusIndicatorStyle } from '../../util/accessibility'
 import safeLocalStorage from '../../util/safeLocalStorage'
 import {
@@ -42,6 +43,8 @@ import ConfirmDialog from '../ChatV2/general/ConfirmDialog'
 import { folderLabel } from './folderLabel'
 import { ExperimentalChip } from './ExperimentalChip'
 import { useMyFilesStore } from './MyFilesStoreContext'
+import { useFileViewer } from '../FileViewer/FileViewerContext'
+import { viewerFileKind } from '../FileViewer/fileKind'
 
 const PERSIST_REQUESTED_KEY = 'myFilesPersistRequested'
 
@@ -239,6 +242,7 @@ const FolderItem = ({
   onExportNotes,
   onImportNotes,
   onDownloadError,
+  onOpenFile,
 }: {
   folder: FolderGroup
   statuses: Map<string, FileStatus>
@@ -248,6 +252,8 @@ const FolderItem = ({
   onExportNotes: () => void
   onImportNotes: () => void
   onDownloadError: () => void
+  /** Opens a file in the viewer; not given when the viewer is not available. */
+  onOpenFile?: (path: string) => void
 }) => {
   const { t, i18n } = useTranslation()
   const [open, setOpen] = useState(false)
@@ -264,7 +270,7 @@ const FolderItem = ({
     }
   }
 
-  const actions = isOutputs
+  const folderActions = isOutputs
     ? (file: MyFilesEntry) => (
         <Button
           size="small"
@@ -291,6 +297,7 @@ const FolderItem = ({
           )
         }
       : undefined
+  const actions = withOpenAction(t, folderActions, onOpenFile)
   const details = isNotes ? (file: MyFilesEntry) => (viewing.includes(file.path) ? <NoteText store={store} path={file.path} /> : null) : undefined
   const contentId = useId()
   const hasFiles = folder.files.length > 0
@@ -353,6 +360,30 @@ const FolderItem = ({
   )
 }
 
+/** Adds an "Open" button for the files the viewer can show (Markdown and text) in front of a folder's own actions. */
+const withOpenAction = (
+  t: TFunction,
+  actions: ((file: MyFilesEntry) => ReactNode) | undefined,
+  onOpenFile: ((path: string) => void) | undefined,
+): ((file: MyFilesEntry) => ReactNode) | undefined => {
+  if (!onOpenFile) return actions
+  return (file: MyFilesEntry) => (
+    <>
+      {viewerFileKind(file.path) && (
+        <Button
+          size="small"
+          onClick={() => onOpenFile(file.path)}
+          aria-label={t('myFiles:openNamed', { name: file.name, interpolation: { escapeValue: false } })}
+          data-testid="my-files-open"
+        >
+          {t('myFiles:open')}
+        </Button>
+      )}
+      {actions?.(file)}
+    </>
+  )
+}
+
 const resultStatuses = (result: ImportResult | null) => {
   const statuses = new Map<string, FileStatus>()
   for (const path of result?.added ?? []) statuses.set(path, 'added')
@@ -360,7 +391,7 @@ const resultStatuses = (result: ImportResult | null) => {
   return statuses
 }
 
-const MyFilesContent = ({ store }: { store: MyFilesStore }) => {
+const MyFilesContent = ({ store, onOpenFile }: { store: MyFilesStore; onOpenFile?: (path: string) => void }) => {
   const { t, i18n } = useTranslation()
   const [entries, setEntries] = useState<MyFilesEntry[] | null>(null)
   const [estimate, setEstimate] = useState<StorageEstimate | null>(null)
@@ -522,6 +553,7 @@ const MyFilesContent = ({ store }: { store: MyFilesStore }) => {
       onExportNotes={() => void handleExportNotes()}
       onImportNotes={() => notesZipInputRef.current?.click()}
       onDownloadError={() => setNotice({ text: t('myFiles:downloadFailed'), error: true })}
+      onOpenFile={onOpenFile}
     />
   )
   const folderList = (headingId: string, heading: string, folders: FolderGroup[], testId: string) => (
@@ -646,7 +678,13 @@ const MyFilesContent = ({ store }: { store: MyFilesStore }) => {
           {defaultFolders.length > 0 && folderList(defaultFoldersHeadingId, t('myFiles:defaultFolders'), defaultFolders, 'my-files-default-folders')}
           {rootFiles.length > 0 && (
             <Box sx={{ mt: 2 }}>
-              <FileTable files={rootFiles} stripPrefix="" statuses={statuses} label={t('myFiles:looseFiles')} />
+              <FileTable
+                files={rootFiles}
+                stripPrefix=""
+                statuses={statuses}
+                label={t('myFiles:looseFiles')}
+                actions={withOpenAction(t, undefined, onOpenFile)}
+              />
             </Box>
           )}
         </>
@@ -692,14 +730,30 @@ const MyFilesContent = ({ store }: { store: MyFilesStore }) => {
 const MyFilesDialog = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const { t } = useTranslation()
   const store = useMyFilesStore()
+  const viewer = useFileViewer()
+  // Opening a file moves focus to the viewer, so the dialog must not return it to the My files button.
+  const [openingFile, setOpeningFile] = useState(false)
+  useEffect(() => {
+    if (open) setOpeningFile(false)
+  }, [open])
+
+  const openFile = viewer
+    ? (path: string) => {
+        setOpeningFile(true)
+        viewer.open({ path })
+        onClose()
+      }
+    : undefined
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md" data-testid="my-files-dialog">
+    <Dialog open={open} onClose={onClose} disableRestoreFocus={openingFile} fullWidth maxWidth="md" data-testid="my-files-dialog">
       <DialogTitle>
         {t('myFiles:title')}
         <ExperimentalChip />
       </DialogTitle>
-      <DialogContent>{store ? <MyFilesContent store={store} /> : <Alert severity="warning">{t('myFiles:unsupported')}</Alert>}</DialogContent>
+      <DialogContent>
+        {store ? <MyFilesContent store={store} onOpenFile={openFile} /> : <Alert severity="warning">{t('myFiles:unsupported')}</Alert>}
+      </DialogContent>
       <DialogActions>
         <Button onClick={onClose} data-testid="my-files-close">
           {t('common:close')}

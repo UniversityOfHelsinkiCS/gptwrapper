@@ -1,22 +1,13 @@
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import { Box, Paper, Typography } from '@mui/material'
-import ReactMarkdown from 'react-markdown'
-import { PrismAsync as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { accessibleOneDark } from './codeTheme'
 import { darkModeLinkColors } from '../../theme'
-import rehypeKatex from 'rehype-katex'
-import remarkGfm from 'remark-gfm'
-import remarkMath from 'remark-math'
 import { LoadingMessage } from './general/LoadingMessage'
-import { preprocessMath } from './util'
-import 'katex/dist/katex.min.css'
-import 'katex/dist/contrib/mhchem'
+import { MarkdownContent } from './MarkdownContent'
 import ArrowRight from '@mui/icons-material/ArrowRight'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
 import { t } from 'i18next'
 import React, { useId } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTheme } from '@mui/material'
 import {
   readMessageContent,
   readMessageImages,
@@ -37,7 +28,6 @@ import { SubagentCard } from './SubagentCard'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
 import CopyToClipboardButton from './CopyToClipboardButton'
 import { StreamStatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
-import { ScrollableRegion } from '../common/accessibility/ScrollableRegion'
 import { BlueButton, OutlineButtonBlack } from './general/Buttons'
 import { focusIndicatorStyle } from 'src/client/util/accessibility'
 import { visuallyHidden } from '@mui/utils'
@@ -179,51 +169,6 @@ const AssistantMessageInfo = ({ message, headingId, number }: { message: Assista
  * Consecutive activity parts (tools, subagents, reasoning) are folded into one activity group.
  */
 const AssistantParts = ({ parts }: { parts: AssistantPart[] }) => {
-  const processedParts = React.useMemo(() => parts.map((part) => (part.type === 'text' ? { ...part, text: preprocessMath(part.text) } : part)), [parts])
-  const { t } = useTranslation()
-  const theme = useTheme()
-  const katexOptions = {
-    macros: {
-      '\\abs': '\\left|#1\\right|',
-      '\\norm': '\\left\\|#1\\right\\|',
-      '\\R': '\\mathbb{R}',
-      '\\C': '\\mathbb{C}',
-      '\\N': '\\mathbb{N}',
-      '\\Z': '\\mathbb{Z}',
-      '\\vec': '\\mathbf{#1}',
-      '\\deriv': '\\frac{d#1}{d#2}',
-      '\\pdv': '\\frac{\\partial#1}{\\partial#2}',
-      '\\set': '\\left\\{#1\\right\\}',
-      '\\lr': '\\left(#1\\right)',
-      '\\T': '^{\\mathsf{T}}',
-      '\\defeq': '\\coloneqq',
-      '\\epsilon_0': '\\text{\\ensuremath{\\epsilon_0}}',
-      '\\mu_0': '\\text{\\ensuremath{\\mu_0}}',
-      '\\div': '\\operatorname{div}',
-      '\\curl': '\\operatorname{curl}',
-      '\\grad': '\\operatorname{grad}',
-      '\\laplacian': '\\nabla^2',
-      '\\dd': '\\mathrm{d}#1',
-      '\\pd': '\\partial #1',
-      '\\vb': '\\mathbf{#1}',
-      '\\vu': '\\hat{\\mathbf{#1}}',
-      '\\aprx': '\\approx',
-      '\\bra': '\\left\\langle#1\\right|',
-      '\\ket': '\\left|#1\\right\\rangle',
-      '\\braket': '\\left\\langle#1\\mid#2\\right\\rangle',
-      '\\oprod': '\\left|#1\\right\\rangle\\left\\langle#2\\right|',
-      '\\slashed': '\\text{{#1\\mkern-10mu/}}',
-    },
-    extensions: ['mhchem.js'],
-    output: 'htmlAndMathml',
-    errorColor: theme.palette.error.main,
-    throwOnError: true,
-    strict: 'error', // disables logging katex warnings/errors – if debugging, turn these two on
-  }
-  // Unique per list of parts: a subagent card's parts are rendered by another AssistantParts in the same message.
-  const codeBlockIdPrefix = useId()
-  let codeCount = 0
-
   const renderPart = (part: AssistantPart, partIdx: number) =>
     part.type === 'tool' ? (
       <ToolPartView key={`tool-${part.callId}`} part={part} />
@@ -234,113 +179,12 @@ const AssistantParts = ({ parts }: { parts: AssistantPart[] }) => {
     ) : part.type === 'reasoning' ? (
       <ThinkingBlock key={`reasoning-${partIdx}`} part={part} />
     ) : (
-      <ReactMarkdown
-        key={`text-${partIdx}`}
-        remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
-        rehypePlugins={[[rehypeKatex, katexOptions]]}
-        components={{
-          pre(props) {
-            const { children, node, ...rest } = props
-            const codeNode = node?.children[0]
-            if (codeNode?.type === 'element' && /language-(\w+)/.test(String(codeNode.properties.className ?? ''))) {
-              return <>{children}</>
-            }
-            return <pre {...rest}>{children}</pre>
-          },
-          table(props) {
-            const { node, ...rest } = props
-            return (
-              <ScrollableRegion label={t('accessibility:scrollableTable')} sx={{ '& th, & td': { wordBreak: 'normal', overflowWrap: 'normal' } }}>
-                <table {...rest} />
-              </ScrollableRegion>
-            )
-          },
-          span(props) {
-            const { node, ...rest } = props
-            if (!rest.className?.includes('katex-display')) {
-              return <span {...rest} />
-            }
-            return (
-              <ScrollableRegion label={t('accessibility:scrollableFormula')}>
-                <span {...rest} />
-              </ScrollableRegion>
-            )
-          },
-          code(props) {
-            const { children, className, node, ...rest } = props
-            const match = /language-(\w+)/.exec(className || '')
-            const language = match?.[1] || 'plaintext' // safe fallback
-
-            if (match) {
-              const codeBlockId = `${codeBlockIdPrefix}codeBlock-${++codeCount}`
-
-              return (
-                <Box
-                  sx={{
-                    borderRadius: '0.5rem',
-                    overflowX: 'auto',
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      opacity: 1,
-                      fontSize: '0.8rem',
-                      padding: '0.4rem 0.8rem',
-                      backgroundColor: 'action.hover',
-                    }}
-                  >
-                    {language}
-                  </Typography>
-                  <Box sx={{ position: 'relative' }}>
-                    {/* @ts-ignore */}
-                    <SyntaxHighlighter
-                      {...rest}
-                      PreTag="pre"
-                      children={String(children)}
-                      language={language}
-                      customStyle={{
-                        padding: '1rem 4rem 1rem 1rem', // 4rem keeps the CopyToClipboard button visible
-                        margin: 0,
-                        fontSize: '15px',
-                        wordBreak: 'break-all',
-                        overflowWrap: 'break-word',
-                        whiteSpace: 'pre-wrap',
-                      }}
-                      style={accessibleOneDark}
-                      className="scrollable-code-highlight"
-                      id={codeBlockId}
-                    />
-                    <CopyToClipboardButton
-                      id={codeBlockId}
-                      copied={String(children)}
-                      label={t('chat:codeBlock')}
-                      iconColor="#FFF"
-                      buttonStyle={{
-                        position: 'absolute',
-                        top: '8px',
-                        right: '8px',
-                      }}
-                    />
-                  </Box>
-                </Box>
-              )
-            } else {
-              return (
-                <code {...rest} className={className}>
-                  {children}
-                </code>
-              )
-            }
-          },
-        }}
-      >
-        {part.text}
-      </ReactMarkdown>
+      <MarkdownContent key={`text-${partIdx}`} text={part.text} />
     )
 
   return (
     <>
-      {groupParts(processedParts, isActivityPart).map((item) =>
+      {groupParts(parts, isActivityPart).map((item) =>
         item.type === 'activity' ? (
           <ActivityGroup key={`activity-${item.index}`} parts={item.parts} index={item.index} renderPart={renderPart} />
         ) : (

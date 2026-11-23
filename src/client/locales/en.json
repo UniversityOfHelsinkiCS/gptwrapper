@@ -1191,6 +1191,15 @@
     "folderFiles": "Files",
     "yourFolders": "Your folders",
     "defaultFolders": "Default folders",
-    "defaultFolderHint": "Single files you add"
+    "defaultFolderHint": "Single files you add",
+    "open": "Open",
+    "openNamed": "Open {{name}}"
+  },
+  "fileViewer": {
+    "closeNamed": "Close {{name}}",
+    "tooLarge": "This file is too large to display.",
+    "unsupported": "This type of file cannot be displayed.",
+    "image": "Image (not shown)",
+    "imageAlt": "Image (not shown): {{alt}}"
   }
 }
