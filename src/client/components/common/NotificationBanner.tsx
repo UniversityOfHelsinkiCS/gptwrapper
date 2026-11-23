@@ -49,7 +49,7 @@ const NotificationBanner = ({ sx }: { sx?: SxProps<Theme> }) => {
   }
 
   return (
-    <Box sx={[{ position: 'relative', width: '100%', pr: '80px', pl: 2, pt: 2 }, ...(Array.isArray(sx) ? sx : [sx])]}>
+    <Box sx={[{ position: 'relative', width: '100%', pr: '80px', pl: 2, pt: 1 }, ...(Array.isArray(sx) ? sx : [sx])]}>
       <Stack spacing={2} sx={{ mb: 2 }}>
         {activeNotifications.map((notification) => {
           const severity = getSeverity(notification.priority)
