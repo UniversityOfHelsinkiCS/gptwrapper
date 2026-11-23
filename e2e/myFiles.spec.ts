@@ -122,6 +122,67 @@ adminTest('opens a Markdown file from My files in the viewer next to the chat', 
   }
 })
 
+adminTest('asks about text selected in the viewer, sending it as a quote', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-quote-'))
+  const sentFrames: string[] = []
+  page.on('websocket', (ws) => ws.on('framesent', (frame) => sentFrames.push(String(frame.payload))))
+  try {
+    const folder = join(root, 'Course notes')
+    mkdirSync(folder, { recursive: true })
+    writeFileSync(join(folder, 'lecture.md'), '# Week 3\n\n## Eigenvalues\n\nAn eigenvector keeps its direction.\n\nThe end.')
+
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+    await page.getByTestId('my-files-button').click()
+    const dialog = page.getByRole('dialog', { name: 'My files' })
+    await dialog.getByTestId('my-files-input-folder').setInputFiles(folder)
+    await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+    await dialog.getByRole('button', { name: /^Course notes/ }).click()
+    await dialog.getByRole('button', { name: 'Open lecture.md' }).click()
+    await expect(dialog).toBeHidden()
+
+    const viewer = page.getByRole('region', { name: 'lecture.md' })
+    const paragraph = viewer.getByText('An eigenvector keeps its direction.')
+    await expect(viewer.getByTestId('file-viewer-ask')).toBeDisabled()
+
+    // Select the paragraph by dragging the mouse over it.
+    const box = (await paragraph.boundingBox())!
+    await page.mouse.move(box.x + 1, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width - 1, box.y + box.height / 2, { steps: 5 })
+    await page.mouse.up()
+
+    const floating = viewer.getByRole('toolbar', { name: 'Selection actions' })
+    await expect(floating).toBeVisible()
+    await expect(viewer.getByTestId('file-viewer-ask')).toBeEnabled()
+    await floating.getByRole('button', { name: 'Ask…' }).click()
+
+    const chip = page.getByTestId('quote-chip')
+    await expect(chip).toContainText('Quote from lecture.md · Eigenvalues')
+    await expect(chip).toContainText('An eigenvector keeps its direction')
+    await expect(page.locator('#chat-input')).toBeFocused()
+    await expect(floating).toHaveCount(0)
+
+    await page.locator('#chat-input').fill('What does this mean?')
+    await page.getByTestId('send-chat-message').click()
+    await closeSendPreference(page)
+
+    const userMessage = page.getByTestId('user-message')
+    const card = userMessage.getByTestId('quote-card')
+    await expect(card.getByTestId('quote-card-source')).toHaveText('📄 lecture.md · Eigenvalues')
+    await expect(card.getByTestId('quote-card-text')).toContainText('An eigenvector keeps its direction')
+    await expect(userMessage).toContainText('What does this mean?')
+    await expect(chip).toHaveCount(0)
+    await expect(page.getByTestId('assistant-message')).toBeVisible()
+
+    const sent = sentFrames.find((frame) => frame.includes('What does this mean?'))
+    expect(sent).toContain('"quotes":[{"kind":"text","path":"Course notes/lecture.md","heading":"Eigenvalues","text":"An eigenvector keeps its direction')
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
 const SECRET_TAIL = 'This last sentence must not be in the tool results of the history.'
 
 /** Copies a `Course notes` folder into My files and attaches it to the chat with the attach menu. */

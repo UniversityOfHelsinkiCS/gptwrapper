@@ -78,6 +78,7 @@ const stream = ({
   courseId,
   history = [],
   quizAnswer,
+  quotes,
   resumeRunId,
 }: {
   message?: string
@@ -86,6 +87,7 @@ const stream = ({
   courseId?: string
   history?: unknown[]
   quizAnswer?: unknown
+  quotes?: unknown
   resumeRunId?: string
 } = {}) => {
   const form = new FormData()
@@ -93,7 +95,7 @@ const stream = ({
     'data',
     JSON.stringify({
       options: {
-        chatMessages: [...history, { role: 'user', content: message, ...(quizAnswer ? { quizAnswer } : {}) }],
+        chatMessages: [...history, { role: 'user', content: message, ...(quizAnswer ? { quizAnswer } : {}), ...(quotes ? { quotes } : {}) }],
         generationInfo: {
           model,
           promptInfo: promptId ? { type: 'saved', id: promptId, name: 'Essay helper' } : { type: 'custom', systemMessage: 'You are helpful' },
@@ -214,6 +216,29 @@ describe('POST /ai/v4/stream', () => {
     const systemMessages = (spy.mock.calls[0][0] as { type: string; content: unknown }[]).filter((m) => m.type === 'system')
     spy.mockRestore()
     expect(String(systemMessages.at(-1)?.content)).toMatch(/^You help with essays\n\n## Tool: document_search\n\nUse document_search/)
+  })
+
+  test('sends a quote to the model before the question, delimited as quoted material', async () => {
+    const spy = vi.spyOn(MockModel.prototype, '_streamResponseChunks')
+    const quotes = [{ kind: 'text', path: 'Course/week3/notes.md', heading: 'Eigenvalues', text: 'An eigenvector keeps its direction.' }]
+
+    const response = await stream({ message: 'say what this means', quotes })
+    await response.text()
+    const messages = spy.mock.calls[0][0] as { type: string; content: unknown }[]
+    spy.mockRestore()
+
+    expect(response.status).toBe(200)
+    expect(messages.at(-1)).toMatchObject({
+      type: 'human',
+      content:
+        'The student quoted this from their file "Course/week3/notes.md", section "Eigenvalues":\n<quote>\nAn eigenvector keeps its direction.\n</quote>\n\nsay what this means',
+    })
+  })
+
+  test('rejects more than 3 quotes', async () => {
+    const quote = { kind: 'text', path: 'notes.md', text: 'x' }
+    const response = await stream({ message: 'hi', quotes: [quote, quote, quote, quote] })
+    expect(response.status).toBe(400)
   })
 
   test('sends earlier tool parts to the model as text summaries, not tool calls', async () => {

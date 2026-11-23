@@ -9,7 +9,7 @@ vi.mock('../../util/saveFile', () => ({ saveFileWithDialog: vi.fn() }))
 
 import { formatEmail, formatMessagesAsPlainText, formatMessagesAsText } from './api'
 import { oldFormatMessages } from './__fixtures__/oldFormatMessages'
-import { migrateMessages } from './messages'
+import { messageToText, migrateMessages, quoteToText } from './messages'
 
 const t = ((key: string) => key) as unknown as TFunction
 // The snapshots were recorded from the formatters before assistant messages had `parts`,
@@ -53,5 +53,28 @@ describe('reasoning in exports', () => {
       expect(output).toContain('The answer.')
       expect(output).not.toContain('SECRET REASONING')
     }
+  })
+})
+
+describe('quotes in exports', () => {
+  const withQuote = [
+    {
+      role: 'user' as const,
+      content: 'What does this mean?',
+      quotes: [{ kind: 'text' as const, path: 'Course/week3/notes.md', heading: '2.3 Eigenvalues', text: 'An eigenvector\nkeeps its direction.' }],
+    },
+    { role: 'assistant' as const, parts: [{ type: 'text' as const, text: 'It is not rotated.' }] },
+  ]
+  const quoted = '> An eigenvector\n> keeps its direction.\n> — notes.md, 2.3 Eigenvalues\n\nWhat does this mean?'
+
+  test('the quote comes before the question as a blockquote with its source, in the download, the email and copy', () => {
+    expect(messageToText(withQuote[0])).toBe(quoted)
+    expect(formatMessagesAsText(withQuote, t)).toContain(`[USER]\n${quoted}`)
+    expect(formatMessagesAsPlainText(withQuote, t)).toContain(`[USER]\n${quoted}`)
+    expect(formatEmail(withQuote, t)).toContain('&gt; An eigenvector\n&gt; keeps its direction.\n&gt; — notes.md, 2.3 Eigenvalues\n\nWhat does this mean?')
+  })
+
+  test('without a heading the source is only the file name', () => {
+    expect(quoteToText({ kind: 'text', path: 'notes.txt', text: 'Plain' })).toBe('> Plain\n> — notes.txt')
   })
 })

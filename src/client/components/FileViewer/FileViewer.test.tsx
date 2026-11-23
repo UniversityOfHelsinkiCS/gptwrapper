@@ -130,6 +130,99 @@ describe('FileViewer', () => {
   })
 })
 
+/** Selects the whole text of `element` and lets the viewer know, as the browser would. */
+const selectText = (element: Element) => {
+  const range = document.createRange()
+  range.selectNodeContents(element)
+  const selection = document.getSelection()!
+  selection.removeAllRanges()
+  selection.addRange(range)
+  act(() => {
+    document.dispatchEvent(new Event('selectionchange'))
+  })
+}
+
+describe('FileViewer Ask…', () => {
+  afterEach(() => document.getSelection()?.removeAllRanges())
+
+  const renderWithAsk = async () => {
+    const store = await storeWith({ 'Course/notes.md': '# Week 3\n\nIntro\n\n## Eigenvalues\n\nAn eigenvector keeps its direction.' })
+    const onAddQuote = vi.fn()
+    render(
+      <I18nextProvider i18n={i18n}>
+        <FileViewer store={store} target={{ path: 'Course/notes.md' }} onClose={vi.fn()} onAddQuote={onAddQuote} />
+      </I18nextProvider>,
+    )
+    const paragraph = await screen.findByText('An eigenvector keeps its direction.')
+    return { onAddQuote, paragraph }
+  }
+  const toolbarAsk = () => screen.getByTestId('file-viewer-ask') as HTMLButtonElement
+  const expectedQuote = {
+    quote: { kind: 'text', path: 'Course/notes.md', heading: 'Eigenvalues', text: 'An eigenvector keeps its direction.' },
+    truncated: false,
+  }
+
+  test('the toolbar action is enabled while text in the file is selected, and adds it as a quote', async () => {
+    const { onAddQuote, paragraph } = await renderWithAsk()
+    expect(toolbarAsk().disabled).toBe(true)
+
+    selectText(paragraph)
+    expect(toolbarAsk().disabled).toBe(false)
+    fireEvent.click(toolbarAsk())
+    expect(onAddQuote).toHaveBeenCalledWith(expectedQuote)
+
+    document.getSelection()!.removeAllRanges()
+    act(() => {
+      document.dispatchEvent(new Event('selectionchange'))
+    })
+    expect(toolbarAsk().disabled).toBe(true)
+  })
+
+  test('a selection outside the file content (the toolbar title) does not count', async () => {
+    await renderWithAsk()
+    selectText(screen.getByRole('heading', { level: 2, name: 'notes.md' }))
+    expect(toolbarAsk().disabled).toBe(true)
+  })
+
+  test('a mouse selection shows a floating toolbar inside the viewer region, which hides on scroll', async () => {
+    const { onAddQuote, paragraph } = await renderWithAsk()
+    expect(screen.queryByTestId('file-viewer-selection-toolbar')).toBe(null)
+
+    selectText(paragraph)
+    fireEvent.mouseUp(paragraph)
+    const floating = screen.getByRole('toolbar', { name: 'Selection actions' })
+    expect(screen.getByTestId('file-viewer').contains(floating)).toBe(true)
+
+    fireEvent.scroll(screen.getByTestId('file-viewer'))
+    expect(screen.queryByTestId('file-viewer-selection-toolbar')).toBe(null)
+
+    fireEvent.mouseUp(paragraph)
+    fireEvent.click(within(screen.getByRole('toolbar', { name: 'Selection actions' })).getByRole('button', { name: 'Ask…' }))
+    expect(onAddQuote).toHaveBeenCalledWith(expectedQuote)
+    expect(screen.queryByTestId('file-viewer-selection-toolbar')).toBe(null)
+  })
+
+  test('the floating toolbar hides when the selection collapses', async () => {
+    const { paragraph } = await renderWithAsk()
+    selectText(paragraph)
+    fireEvent.mouseUp(paragraph)
+    expect(screen.getByTestId('file-viewer-selection-toolbar')).toBeTruthy()
+
+    document.getSelection()!.removeAllRanges()
+    act(() => {
+      document.dispatchEvent(new Event('selectionchange'))
+    })
+    expect(screen.queryByTestId('file-viewer-selection-toolbar')).toBe(null)
+  })
+
+  test('without onAddQuote there is no Ask… action', async () => {
+    const store = await storeWith({ 'a.txt': 'text' })
+    renderViewer(store, 'a.txt')
+    await screen.findByTestId('file-viewer-text')
+    expect(screen.queryByTestId('file-viewer-ask')).toBe(null)
+  })
+})
+
 const OpenTarget = () => {
   const viewer = useFileViewer()
   return <output data-testid="viewer-target">{viewer?.target?.path ?? ''}</output>

@@ -435,3 +435,20 @@ describe('quiz parts', () => {
     expect(screen.getAllByTestId('quiz-card').map((card) => card.getAttribute('data-quiz-state'))).toEqual(['answered', 'open'])
   })
 })
+
+describe('Conversation quotes', () => {
+  test('shows the quote card above the text of the user message', () => {
+    const messages: ClientChatMessage[] = [
+      { role: 'user', content: 'What does this mean?', quotes: [{ kind: 'text', path: 'Course/notes.md', heading: 'Week 3', text: 'Quoted text' }] },
+    ]
+    renderConversation({ messages, completion: '', isStreaming: false })
+
+    const userMessage = screen.getByTestId('user-message')
+    const card = screen.getByTestId('quote-card')
+    expect(userMessage.contains(card)).toBe(true)
+    expect(screen.getByTestId('quote-card-source').textContent).toBe('📄 notes.md · Week 3')
+    // The card comes before the question in the bubble.
+    const text = userMessage.textContent!
+    expect(text.indexOf('Quoted text')).toBeLessThan(text.indexOf('What does this mean?'))
+  })
+})

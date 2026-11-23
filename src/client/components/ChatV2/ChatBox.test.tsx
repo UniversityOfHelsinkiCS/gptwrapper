@@ -18,6 +18,7 @@ vi.mock('../../hooks/useCurrentUser', () => {
 vi.mock('./ModelSelector', () => ({ default: () => null }))
 vi.mock('./UsageSelector', () => ({ default: () => null }))
 vi.mock('./useKeyboardCommands', () => ({ useKeyboardCommands: () => {} }))
+vi.mock('../common/accessibility/SnackbarAnnouncer', () => ({ announceToScreenReader: vi.fn() }))
 vi.mock('../Settings/SendPreferenceConfigurator', () => ({
   SendPreferenceConfiguratorModal: () => null,
   ShiftEnterForNewline: () => null,
@@ -25,6 +26,8 @@ vi.mock('../Settings/SendPreferenceConfigurator', () => ({
 }))
 
 import en from '../../locales/en.json'
+import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
+import type { PendingQuote } from '../FileViewer/selectionQuote'
 import { ChatBox, type ChatBoxActions, type QuizPrompt } from './ChatBox'
 
 const i18n = i18next.createInstance()
@@ -157,5 +160,81 @@ describe('ChatBox', () => {
   test('without a used-up budget, no budget message is shown', () => {
     renderChatBox()
     expect(screen.queryByTestId('budget-used-up')).toBeNull()
+  })
+})
+
+describe('ChatBox quote chip', () => {
+  const pending = (text: string, overrides: Partial<PendingQuote> = {}): PendingQuote => ({
+    quote: { kind: 'text', path: 'Course/week3/notes.md', heading: 'Eigenvalues', text },
+    truncated: false,
+    ...overrides,
+  })
+  const chips = () => screen.queryAllByTestId('quote-chip')
+
+  test('addQuote shows the quote above the input, focuses the input and announces it', () => {
+    const { actionsRef } = renderChatBox()
+    expect(chips()).toHaveLength(0)
+
+    act(() => actionsRef.current!.addQuote(pending('An eigenvector keeps its direction.')))
+    expect(chips()).toHaveLength(1)
+    expect(chips()[0].textContent).toBe('Quote from notes.md · Eigenvalues: An eigenvector keeps its direction.')
+    expect(chips()[0].getAttribute('aria-label')).toBe('Quote from notes.md · Eigenvalues, Remove the quote by pressing Delete or Backspace')
+    expect(document.activeElement).toBe(input())
+    expect(announceToScreenReader).toHaveBeenCalledWith('Quote added to chat')
+  })
+
+  test('a new quote replaces the earlier one, and a truncated one says so', () => {
+    const { actionsRef } = renderChatBox()
+    act(() => actionsRef.current!.addQuote(pending('first')))
+    act(() => actionsRef.current!.addQuote(pending('second', { truncated: true })))
+    expect(chips()).toHaveLength(1)
+    expect(chips()[0].textContent).toBe('Quote from notes.md · Eigenvalues (truncated): second')
+    expect(chips()[0].getAttribute('aria-label')).toContain('truncated')
+  })
+
+  test('the chip can be removed with Delete, which focuses the input', () => {
+    const { actionsRef, handleSubmit } = renderChatBox()
+    act(() => actionsRef.current!.addQuote(pending('first')))
+    chips()[0].focus()
+    fireEvent.keyUp(chips()[0], { key: 'Delete' })
+    expect(chips()).toHaveLength(0)
+    expect(document.activeElement).toBe(input())
+    expect(announceToScreenReader).toHaveBeenCalledWith('Quote removed')
+
+    fireEvent.change(input(), { target: { value: 'hello' } })
+    fireEvent.click(sendButton())
+    expect(handleSubmit).toHaveBeenCalledWith('hello')
+  })
+
+  test('sending carries the quote and clears the chip', () => {
+    const { actionsRef, handleSubmit } = renderChatBox()
+    const quote = pending('An eigenvector keeps its direction.')
+    act(() => actionsRef.current!.addQuote(quote))
+    expect(sendButton().disabled).toBe(true)
+
+    fireEvent.change(input(), { target: { value: 'What does this mean?' } })
+    fireEvent.click(sendButton())
+    expect(handleSubmit).toHaveBeenCalledWith('What does this mean?', [quote.quote])
+    expect(chips()).toHaveLength(0)
+  })
+
+  test('a quiz answer is sent without the quote, which stays for the next message', () => {
+    const { actionsRef, handleSubmit, rerenderWith } = renderChatBox({ quizPrompt: 'reasoning' })
+    act(() => actionsRef.current!.addQuote(pending('quoted')))
+    fireEvent.click(sendButton())
+    expect(handleSubmit).toHaveBeenCalledWith('')
+    expect(chips()).toHaveLength(1)
+
+    rerenderWith(null)
+    fireEvent.change(input(), { target: { value: 'now with the quote' } })
+    fireEvent.click(sendButton())
+    expect(handleSubmit).toHaveBeenLastCalledWith('now with the quote', [pending('quoted').quote])
+  })
+
+  test('clearQuote removes the chip', () => {
+    const { actionsRef } = renderChatBox()
+    act(() => actionsRef.current!.addQuote(pending('first')))
+    act(() => actionsRef.current!.clearQuote())
+    expect(chips()).toHaveLength(0)
   })
 })
