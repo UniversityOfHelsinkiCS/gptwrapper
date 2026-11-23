@@ -13,7 +13,7 @@ import { MarkdownContent } from '../ChatV2/MarkdownContent'
 import { ExperimentalChip } from '../MyFiles/ExperimentalChip'
 import { MAX_VIEWER_TEXT_BYTES, viewerFileKind } from './fileKind'
 import type { ViewerTarget } from './FileViewerContext'
-import { selectionToQuote, type PendingQuote } from './selectionQuote'
+import { pdfPageOf, selectionToQuote, type PendingQuote } from './selectionQuote'
 import { usePdfViewer } from './usePdfViewer'
 import { PDF_VIEWER_SCOPE_CLASS } from '../../util/pdfjs'
 
@@ -62,36 +62,41 @@ const floatingPosition = (selection: Selection, content: HTMLElement): { top: nu
   const end = rects && rects.length > 0 ? rects[rects.length - 1] : range.getBoundingClientRect?.()
   const base = content.getBoundingClientRect()
   if (!end) return { top: 0, left: 0 }
-  return { top: end.bottom - base.top + 6, left: Math.max(0, Math.min(end.right - base.left, base.width - 120)) }
+  // Kept inside the content box, which for a PDF is the visible area of its scroll container.
+  return {
+    top: Math.max(0, Math.min(end.bottom - base.top + 6, base.height - 48)),
+    left: Math.max(0, Math.min(end.right - base.left, base.width - 120)),
+  }
 }
 
 /**
  * Tracks the selection in the file content as a quote, and where to show the floating toolbar for it (after a mouse
- * selection). The toolbar hides when the selection collapses or leaves the content, on scroll and on Escape.
+ * selection). The toolbar hides when the selection collapses or leaves the content, on scroll and on Escape. `pageOf`
+ * gives a PDF quote its page.
  */
-const useSelectionQuote = (contentRef: RefObject<HTMLElement | null>, path: string) => {
+const useSelectionQuote = (contentRef: RefObject<HTMLElement | null>, path: string, pageOf?: (node: Node) => number | undefined) => {
   const [selected, setSelected] = useState<PendingQuote | null>(null)
   const [floating, setFloating] = useState<{ top: number; left: number } | null>(null)
 
   useEffect(() => {
     const onSelectionChange = () => {
       const content = contentRef.current
-      const next = content ? selectionToQuote(document.getSelection(), content, path) : null
+      const next = content ? selectionToQuote(document.getSelection(), content, path, { pageOf }) : null
       setSelected(next)
       if (!next) setFloating(null)
     }
     onSelectionChange()
     document.addEventListener('selectionchange', onSelectionChange)
     return () => document.removeEventListener('selectionchange', onSelectionChange)
-  }, [contentRef, path])
+  }, [contentRef, path, pageOf])
 
   const onMouseUp = useCallback(() => {
     const content = contentRef.current
     const selection = document.getSelection()
-    const next = content ? selectionToQuote(selection, content, path) : null
+    const next = content ? selectionToQuote(selection, content, path, { pageOf }) : null
     setSelected(next)
     setFloating(next && selection && content ? floatingPosition(selection, content) : null)
-  }, [contentRef, path])
+  }, [contentRef, path, pageOf])
 
   const hideFloating = useCallback(() => setFloating(null), [])
 
@@ -121,10 +126,10 @@ const FileViewer = ({
   const titleId = useId()
   const regionRef = useRef<HTMLElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
-  const { selected, floating, onMouseUp, hideFloating } = useSelectionQuote(contentRef, target.path)
   const name = baseName(target.path)
   const kind = viewerFileKind(target.path)
   const isPdf = kind === 'pdf'
+  const { selected, floating, onMouseUp, hideFloating } = useSelectionQuote(contentRef, target.path, isPdf ? pdfPageOf : undefined)
   const content = useFileText(store, target.path, !isPdf)
   const params = { name, interpolation: { escapeValue: false } }
   const pdfContainerRef = useRef<HTMLDivElement>(null)

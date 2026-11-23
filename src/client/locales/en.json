@@ -1218,6 +1218,7 @@
     "zoomPercent": "{{percent}}%",
     "fitWidth": "Fit to width",
     "pdfPassword": "This PDF is password-protected and cannot be displayed.",
-    "pdfInvalid": "This file could not be read as a PDF."
+    "pdfInvalid": "This file could not be read as a PDF.",
+    "pageShort": "p. {{page}}"
   }
 }

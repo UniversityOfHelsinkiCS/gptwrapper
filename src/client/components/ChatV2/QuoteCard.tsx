@@ -8,7 +8,7 @@ const CLAMPED_LINES = 6
 const clampSx = { display: '-webkit-box', WebkitLineClamp: CLAMPED_LINES, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as const
 
 /**
- * A quote sent with a user message, above its text: the source file (and heading) with the full path in a tooltip, and
+ * A quote sent with a user message, above its text: the source file (and PDF page or heading) with the full path in a tooltip, and
  * the quoted text clamped to a few lines with "Show more" when it is longer.
  */
 export const QuoteCard = ({ quote }: { quote: Quote }) => {
@@ -32,7 +32,7 @@ export const QuoteCard = ({ quote }: { quote: Quote }) => {
     return () => observer.disconnect()
   }, [measure])
 
-  const source = [quoteFileName(quote), quote.heading].filter(Boolean).join(' · ')
+  const source = [quoteFileName(quote), quote.page ? t('fileViewer:pageShort', { page: quote.page }) : undefined, quote.heading].filter(Boolean).join(' · ')
 
   return (
     <Box component="figure" data-testid="quote-card" sx={{ m: 0, mb: 1.5, pl: 1.5, borderLeft: '3px solid', borderLeftColor: 'divider', whiteSpace: 'normal' }}>

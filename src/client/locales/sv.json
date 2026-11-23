@@ -1194,6 +1194,7 @@
     "zoomPercent": "{{percent}} %",
     "fitWidth": "Anpassa till bredd",
     "pdfPassword": "Den här PDF-filen är lösenordsskyddad och kan inte visas.",
-    "pdfInvalid": "Filen kunde inte läsas som en PDF."
+    "pdfInvalid": "Filen kunde inte läsas som en PDF.",
+    "pageShort": "s. {{page}}"
   }
 }

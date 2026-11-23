@@ -1219,6 +1219,7 @@
     "zoomPercent": "{{percent}} %",
     "fitWidth": "Sovita leveyteen",
     "pdfPassword": "PDF on suojattu salasanalla, eikä sitä voi näyttää.",
-    "pdfInvalid": "Tiedostoa ei voitu lukea PDF-tiedostona."
+    "pdfInvalid": "Tiedostoa ei voitu lukea PDF-tiedostona.",
+    "pageShort": "s. {{page}}"
   }
 }

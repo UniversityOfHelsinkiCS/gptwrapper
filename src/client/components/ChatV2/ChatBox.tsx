@@ -471,12 +471,14 @@ export const ChatBox = ({
   )
 }
 
-/** The quote waiting to be sent: its file (and heading) and the start of its text. */
+/** The quote waiting to be sent: its file (and PDF page or heading) and the start of its text. */
 const QuoteChip = ({ pending, onRemove }: { pending: PendingQuote; onRemove?: () => void }) => {
   const { t } = useTranslation()
   const { quote, truncated } = pending
   const params = { name: quoteFileName(quote), interpolation: { escapeValue: false } }
-  const source = [t('fileViewer:quoteChip', params), quote.heading].filter(Boolean).join(' · ')
+  const source = [t('fileViewer:quoteChip', params), quote.page ? t('fileViewer:pageShort', { page: quote.page }) : undefined, quote.heading]
+    .filter(Boolean)
+    .join(' · ')
   return (
     <Chip
       data-testid="quote-chip"

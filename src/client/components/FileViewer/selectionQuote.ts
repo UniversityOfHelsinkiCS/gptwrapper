@@ -21,6 +21,16 @@ export const nearestHeading = (container: HTMLElement, node: Node): string | und
 }
 
 /**
+ * The physical, 1-based PDF page of a node in pdf.js's viewer: the `data-page-number` of the page container around it.
+ * Undefined outside a page (e.g. in the gap between pages).
+ */
+export const pdfPageOf = (node: Node): number | undefined => {
+  const element = node.nodeType === Node.ELEMENT_NODE ? (node as Element) : node.parentElement
+  const page = Number(element?.closest<HTMLElement>('.page[data-page-number]')?.dataset.pageNumber)
+  return Number.isInteger(page) && page > 0 ? page : undefined
+}
+
+/**
  * The quote for the current selection, or null when nothing is selected or the selection does not lie fully inside
  * `container` (the file content, not the viewer's toolbar). The text is trimmed and cut to `MAX_QUOTE_LENGTH`.
  * `pageOf` gives the PDF page of the selection's start node; Markdown headings come from the rendered DOM.

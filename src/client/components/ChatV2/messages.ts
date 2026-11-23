@@ -15,9 +15,9 @@ export const MESSAGES_VERSION = 2
 
 type HistoryMessage = PostStreamSchemaV4Type['options']['chatMessages'][number]
 
-/** A quote as Markdown for exports: the text as a blockquote, then its source (`> — notes.md, Heading`). */
+/** A quote as Markdown for exports: the text as a blockquote, then its source (`> — notes.md, Heading` or `> — book.pdf, p. 12`). */
 export const quoteToText = (quote: Quote): string => {
-  const source = [quoteFileName(quote), quote.heading].filter(Boolean).join(', ')
+  const source = [quoteFileName(quote), quote.page ? `p. ${quote.page}` : undefined, quote.heading].filter(Boolean).join(', ')
   const lines = quote.text.split('\n').map((line) => (line ? `> ${line}` : '>'))
   return [...lines, `> — ${source}`].join('\n')
 }
