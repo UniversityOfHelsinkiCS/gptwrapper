@@ -81,6 +81,7 @@ beforeAll(async () => {
   await i18n.use(initReactI18next).init({ resources: { en }, lng: 'en', fallbackLng: 'en', defaultNS: 'common' })
 })
 beforeEach(() => {
+  localStorage.clear()
   fake.state.viewer = null
   fake.state.bus = null
 })
@@ -177,5 +178,42 @@ describe('FileViewer PDFs', () => {
     fireEvent.click(screen.getByTestId('file-viewer-ask'))
     expect(onAddQuote).toHaveBeenCalledWith({ quote: { kind: 'text', path: 'Course/book.pdf', page: 2, text: 'Text of page 2.' }, truncated: false })
     document.getSelection()!.removeAllRanges()
+  })
+
+  test('opens at the remembered page of the same file version, unless a target page is given', async () => {
+    fake.state.getDocument = loading(7)
+    const store = await storeWithPdf()
+    const first = render(ui(store, { path: 'Course/book.pdf' }))
+    await screen.findByTestId('file-viewer-pdf-page')
+    act(() => fake.state.bus!.dispatch('pagesinit'))
+    act(() => fake.state.bus!.dispatch('pagechanging', { pageNumber: 4 }))
+    first.unmount()
+
+    const second = render(ui(store, { path: 'Course/book.pdf' }))
+    await screen.findByTestId('file-viewer-pdf-page')
+    act(() => fake.state.bus!.dispatch('pagesinit'))
+    expect(fake.state.viewer!.currentPageNumber).toBe(4)
+    second.unmount()
+
+    render(ui(store, { path: 'Course/book.pdf', page: 2 }))
+    await screen.findByTestId('file-viewer-pdf-page')
+    act(() => fake.state.bus!.dispatch('pagesinit'))
+    expect(fake.state.viewer!.currentPageNumber).toBe(2)
+  })
+
+  test('a replaced file starts at the first page', async () => {
+    fake.state.getDocument = loading(7)
+    const store = await storeWithPdf()
+    const first = render(ui(store, { path: 'Course/book.pdf' }))
+    await screen.findByTestId('file-viewer-pdf-page')
+    act(() => fake.state.bus!.dispatch('pagesinit'))
+    act(() => fake.state.bus!.dispatch('pagechanging', { pageNumber: 4 }))
+    first.unmount()
+
+    await store.write('Course/book.pdf', new Uint8Array([37, 80, 68, 70]), { lastModified: 1 })
+    render(ui(store, { path: 'Course/book.pdf' }))
+    await screen.findByTestId('file-viewer-pdf-page')
+    act(() => fake.state.bus!.dispatch('pagesinit'))
+    expect(fake.state.viewer!.currentPageNumber).toBe(1)
   })
 })

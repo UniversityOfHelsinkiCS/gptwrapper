@@ -300,3 +300,49 @@ adminTest('Explain sends a PDF selection right away, keeping the typed draft', a
     rmSync(root, { recursive: true, force: true })
   }
 })
+
+adminTest('the open PDF and its page are remembered over a reload and a chat reset', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-pdf-persist-'))
+  try {
+    const folder = join(root, 'Course notes')
+    mkdirSync(folder, { recursive: true })
+    const pages = Array.from({ length: 12 }, (_, n) => [`Chapter ${n + 1}: Thermodynamics.`])
+    writeFileSync(join(folder, 'book.pdf'), makeTextPdf(pages, { links: [{ page: 1, text: 'Go to chapter 8', to: 8 }] }))
+
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+    await page.getByTestId('my-files-button').click()
+    const dialog = page.getByRole('dialog', { name: 'My files' })
+    await dialog.getByTestId('my-files-input-folder').setInputFiles(folder)
+    await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+    await dialog.getByRole('button', { name: /^Course notes/ }).click()
+    await dialog.getByRole('button', { name: 'Open book.pdf' }).click()
+
+    const viewer = page.getByRole('region', { name: 'book.pdf' })
+    const pdf = viewer.getByTestId('file-viewer-pdf')
+    await pdf.locator('.page[data-page-number="1"] .annotationLayer a').first().click()
+    await expect(viewer.getByTestId('file-viewer-pdf-page')).toHaveText('Page 8 / 12')
+
+    await page.reload()
+    await expect(viewer.getByTestId('file-viewer-pdf-page')).toHaveText('Page 8 / 12')
+    await expect(pdf.locator('.page[data-page-number="8"] .textLayer')).toContainText('Chapter 8: Thermodynamics.')
+
+    // Resetting the chat keeps the file open.
+    await sendChatMessage(page, 'say hello')
+    await closeSendPreference(page)
+    await expect(page.getByTestId('assistant-message')).toContainText('hello')
+    await page.getByTestId('new-conversation-button').click()
+    await page.getByTestId('submit-confirm-reset').click()
+    await expect(page.getByTestId('assistant-message')).toHaveCount(0)
+    await expect(viewer.getByTestId('file-viewer-pdf-page')).toHaveText('Page 8 / 12')
+
+    // Closed, it stays closed over a reload. (With the keyboard: a snackbar may cover the button.)
+    await viewer.getByRole('button', { name: 'Close book.pdf' }).press('Enter')
+    await page.reload()
+    await expect(page.locator('#chat-input')).toBeVisible()
+    await expect(page.getByTestId('file-viewer')).toHaveCount(0)
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})

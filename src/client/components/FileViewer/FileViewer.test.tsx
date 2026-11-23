@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import i18next from 'i18next'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
-import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('react-syntax-highlighter', () => ({ PrismAsync: () => null }))
 
@@ -13,7 +13,7 @@ import type { MyFilesStore } from '../../util/myFiles/store'
 import MyFilesDialog from '../MyFiles/MyFilesDialog'
 import { MyFilesStoreProvider } from '../MyFiles/MyFilesStoreContext'
 import FileViewer from './FileViewer'
-import { FileViewerProvider, useFileViewer } from './FileViewerContext'
+import { FileViewerProvider, useFileViewer, type ViewerTarget } from './FileViewerContext'
 import { MAX_VIEWER_TEXT_BYTES, viewerFileKind } from './fileKind'
 
 const i18n = i18next.createInstance()
@@ -361,5 +361,63 @@ describe('My files dialog Open action', () => {
     })
     await waitFor(() => expect(within(dialog).getByText('notes.md')).toBeTruthy())
     expect(within(dialog).queryAllByTestId('my-files-open')).toHaveLength(0)
+  })
+})
+
+describe('FileViewer reading position', () => {
+  beforeEach(() => localStorage.clear())
+
+  /** jsdom has no layout: gives the viewer region a size and a writable scroll position. */
+  const withLayout = (region: HTMLElement) => {
+    let scrollTop = 0
+    Object.defineProperty(region, 'clientHeight', { value: 100, configurable: true })
+    Object.defineProperty(region, 'scrollHeight', { value: 1100, configurable: true })
+    Object.defineProperty(region, 'scrollTop', { get: () => scrollTop, set: (value: number) => (scrollTop = value), configurable: true })
+    return region
+  }
+
+  const ui = (store: MyFilesStore, target: ViewerTarget) => (
+    <I18nextProvider i18n={i18n}>
+      <FileViewer store={store} target={target} onClose={vi.fn()} />
+    </I18nextProvider>
+  )
+
+  test('a text file reopens scrolled as far down as it was left, a replaced one at the top', async () => {
+    const store = await storeWith({ 'a.txt': 'long text' })
+    const first = render(ui(store, { path: 'a.txt' }))
+    const region = withLayout(screen.getByTestId('file-viewer'))
+    await screen.findByTestId('file-viewer-text')
+    region.scrollTop = 500
+    fireEvent.scroll(region)
+    await waitFor(() => expect(localStorage.getItem('file-viewer-positions')).toContain('"scroll":0.5'))
+    first.unmount()
+
+    const second = render(ui(store, { path: 'a.txt' }))
+    const reopened = withLayout(screen.getByTestId('file-viewer'))
+    await screen.findByTestId('file-viewer-text')
+    await waitFor(() => expect(reopened.scrollTop).toBe(500))
+    second.unmount()
+
+    await store.write('a.txt', 'replaced!', { lastModified: 1 })
+    render(ui(store, { path: 'a.txt' }))
+    const replaced = withLayout(screen.getByTestId('file-viewer'))
+    await screen.findByTestId('file-viewer-text')
+    await act(async () => {})
+    expect(replaced.scrollTop).toBe(0)
+  })
+
+  test('a target heading scrolls Markdown to that heading', async () => {
+    const store = await storeWith({ 'notes.md': '# Part 1\n\ntext\n\n## Part 2\n\nmore' })
+    const { rerender } = render(ui(store, { path: 'notes.md' }))
+    const region = withLayout(screen.getByTestId('file-viewer'))
+    await screen.findByRole('heading', { name: 'Part 2' })
+    const rect = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      return { top: this.tagName === 'H2' ? 300 : 0 } as DOMRect
+    })
+
+    rerender(ui(store, { path: 'notes.md', heading: 'Part 2' }))
+    // Just below the sticky toolbar (no height in jsdom), with a small gap.
+    expect(region.scrollTop).toBe(292)
+    rect.mockRestore()
   })
 })

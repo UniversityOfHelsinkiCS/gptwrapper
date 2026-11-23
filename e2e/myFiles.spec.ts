@@ -448,3 +448,24 @@ adminTest('notes written in one chat are read by the agent in a new chat, and ex
     rmSync(root, { recursive: true, force: true })
   }
 })
+
+adminTest('a Markdown file reopens after a reload scrolled where it was left', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-persist-'))
+  try {
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    const text = Array.from({ length: 80 }, (_, n) => `## Section ${n + 1}\n\nParagraph ${n + 1}.`).join('\n\n')
+    const viewer = await openLectureInViewer(page, root, text)
+    await expect(viewer.getByText('Paragraph 80.')).toBeAttached()
+
+    const fraction = (region: HTMLElement) => region.scrollTop / (region.scrollHeight - region.clientHeight)
+    await viewer.evaluate((region) => region.scrollTo({ top: (region.scrollHeight - region.clientHeight) / 2 }))
+    await page.waitForTimeout(500) // the position is saved once scrolling pauses
+
+    await page.reload()
+    await expect(viewer.getByText('Paragraph 80.')).toBeAttached()
+    await expect.poll(() => viewer.evaluate(fraction)).toBeCloseTo(0.5, 1)
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
