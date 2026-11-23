@@ -346,3 +346,62 @@ adminTest('the open PDF and its page are remembered over a reload and a chat res
     rmSync(root, { recursive: true, force: true })
   }
 })
+
+adminTest('the source of a PDF quote opens the file at the quoted page', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-pdf-quote-source-'))
+  try {
+    const folder = join(root, 'Course notes')
+    mkdirSync(folder, { recursive: true })
+    const pages = Array.from({ length: 6 }, (_, n) => [`Chapter ${n + 1}: Thermodynamics.`])
+    writeFileSync(join(folder, 'book.pdf'), makeTextPdf(pages, { links: [{ page: 1, text: 'Go to chapter 4', to: 4 }] }))
+
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+    await page.getByTestId('my-files-button').click()
+    const dialog = page.getByRole('dialog', { name: 'My files' })
+    await dialog.getByTestId('my-files-input-folder').setInputFiles(folder)
+    await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+    await dialog.getByRole('button', { name: /^Course notes/ }).click()
+    await dialog.getByRole('button', { name: 'Open book.pdf' }).click()
+
+    // Quote a line on page 4.
+    const viewer = page.getByRole('region', { name: 'book.pdf' })
+    const pdf = viewer.getByTestId('file-viewer-pdf')
+    await pdf.locator('.page[data-page-number="1"] .annotationLayer a').first().click()
+    const line = pdf.locator('.page[data-page-number="4"] .textLayer span', { hasText: 'Chapter 4' })
+    await expect(line).toBeVisible()
+    await line.evaluate((span) => {
+      const range = document.createRange()
+      range.selectNodeContents(span)
+      document.getSelection()!.removeAllRanges()
+      document.getSelection()!.addRange(range)
+    })
+    await viewer.getByTestId('file-viewer-ask').click()
+    await expect(page.getByTestId('quote-chip')).toContainText('Quote from book.pdf · p. 4')
+    await page.locator('#chat-input').fill('What does this mean?')
+    await page.getByTestId('send-chat-message').click()
+    await closeSendPreference(page)
+    await expect(page.getByTestId('assistant-message')).toBeVisible()
+
+    // Back to page 1, which is remembered, then closed.
+    await pdf.evaluate((container) => container.scrollTo({ top: 0 }))
+    await expect(viewer.getByTestId('file-viewer-pdf-page')).toHaveText('Page 1 / 6')
+    await viewer.getByRole('button', { name: 'Close book.pdf' }).press('Enter')
+    await expect(viewer).toHaveCount(0)
+
+    const source = page.getByTestId('user-message').getByRole('button', { name: 'Open book.pdf · p. 4 in the file viewer' })
+    await source.click()
+    await expect(viewer).toBeFocused()
+    await expect(viewer.getByTestId('file-viewer-pdf-page')).toHaveText('Page 4 / 6')
+    await expect(pdf.locator('.page[data-page-number="4"] .textLayer')).toContainText('Chapter 4: Thermodynamics.')
+
+    // With the file open at another page, the source jumps back to the quoted page.
+    await pdf.evaluate((container) => container.scrollTo({ top: 0 }))
+    await expect(viewer.getByTestId('file-viewer-pdf-page')).toHaveText('Page 1 / 6')
+    await source.click()
+    await expect(viewer.getByTestId('file-viewer-pdf-page')).toHaveText('Page 4 / 6')
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})

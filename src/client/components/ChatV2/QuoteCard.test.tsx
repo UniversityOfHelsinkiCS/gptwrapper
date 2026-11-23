@@ -1,9 +1,13 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import i18next from 'i18next'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
 import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
 
 import en from '../../locales/en.json'
+import { createMemoryStore } from '../../util/myFiles/memoryStore'
+import type { MyFilesStore } from '../../util/myFiles/store'
+import { FileViewerProvider, useFileViewer } from '../FileViewer/FileViewerContext'
+import { MyFilesStoreProvider } from '../MyFiles/MyFilesStoreContext'
 import { QuoteCard } from './QuoteCard'
 
 const i18n = i18next.createInstance()
@@ -68,6 +72,66 @@ describe('QuoteCard', () => {
   test('short text has no Show more', () => {
     overflowing(false)
     renderCard({ path: 'notes.md', text: 'short' })
+    expect(screen.queryByRole('button')).toBe(null)
+  })
+})
+
+const ViewerTarget = () => {
+  const target = useFileViewer()?.target
+  return <output data-testid="viewer-target">{target ? JSON.stringify(target) : ''}</output>
+}
+
+const renderWithViewer = (store: MyFilesStore, quote: { path: string; page?: number; heading?: string; text: string }, available = true) =>
+  render(
+    <I18nextProvider i18n={i18n}>
+      <MyFilesStoreProvider store={store}>
+        <FileViewerProvider available={available}>
+          <QuoteCard quote={{ kind: 'text', ...quote }} />
+          <ViewerTarget />
+        </FileViewerProvider>
+      </MyFilesStoreProvider>
+    </I18nextProvider>,
+  )
+
+describe('QuoteCard source', () => {
+  const storeWith = async (path: string) => {
+    const store = createMemoryStore()
+    await store.write(path, 'content')
+    return store
+  }
+
+  test('opens the file in the viewer at the quoted page when it is in My files', async () => {
+    const store = await storeWith('Course/book.pdf')
+    renderWithViewer(store, { path: 'Course/book.pdf', page: 12, text: 'Entropy grows.' })
+    const button = await screen.findByRole('button', { name: 'Open book.pdf · p. 12 in the file viewer' })
+    expect(screen.getByTestId('quote-card-source').textContent).toBe('📄 book.pdf · p. 12')
+    fireEvent.click(button)
+    expect(JSON.parse(screen.getByTestId('viewer-target').textContent!)).toEqual({ path: 'Course/book.pdf', page: 12 })
+  })
+
+  test('opens a Markdown file at the quoted heading', async () => {
+    const store = await storeWith('notes.md')
+    renderWithViewer(store, { path: 'notes.md', heading: 'Eigenvalues', text: 'An eigenvector.' })
+    fireEvent.click(await screen.findByTestId('quote-card-open'))
+    expect(JSON.parse(screen.getByTestId('viewer-target').textContent!)).toEqual({ path: 'notes.md', heading: 'Eigenvalues' })
+  })
+
+  test('is plain text when the file is no longer in My files', async () => {
+    const store = await storeWith('other.pdf')
+    const stat = vi.spyOn(store, 'stat')
+    renderWithViewer(store, { path: 'Course/book.pdf', page: 12, text: 'Entropy grows.' })
+    await waitFor(() => expect(stat).toHaveBeenCalledWith('Course/book.pdf'))
+    await stat.mock.results[0].value
+    expect(screen.queryByRole('button')).toBe(null)
+    expect(screen.getByTestId('quote-card-source').textContent).toBe('📄 book.pdf · p. 12')
+  })
+
+  test('is plain text when the viewer is not available', async () => {
+    const store = await storeWith('Course/book.pdf')
+    const stat = vi.spyOn(store, 'stat')
+    renderWithViewer(store, { path: 'Course/book.pdf', page: 12, text: 'Entropy grows.' }, false)
+    await Promise.resolve()
+    expect(stat).not.toHaveBeenCalled()
     expect(screen.queryByRole('button')).toBe(null)
   })
 })
