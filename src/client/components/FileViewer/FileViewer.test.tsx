@@ -37,11 +37,13 @@ const storeWith = async (files: Record<string, string>) => {
 }
 
 describe('viewerFileKind', () => {
-  test('knows Markdown and text files only', () => {
+  test('knows Markdown, text and PDF files only', () => {
     expect(viewerFileKind('Course/notes.md')).toBe('markdown')
     expect(viewerFileKind('README.MD')).toBe('markdown')
     expect(viewerFileKind('a/b.txt')).toBe('text')
-    expect(viewerFileKind('book.pdf')).toBe(null)
+    expect(viewerFileKind('book.pdf')).toBe('pdf')
+    expect(viewerFileKind('Book.PDF')).toBe('pdf')
+    expect(viewerFileKind('slides.pptx')).toBe(null)
     expect(viewerFileKind('md')).toBe(null)
     expect(viewerFileKind('folder.md/file')).toBe(null)
   })
@@ -243,9 +245,9 @@ const renderDialog = (store: MyFilesStore, { viewer = true, onClose = vi.fn() } 
 }
 
 describe('My files dialog Open action', () => {
-  const files = { 'Course/notes.md': '# Notes', 'Course/list.txt': 'a', 'Course/book.pdf': '%PDF', 'loose.txt': 'b' }
+  const files = { 'Course/notes.md': '# Notes', 'Course/list.txt': 'a', 'Course/book.pdf': '%PDF', 'Course/data.csv': 'a,b', 'loose.txt': 'b' }
 
-  test('is shown for Markdown and text files only, and opens them in the viewer', async () => {
+  test('is shown for Markdown, text and PDF files only, and opens them in the viewer', async () => {
     const store = await storeWith(files)
     const onClose = renderDialog(store)
     const dialog = await screen.findByRole('dialog')
@@ -256,7 +258,7 @@ describe('My files dialog Open action', () => {
     const openButtons = within(dialog)
       .getAllByTestId('my-files-open')
       .map((button) => button.getAttribute('aria-label'))
-    expect(openButtons.sort()).toEqual(['Open list.txt', 'Open loose.txt', 'Open notes.md'])
+    expect(openButtons.sort()).toEqual(['Open book.pdf', 'Open list.txt', 'Open loose.txt', 'Open notes.md'])
 
     fireEvent.click(within(dialog).getByRole('button', { name: 'Open notes.md' }))
     expect(screen.getByTestId('viewer-target').textContent).toBe('Course/notes.md')

@@ -124,3 +124,75 @@ adminTest('the PDF reader subagent reads an attached PDF and the answer uses its
     rmSync(root, { recursive: true, force: true })
   }
 })
+
+adminTest('opens a PDF from My files in the viewer, with page and zoom controls and internal links', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-pdf-viewer-'))
+  try {
+    const folder = join(root, 'Course notes')
+    mkdirSync(folder, { recursive: true })
+    const pages = Array.from({ length: 12 }, (_, n) => [`Chapter ${n + 1}: Thermodynamics.`])
+    writeFileSync(join(folder, 'book.pdf'), makeTextPdf(pages, { links: [{ page: 1, text: 'Go to chapter 10', to: 10 }] }))
+    writeFileSync(join(folder, 'secret.pdf'), makeTextPdf([['Hidden']], { password: 'pw' }))
+    writeFileSync(join(folder, 'broken.pdf'), '%PDF-1.4 this is not a PDF')
+
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    const openFile = async (name: string) => {
+      await page.getByTestId('my-files-button').click()
+      const dialog = page.getByRole('dialog', { name: 'My files' })
+      if (!(await dialog.getByRole('button', { name: `Open ${name}` }).isVisible())) {
+        await dialog.getByRole('button', { name: /^Course notes/ }).click()
+      }
+      await dialog.getByRole('button', { name: `Open ${name}` }).click()
+      await expect(dialog).toBeHidden()
+    }
+
+    await page.getByTestId('my-files-button').click()
+    const dialog = page.getByRole('dialog', { name: 'My files' })
+    await dialog.getByTestId('my-files-input-folder').setInputFiles(folder)
+    await expect(dialog.getByTestId('my-files-status')).toContainText('New: 3')
+    await dialog.getByTestId('my-files-close').click()
+
+    await openFile('book.pdf')
+    const viewer = page.getByRole('region', { name: 'book.pdf' })
+    const pdf = viewer.getByTestId('file-viewer-pdf')
+    await expect(pdf.locator('.page[data-page-number="1"] .textLayer')).toContainText('Chapter 1: Thermodynamics.')
+    await expect(viewer.getByTestId('file-viewer-pdf-page')).toHaveText('Page 1 / 12')
+    await expect(pdf.getByRole('region', { name: 'Page 12' })).toHaveCount(1)
+    // Only the pages in view are rendered
+    expect(await pdf.locator('.page canvas').count()).toBeLessThan(12)
+
+    // The text layer is selectable
+    const selected = await pdf.locator('.page[data-page-number="1"] .textLayer').evaluate((layer) => {
+      const range = document.createRange()
+      range.selectNodeContents(layer)
+      document.getSelection()!.removeAllRanges()
+      document.getSelection()!.addRange(range)
+      return document.getSelection()!.toString()
+    })
+    expect(selected).toContain('Chapter 1: Thermodynamics.')
+
+    // Zoom in and out, and back to the page width
+    const zoom = viewer.getByTestId('file-viewer-zoom')
+    const fitted = await zoom.textContent()
+    await viewer.getByRole('button', { name: 'Zoom in' }).click()
+    await expect(zoom).not.toHaveText(fitted!)
+    await viewer.getByRole('button', { name: 'Fit to width' }).click()
+    await expect(zoom).toHaveText(fitted!)
+
+    // An internal link jumps to its page
+    await pdf.locator('.page[data-page-number="1"] .annotationLayer a').first().click()
+    await expect(viewer.getByTestId('file-viewer-pdf-page')).toHaveText('Page 10 / 12')
+    await expect(pdf.locator('.page[data-page-number="10"] .textLayer')).toContainText('Chapter 10: Thermodynamics.')
+
+    // Password-protected and invalid PDFs say why they are not shown
+    await openFile('secret.pdf')
+    await expect(page.getByRole('region', { name: 'secret.pdf' }).getByTestId('file-viewer-message')).toHaveText(
+      'This PDF is password-protected and cannot be displayed.',
+    )
+    await openFile('broken.pdf')
+    await expect(page.getByRole('region', { name: 'broken.pdf' }).getByTestId('file-viewer-message')).toHaveText('This file could not be read as a PDF.')
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})

@@ -104,7 +104,7 @@ adminTest('opens a Markdown file from My files in the viewer next to the chat', 
     await dialog.getByTestId('my-files-input-folder').setInputFiles(folder)
     await expect(dialog.getByTestId('my-files-status')).toContainText('New: 2')
     await dialog.getByRole('button', { name: /^Course notes/ }).click()
-    await expect(dialog.getByRole('button', { name: 'Open book.pdf' })).toHaveCount(0)
+    await expect(dialog.getByRole('button', { name: 'Open book.pdf' })).toBeVisible()
     await dialog.getByRole('button', { name: 'Open lecture.md' }).click()
     await expect(dialog).toBeHidden()
 

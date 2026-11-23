@@ -491,6 +491,35 @@ adminTest.describe('axe wcag scan for my files', () => {
       rmSync(root, { recursive: true, force: true })
     }
   })
+
+  adminTest('scan chat with a PDF open in the viewer', async ({ page }, testInfo) => {
+    const root = mkdtempSync(join(tmpdir(), 'axe-pdf-viewer-'))
+    try {
+      mkdirSync(join(root, 'Course notes'), { recursive: true })
+      writeFileSync(
+        join(root, 'Course notes', 'book.pdf'),
+        makeTextPdf([['Chapter 1: Energy.'], ['Chapter 2: Entropy.']], { links: [{ page: 1, text: 'Go to chapter 2', to: 2 }] }),
+      )
+
+      await page.goto('/general')
+      await acceptDisclaimer(page)
+      await page.getByTestId('my-files-button').click()
+      const dialog = page.getByRole('dialog', { name: 'My files' })
+      await dialog.getByTestId('my-files-input-folder').setInputFiles(join(root, 'Course notes'))
+      await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+      await dialog.getByRole('button', { name: /^Course notes/ }).click()
+      await dialog.getByRole('button', { name: 'Open book.pdf' }).click()
+      await expect(dialog).toBeHidden()
+      const viewer = page.getByRole('region', { name: 'book.pdf' })
+      await expect(viewer.locator('.page[data-page-number="1"] .textLayer')).toContainText('Chapter 1: Energy.')
+      await expect(viewer.locator('.page[data-page-number="1"] .annotationLayer a')).toHaveCount(1)
+      await page.mouse.move(0, 0)
+      await expect(page.getByRole('tooltip')).toHaveCount(0)
+      await scan(page, testInfo.title)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
 })
 
 adminTest.describe('axe wcag scan for chat with attached folders', () => {
