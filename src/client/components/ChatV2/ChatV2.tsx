@@ -1071,12 +1071,13 @@ const ChatV2Content = () => {
 }
 
 export const ChatV2 = () => {
-  // The viewer follows My files: not in embedded mode and not without OPFS.
+  // The viewer follows My files: not in embedded mode and not without OPFS. The open file is per course (or general chat).
   const isEmbeddedMode = useIsEmbedded()
   const myFilesStore = useMyFilesStore()
+  const { courseId } = useParams()
   return (
     <PromptStateProvider>
-      <FileViewerProvider available={!isEmbeddedMode && !!myFilesStore}>
+      <FileViewerProvider available={!isEmbeddedMode && !!myFilesStore} chatContext={courseId ?? 'general'}>
         <ChatV2Content />
       </FileViewerProvider>
     </PromptStateProvider>

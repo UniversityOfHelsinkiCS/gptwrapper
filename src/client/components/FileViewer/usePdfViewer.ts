@@ -6,7 +6,8 @@ import { loadPdfViewer } from '../../util/pdfjs'
 
 export type PdfStatus =
   | { state: 'loading' }
-  | { state: 'ready'; pageCount: number }
+  /** `path`, `size` and `lastModified` identify the file version shown, for its reading position. */
+  | { state: 'ready'; pageCount: number; path: string; size: number; lastModified: number }
   | { state: 'missing' }
   | { state: 'password' }
   | { state: 'invalid' }
@@ -132,7 +133,7 @@ export const usePdfViewer = ({
         viewer.setDocument(doc)
         linkService.setDocument(doc, null)
         viewerInstance.current = viewer
-        setStatus({ state: 'ready', pageCount: doc.numPages })
+        setStatus({ state: 'ready', pageCount: doc.numPages, path, size: entry.size, lastModified: entry.lastModified })
       } catch {
         if (!cancelled) setStatus({ state: 'error' })
       }

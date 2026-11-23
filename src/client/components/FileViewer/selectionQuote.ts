@@ -23,6 +23,10 @@ export const nearestHeading = (container: HTMLElement, node: Node): string | und
   return found
 }
 
+/** The first heading in `container` with the text `text` (as `nearestHeading` gives it): where a quote's heading is. */
+export const findHeading = (container: HTMLElement, text: string): HTMLElement | null =>
+  [...container.querySelectorAll<HTMLElement>(HEADING_SELECTOR)].find((heading) => heading.textContent?.trim() === text) ?? null
+
 /**
  * The physical, 1-based PDF page of a node in pdf.js's viewer: the `data-page-number` of the page container around it.
  * Undefined outside a page (e.g. in the gap between pages).

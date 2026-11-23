@@ -14,13 +14,15 @@ import { MarkdownContent } from '../ChatV2/MarkdownContent'
 import { ExperimentalChip } from '../MyFiles/ExperimentalChip'
 import { MAX_VIEWER_TEXT_BYTES, viewerFileKind } from './fileKind'
 import type { ViewerTarget } from './FileViewerContext'
-import { pdfPageOf, selectionToQuote, type AddQuoteOptions, type PendingQuote } from './selectionQuote'
+import { findHeading, pdfPageOf, selectionToQuote, type AddQuoteOptions, type PendingQuote } from './selectionQuote'
 import { usePdfViewer } from './usePdfViewer'
+import { readingPositionKey, readReadingPosition, writeReadingPosition } from './viewerPersistence'
 import { PDF_VIEWER_SCOPE_CLASS } from '../../util/pdfjs'
 
 type Content =
   | { state: 'loading' }
-  | { state: 'ready'; text: string }
+  /** `path`, `size` and `lastModified` identify the file version read, for its reading position. */
+  | { state: 'ready'; text: string; path: string; size: number; lastModified: number }
   | { state: 'missing' }
   | { state: 'tooLarge' }
   | { state: 'error' }
@@ -40,7 +42,7 @@ const useFileText = (store: MyFilesStore, path: string, enabled: boolean): Conte
         if (!entry || entry.kind !== 'file') next = { state: 'missing' }
         else if (!viewerFileKind(path)) next = { state: 'unsupported' }
         else if (entry.size > MAX_VIEWER_TEXT_BYTES) next = { state: 'tooLarge' }
-        else next = { state: 'ready', text: await store.readText(path) }
+        else next = { state: 'ready', text: await store.readText(path), path, size: entry.size, lastModified: entry.lastModified }
         if (!cancelled) setContent(next)
       } catch {
         if (!cancelled) setContent({ state: 'error' })
@@ -51,6 +53,15 @@ const useFileText = (store: MyFilesStore, path: string, enabled: boolean): Conte
     }
   }, [store, path, enabled])
   return content
+}
+
+/** How long scrolling has to pause before a Markdown or text file's reading position is saved. */
+const SAVE_SCROLL_DELAY_MS = 250
+
+/** How far down (0–1) an element is scrolled. */
+const scrollFraction = (element: HTMLElement) => {
+  const max = element.scrollHeight - element.clientHeight
+  return max > 0 ? Math.min(1, Math.max(0, element.scrollTop / max)) : 0
 }
 
 /** The selection actions: the quick actions send the quote right away with a fixed message, "Ask…" waits for a question. */
@@ -115,7 +126,9 @@ const useSelectionQuote = (contentRef: RefObject<HTMLElement | null>, path: stri
  * A My files file shown next to the chat: Markdown rendered like chat answers (without loading images), text in a
  * wrapping monospace block, PDFs in pdf.js's viewer (with page and zoom controls in the toolbar). The whole panel is one
  * labelled, focusable region; it scrolls under a sticky toolbar, except a PDF, which scrolls in its own container.
- * `target.page` opens a PDF at that page, also when the same file is opened again with another page.
+ * `target.page` opens a PDF at that page and `target.heading` scrolls Markdown to that heading, also when the same file
+ * is opened again with another one. Without them, the file opens at its remembered reading position (the PDF page or
+ * how far down it was scrolled), which is saved per file version: a replaced file starts at the top.
  * With `onAddQuote`, selected text can be added to the chat as a quote ("Ask…") or sent right away with a fixed
  * message (Explain, Summarize, Translate; disabled with `quickActionsDisabled`, while a response streams), from a
  * toolbar floating next to a mouse selection (unless `floatingToolbar` is false: narrow screens and touch, which use
@@ -155,11 +168,75 @@ const FileViewer = ({
   const pageLabel = useCallback((page: number) => t('fileViewer:pdfPage', { page }), [t])
   const pdf = usePdfViewer({ store, path: target.path, containerRef: pdfContainerRef, viewerRef: pdfViewerRef, pageLabel })
   const { goToPage } = pdf
+  const toolbarRef = useRef<HTMLDivElement>(null)
 
-  // A target page (a quote's source, a remembered position) is applied whenever a target is opened.
+  // A target page (a quote's source) is applied whenever a target is opened.
   useEffect(() => {
     if (target.page) goToPage(target.page)
   }, [target, goToPage])
+
+  // The shown file version's reading position key, once the target file has been read.
+  let positionKey: string | null = null
+  if (isPdf && pdf.status.state === 'ready' && pdf.status.path === target.path) {
+    positionKey = readingPositionKey(target.path, pdf.status.size, pdf.status.lastModified)
+  } else if (!isPdf && content.state === 'ready' && content.path === target.path) {
+    positionKey = readingPositionKey(target.path, content.size, content.lastModified)
+  }
+  const positionKeyRef = useRef(positionKey)
+  positionKeyRef.current = positionKey
+
+  // A PDF without a target page opens at its remembered page, and the page is remembered as it changes.
+  useEffect(() => {
+    if (!isPdf || !positionKey || target.page) return
+    const stored = readReadingPosition(positionKey)
+    if (stored && 'page' in stored) goToPage(stored.page)
+  }, [isPdf, positionKey, target, goToPage])
+  useEffect(() => {
+    if (isPdf && positionKeyRef.current) writeReadingPosition(positionKeyRef.current, { page: pdf.page })
+  }, [isPdf, pdf.page])
+
+  // Markdown and text scroll to the target heading, else to the remembered position. A hidden viewer (narrow mode
+  // showing the chat, the sources in its slot) has no size to scroll in, so this waits until it is shown.
+  const pendingScroll = useRef<((region: HTMLElement) => void) | null>(null)
+  const applyPendingScroll = useCallback(() => {
+    const region = regionRef.current
+    if (!region || region.clientHeight === 0 || !pendingScroll.current) return
+    pendingScroll.current(region)
+    pendingScroll.current = null
+  }, [])
+  useEffect(() => {
+    if (isPdf || !positionKey) return
+    pendingScroll.current = (region) => {
+      const heading = target.heading && contentRef.current ? findHeading(contentRef.current, target.heading) : null
+      if (heading) {
+        const offset = heading.getBoundingClientRect().top - region.getBoundingClientRect().top - (toolbarRef.current?.offsetHeight ?? 0)
+        region.scrollTop += offset - 8
+        return
+      }
+      const stored = readReadingPosition(positionKey)
+      if (stored && 'scroll' in stored) region.scrollTop = stored.scroll * (region.scrollHeight - region.clientHeight)
+    }
+    applyPendingScroll()
+  }, [isPdf, positionKey, target, applyPendingScroll])
+  useEffect(() => {
+    const region = regionRef.current
+    if (!region || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(applyPendingScroll)
+    observer.observe(region)
+    return () => observer.disconnect()
+  }, [applyPendingScroll])
+
+  const saveScrollTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(saveScrollTimer.current), [])
+  const onRegionScroll = () => {
+    if (floating) hideFloating()
+    const region = regionRef.current
+    const key = positionKeyRef.current
+    if (isPdf || !region || !key || region.clientHeight === 0 || pendingScroll.current) return
+    const scroll = scrollFraction(region)
+    clearTimeout(saveScrollTimer.current)
+    saveScrollTimer.current = setTimeout(() => writeReadingPosition(key, { scroll }), SAVE_SCROLL_DELAY_MS)
+  }
 
   // Opening a file moves focus to it, so keyboard and screen reader users land in the viewer.
   useEffect(() => {
@@ -202,7 +279,7 @@ const FileViewer = ({
       tabIndex={0}
       data-testid="file-viewer"
       data-path={target.path}
-      onScroll={floating ? hideFloating : undefined}
+      onScroll={onRegionScroll}
       onKeyDown={floating ? (event) => event.key === 'Escape' && hideFloating() : undefined}
       sx={{
         height: '100%',
@@ -213,6 +290,7 @@ const FileViewer = ({
       }}
     >
       <Box
+        ref={toolbarRef}
         sx={{
           position: 'sticky',
           top: 0,
