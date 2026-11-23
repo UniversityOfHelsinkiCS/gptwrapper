@@ -21,7 +21,15 @@ import { handleWarnings, modelConfigHasInstructions, prepareMessagesForLLM, type
 import { getAgentModel } from './agentModel'
 import { describeGenerationError } from './generationError'
 import { keepFailedRun, readMissedCallUpdate, readResumeState, takeFailedRun } from './resumableRuns'
-import { createStreamState, getMainAgentModelCall, getSubagentModelCall, mapStreamChunk, nextStreamState, type StreamChunk } from './mapStreamChunk'
+import {
+  createStreamState,
+  getMainAgentModelCall,
+  getSubagentModelCall,
+  isMainAgentModelChunk,
+  mapStreamChunk,
+  nextStreamState,
+  type StreamChunk,
+} from './mapStreamChunk'
 import { createRunUsage } from './runUsage'
 import type { ClientToolCaller } from './clientTools'
 import { fileToolsFor } from './tools/fileTools'
@@ -164,6 +172,9 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
   const showReasoning = modelConfig.reasoning?.showSummary === true
   const startedAt = Date.now()
   let firstTokenAt: number | undefined
+  // Time the main agent's model calls spent streaming, without tool runs in between. For `tokensPerSecond`.
+  let callStreamStartedAt: number | undefined
+  let streamingMs = 0
   let inputTokens = 0
   let outputTokens = 0
   let modelCalls = 0
@@ -184,6 +195,61 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
   const startedCalls = new Set<string>(resumeState?.startedCallIds)
   const endedCalls = new Set<string>(resumeState?.endedCallIds)
 
+  /**
+   * Charges the model calls that finished and fills the token fields of the run log. Failed and aborted runs are
+   * charged too, for the calls that finished before the failure; a resumed run does not run those calls again.
+   */
+  const chargeRun = async () => {
+    const totalTokens = inputTokens + outputTokens
+    if (!isFreeModel(model) && modelCalls > 0) {
+      if (course) {
+        await incrementCourseUsage(course.chatInstance, totalTokens)
+        await PromptUsage.create({
+          chatInstanceId: course.chatInstance.id,
+          promptId: prompt?.id ?? null,
+          userId: chargeUser.id,
+          tokenCount: totalTokens,
+        })
+      } else {
+        await incrementUsage(chargeUser, totalTokens)
+      }
+    }
+    // Recorded for free models too: the cost budget has no free models.
+    try {
+      if (Object.keys(runUsage.usage).length > 0)
+        await recordModelUsage({ userId: chargeUser.id, courseUsageId: course?.chatInstance.currentUserUsage?.id, usage: runUsage.usage })
+    } catch (error) {
+      // Under cost enforcement this usage goes unbilled.
+      const message = getUsageEnforcement() === 'cost' ? 'Failed to record model usage, usage not billed' : 'Failed to record model usage'
+      logger.error(message, { model, userId: chargeUser.id, error: error instanceof Error ? error.message : error })
+    }
+
+    Object.assign(meta, {
+      inputTokenCount: inputTokens,
+      outputTokenCount: outputTokens,
+      tokenCount: totalTokens,
+      modelCalls,
+      timeToFirstToken: firstTokenAt ? firstTokenAt - startedAt : undefined,
+      tokensPerSecond: streamingMs > 0 ? (outputTokens / streamingMs) * 1000 : undefined,
+      toolCalls: toolCalls.length > 0 ? JSON.stringify(toolCalls) : undefined,
+      subagentUsage: Object.keys(subagentUsage).length > 0 ? JSON.stringify(subagentUsage) : undefined,
+    })
+  }
+
+  /** On the error paths a failed charge is only logged, so it cannot hide the run's own outcome. */
+  const chargeFailedRun = async (outcome: string) => {
+    meta.runOutcome = outcome
+    try {
+      await chargeRun()
+    } catch (error) {
+      logger.error('Failed to charge the usage of a failed or aborted run', {
+        model,
+        userId: chargeUser.id,
+        error: error instanceof Error ? error.message : error,
+      })
+    }
+  }
+
   try {
     if (resumeState) await emit({ type: 'resumed', pendingCallIds: resumeState.pendingCallIds })
     // A `null` input continues the thread from its latest checkpoint: only the step that failed runs again.
@@ -199,8 +265,15 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
       const streamChunk = chunk as StreamChunk
       streamState = nextStreamState(streamState, streamChunk)
 
+      if (isMainAgentModelChunk(streamChunk)) {
+        callStreamStartedAt ??= Date.now()
+        firstTokenAt ??= callStreamStartedAt
+      }
+
       const call = getMainAgentModelCall(streamChunk)
       if (call) {
+        if (callStreamStartedAt) streamingMs += Date.now() - callStreamStartedAt
+        callStreamStartedAt = undefined
         modelCalls++
         inputTokens += call.inputTokens
         outputTokens += call.outputTokens
@@ -226,21 +299,20 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
         if ((event.type === 'tool.end' || event.type === 'subagent.end') && event.path.length === 0) endedCalls.add(event.callId)
         // Models without a reasoning config look as before, even if their provider streams reasoning anyway.
         if (event.type === 'reasoning.delta' && !showReasoning) continue
-        if (event.type === 'text.delta' && event.path.length === 0) {
-          firstTokenAt ??= Date.now()
-          response += event.text
-        }
+        if (event.type === 'text.delta' && event.path.length === 0) response += event.text
         await emit(event)
       }
     }
   } catch (error) {
     if (signal.aborted) {
       logger.info('Agent run aborted', { reason: signal.reason, model })
+      await chargeFailedRun('aborted')
       return { status: 'aborted' }
     }
 
     const contentFilterMessage = getContentFilterMessage(error)
     if (contentFilterMessage) {
+      await chargeFailedRun('content_filter')
       // The content-filter explanation is shown as the assistant's answer.
       await emit({ type: 'text.delta', path: [], text: contentFilterMessage })
       return { status: 'completed' }
@@ -255,6 +327,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
       logger.error('Failed to emit the tool calls of a failed run', { error: missedError instanceof Error ? missedError.message : missedError })
     }
     await keepFailedRun(user.id, runId, checkpointer)
+    await chargeFailedRun('failed')
     await emit({ type: 'error', error: describeGenerationError(error), resumeId: runId })
     return { status: 'completed' }
   } finally {
@@ -262,41 +335,7 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
   }
 
   await emit({ type: 'usage', inputTokens, outputTokens })
-
-  const totalTokens = inputTokens + outputTokens
-  if (!isFreeModel(model)) {
-    if (course) {
-      await incrementCourseUsage(course.chatInstance, totalTokens)
-      await PromptUsage.create({
-        chatInstanceId: course.chatInstance.id,
-        promptId: prompt?.id ?? null,
-        userId: chargeUser.id,
-        tokenCount: totalTokens,
-      })
-    } else {
-      await incrementUsage(chargeUser, totalTokens)
-    }
-  }
-  // Recorded for free models too: the cost budget has no free models.
-  try {
-    await recordModelUsage({ userId: chargeUser.id, courseUsageId: course?.chatInstance.currentUserUsage?.id, usage: runUsage.usage })
-  } catch (error) {
-    // Under cost enforcement this usage goes unbilled.
-    const message = getUsageEnforcement() === 'cost' ? 'Failed to record model usage, usage not billed' : 'Failed to record model usage'
-    logger.error(message, { model, userId: chargeUser.id, error: error instanceof Error ? error.message : error })
-  }
-
-  const streamingMs = firstTokenAt ? Date.now() - firstTokenAt : 0
-  Object.assign(meta, {
-    inputTokenCount: inputTokens,
-    outputTokenCount: outputTokens,
-    tokenCount: totalTokens,
-    modelCalls,
-    timeToFirstToken: firstTokenAt ? firstTokenAt - startedAt : undefined,
-    tokensPerSecond: streamingMs > 0 ? (outputTokens / streamingMs) * 1000 : undefined,
-    toolCalls: toolCalls.length > 0 ? JSON.stringify(toolCalls) : undefined,
-    subagentUsage: Object.keys(subagentUsage).length > 0 ? JSON.stringify(subagentUsage) : undefined,
-  })
+  await chargeRun()
 
   if (courseId && course?.chatInstance.saveDiscussions) {
     await Discussion.create({ userId: user.id, courseId, response, metadata: { ...options, chatMessages: history } })

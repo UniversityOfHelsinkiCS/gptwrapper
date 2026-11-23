@@ -238,6 +238,10 @@ export type ModelCallSummary = {
  * token usage and the names of the tools it called. Returns null for anything else (token chunks, tool
  * results, subagent updates). The runner sums these over the run, so every model call is counted.
  */
+/** True for a `messages` chunk that the **main** agent's model streams (a token chunk, not a tool result). */
+export const isMainAgentModelChunk = ([namespace, mode, data]: StreamChunk): boolean =>
+  mode === 'messages' && namespaceToPath(namespace).length === 0 && Array.isArray(data) && AIMessage.isInstance(data[0])
+
 export const getMainAgentModelCall = ([namespace, mode, data]: StreamChunk): ModelCallSummary | null => {
   if (mode !== 'updates' || namespaceToPath(namespace).length > 0) return null
   return modelCallOf(data)
