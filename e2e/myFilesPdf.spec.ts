@@ -196,3 +196,58 @@ adminTest('opens a PDF from My files in the viewer, with page and zoom controls 
     rmSync(root, { recursive: true, force: true })
   }
 })
+
+adminTest('asks about text selected on a PDF page, quoted with its page number', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-pdf-quote-'))
+  const sentFrames: string[] = []
+  page.on('websocket', (ws) => ws.on('framesent', (frame) => sentFrames.push(String(frame.payload))))
+  try {
+    const folder = join(root, 'Course notes')
+    mkdirSync(folder, { recursive: true })
+    writeFileSync(join(folder, 'book.pdf'), makeTextPdf([['Entropy always grows in a closed system.'], ['Chapter 2: Heat engines.']]))
+
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+    await page.getByTestId('my-files-button').click()
+    const dialog = page.getByRole('dialog', { name: 'My files' })
+    await dialog.getByTestId('my-files-input-folder').setInputFiles(folder)
+    await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+    await dialog.getByRole('button', { name: /^Course notes/ }).click()
+    await dialog.getByRole('button', { name: 'Open book.pdf' }).click()
+    await expect(dialog).toBeHidden()
+
+    const viewer = page.getByRole('region', { name: 'book.pdf' })
+    const line = viewer.locator('.page[data-page-number="1"] .textLayer span', { hasText: 'Entropy always grows' })
+    await expect(line).toBeVisible()
+
+    // Select the line on page 1 by dragging the mouse over it.
+    const box = (await line.boundingBox())!
+    await page.mouse.move(box.x + 1, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width - 1, box.y + box.height / 2, { steps: 5 })
+    await page.mouse.up()
+
+    const floating = viewer.getByRole('toolbar', { name: 'Selection actions' })
+    await expect(floating).toBeVisible()
+    await floating.getByRole('button', { name: 'Ask…' }).click()
+
+    const chip = page.getByTestId('quote-chip')
+    await expect(chip).toContainText('Quote from book.pdf · p. 1')
+    await expect(chip).toContainText('Entropy always grows')
+
+    await page.locator('#chat-input').fill('Why is that?')
+    await page.getByTestId('send-chat-message').click()
+    await closeSendPreference(page)
+
+    const card = page.getByTestId('user-message').getByTestId('quote-card')
+    await expect(card.getByTestId('quote-card-source')).toHaveText('📄 book.pdf · p. 1')
+    await expect(card.getByTestId('quote-card-text')).toContainText('Entropy always grows')
+    await expect(page.getByTestId('assistant-message')).toBeVisible()
+
+    const sent = sentFrames.find((frame) => frame.includes('Why is that?'))
+    expect(sent).toContain('"quotes":[{"kind":"text","path":"Course notes/book.pdf","page":1,"text":"Entropy always grows')
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})

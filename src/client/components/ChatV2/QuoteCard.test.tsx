@@ -16,7 +16,7 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-const renderCard = (quote: { path: string; heading?: string; text: string }) =>
+const renderCard = (quote: { path: string; page?: number; heading?: string; text: string }) =>
   render(
     <I18nextProvider i18n={i18n}>
       <QuoteCard quote={{ kind: 'text', ...quote }} />
@@ -35,6 +35,11 @@ describe('QuoteCard', () => {
     expect(screen.getByTestId('quote-card-source').textContent).toBe('📄 notes.md · 2.3 Eigenvalues')
     expect(screen.getByTestId('quote-card-text').tagName).toBe('BLOCKQUOTE')
     expect(screen.getByTestId('quote-card-text').textContent).toBe('An eigenvector keeps its direction.')
+  })
+
+  test('a PDF quote shows its page', () => {
+    renderCard({ path: 'Course/book.pdf', page: 12, text: 'Entropy grows.' })
+    expect(screen.getByTestId('quote-card-source').textContent).toBe('📄 book.pdf · p. 12')
   })
 
   test('without a heading shows only the file name', () => {

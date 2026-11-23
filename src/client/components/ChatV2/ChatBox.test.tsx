@@ -183,6 +183,13 @@ describe('ChatBox quote chip', () => {
     expect(announceToScreenReader).toHaveBeenCalledWith('Quote added to chat')
   })
 
+  test('a PDF quote shows its page', () => {
+    const { actionsRef } = renderChatBox()
+    act(() => actionsRef.current!.addQuote({ quote: { kind: 'text', path: 'Course/book.pdf', page: 3, text: 'Entropy grows.' }, truncated: false }))
+    expect(chips()[0].textContent).toBe('Quote from book.pdf · p. 3: Entropy grows.')
+    expect(chips()[0].getAttribute('aria-label')).toBe('Quote from book.pdf · p. 3, Remove the quote by pressing Delete or Backspace')
+  })
+
   test('a new quote replaces the earlier one, and a truncated one says so', () => {
     const { actionsRef } = renderChatBox()
     act(() => actionsRef.current!.addQuote(pending('first')))

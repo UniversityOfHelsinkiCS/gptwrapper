@@ -46,6 +46,7 @@ const fake = vi.hoisted(() => {
         page.className = 'page'
         page.setAttribute('role', 'region')
         page.dataset.pageNumber = String(n)
+        page.innerHTML = `<div class="textLayer"><span>Text of page ${n}.</span></div>`
         this.viewerElement.append(page)
       }
       this.pagesCount = doc.numPages
@@ -72,6 +73,7 @@ import { createMemoryStore } from '../../util/myFiles/memoryStore'
 import type { MyFilesStore } from '../../util/myFiles/store'
 import FileViewer from './FileViewer'
 import type { ViewerTarget } from './FileViewerContext'
+import type { PendingQuote } from './selectionQuote'
 
 const i18n = i18next.createInstance()
 
@@ -87,9 +89,9 @@ afterEach(cleanup)
 const failingWith = (error: unknown) => () => ({ promise: Promise.reject(error), destroy: async () => {} })
 const loading = (numPages: number) => () => ({ promise: Promise.resolve({ numPages }), destroy: async () => {} })
 
-const ui = (store: MyFilesStore, target: ViewerTarget) => (
+const ui = (store: MyFilesStore, target: ViewerTarget, onAddQuote?: (pending: PendingQuote) => void) => (
   <I18nextProvider i18n={i18n}>
-    <FileViewer store={store} target={target} onClose={vi.fn()} />
+    <FileViewer store={store} target={target} onClose={vi.fn()} onAddQuote={onAddQuote} />
   </I18nextProvider>
 )
 
@@ -151,5 +153,29 @@ describe('FileViewer PDFs', () => {
     expect(screen.getByTestId('file-viewer-zoom').textContent).toBe('150%')
     fireEvent.click(screen.getByRole('button', { name: 'Fit to width' }))
     expect(viewer.currentScaleValue).toBe('page-width')
+  })
+
+  test('a selection on a page is quoted with that page, and the floating toolbar hides on scroll of the PDF', async () => {
+    fake.state.getDocument = loading(3)
+    const onAddQuote = vi.fn()
+    render(ui(await storeWithPdf(), { path: 'Course/book.pdf' }, onAddQuote))
+    const span = await screen.findByText('Text of page 2.')
+
+    const range = document.createRange()
+    range.selectNodeContents(span)
+    document.getSelection()!.removeAllRanges()
+    document.getSelection()!.addRange(range)
+    act(() => {
+      document.dispatchEvent(new Event('selectionchange'))
+    })
+    fireEvent.mouseUp(span)
+    expect(screen.getByRole('toolbar', { name: 'Selection actions' })).toBeTruthy()
+
+    fireEvent.scroll(screen.getByTestId('file-viewer-pdf'))
+    expect(screen.queryByTestId('file-viewer-selection-toolbar')).toBe(null)
+
+    fireEvent.click(screen.getByTestId('file-viewer-ask'))
+    expect(onAddQuote).toHaveBeenCalledWith({ quote: { kind: 'text', path: 'Course/book.pdf', page: 2, text: 'Text of page 2.' }, truncated: false })
+    document.getSelection()!.removeAllRanges()
   })
 })

@@ -74,6 +74,10 @@ describe('quotes in exports', () => {
     expect(formatEmail(withQuote, t)).toContain('&gt; An eigenvector\n&gt; keeps its direction.\n&gt; — notes.md, 2.3 Eigenvalues\n\nWhat does this mean?')
   })
 
+  test('a PDF quote names its page', () => {
+    expect(quoteToText({ kind: 'text', path: 'Course/book.pdf', page: 12, text: 'Entropy grows.' })).toBe('> Entropy grows.\n> — book.pdf, p. 12')
+  })
+
   test('without a heading the source is only the file name', () => {
     expect(quoteToText({ kind: 'text', path: 'notes.txt', text: 'Plain' })).toBe('> Plain\n> — notes.txt')
   })

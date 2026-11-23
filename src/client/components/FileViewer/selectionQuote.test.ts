@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from 'vitest'
 import { MAX_QUOTE_LENGTH } from '@shared/quote'
-import { nearestHeading, selectionToQuote } from './selectionQuote'
+import { nearestHeading, pdfPageOf, selectionToQuote } from './selectionQuote'
 
 afterEach(() => {
   document.getSelection()?.removeAllRanges()
@@ -75,6 +75,36 @@ describe('selectionToQuote', () => {
       pageOf: (node) => Number(node.parentElement!.closest<HTMLElement>('[data-page-number]')!.dataset.pageNumber),
     })
     expect(pending?.quote).toEqual({ kind: 'text', path: 'lecture.pdf', page: 2, text: 'Page text' })
+  })
+})
+
+/** Two pages as pdf.js's viewer renders them: page containers with a text layer of spans. */
+const PDF_PAGES =
+  '<div class="pdfViewer">' +
+  '<div class="page" data-page-number="1" role="region"><div class="textLayer"><span id="p1a">First page line.</span><span id="p1b">End of page one.</span></div></div>' +
+  '<div class="page" data-page-number="2" role="region"><div class="textLayer"><span id="p2a">Second page line.</span></div></div>' +
+  '</div>'
+
+describe('pdfPageOf', () => {
+  test('is the page number of the page container around a node', () => {
+    setup(PDF_PAGES)
+    expect(pdfPageOf(byId('p1a').firstChild!)).toBe(1)
+    expect(pdfPageOf(byId('p2a'))).toBe(2)
+    expect(pdfPageOf(document.querySelector('.pdfViewer')!)).toBe(undefined)
+    expect(pdfPageOf(byId('outside').firstChild!)).toBe(undefined)
+  })
+
+  test('gives a PDF selection the page where it starts, also when it spans two pages', () => {
+    const content = setup(PDF_PAGES)
+    expect(selectionToQuote(select(byId('p2a')), content, 'book.pdf', { pageOf: pdfPageOf })?.quote).toEqual({
+      kind: 'text',
+      path: 'book.pdf',
+      page: 2,
+      text: 'Second page line.',
+    })
+    const spanning = selectionToQuote(select(byId('p1b'), byId('p2a')), content, 'book.pdf', { pageOf: pdfPageOf })
+    expect(spanning?.quote.page).toBe(1)
+    expect(spanning?.quote.text).toBe('End of page one.Second page line.')
   })
 })
 
