@@ -31,6 +31,7 @@ import { StreamStatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
 import { BlueButton, OutlineButtonBlack } from './general/Buttons'
 import { focusIndicatorStyle } from 'src/client/util/accessibility'
 import { visuallyHidden } from '@mui/utils'
+import { QuoteCard } from './QuoteCard'
 
 const UserMessageItem = ({ message }: { message: UserMessage }) => (
   <Box
@@ -48,6 +49,7 @@ const UserMessageItem = ({ message }: { message: UserMessage }) => (
       width: 'fit-content',
     }}
   >
+    {message.quotes?.map((quote, idx) => <QuoteCard key={idx} quote={quote} />)}
     {readMessageContent(message)}
 
     {readMessageImages(message).map((url, idx) => (

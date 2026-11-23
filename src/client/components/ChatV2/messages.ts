@@ -1,4 +1,5 @@
 import { readMessageContent, type ToolCallResultEvent, type UserMessage } from '../../../shared/chat'
+import { quoteFileName, type Quote } from '../../../shared/quote'
 import type { AssistantMessageV2, AssistantPart, PostStreamSchemaV4Type, ToolPart } from '../../../shared/agentChat'
 import { finishParts } from './applyEvent'
 import { toolPartSource } from './tools/registry'
@@ -14,12 +15,23 @@ export const MESSAGES_VERSION = 2
 
 type HistoryMessage = PostStreamSchemaV4Type['options']['chatMessages'][number]
 
+/** A quote as Markdown for exports: the text as a blockquote, then its source (`> — notes.md, Heading`). */
+export const quoteToText = (quote: Quote): string => {
+  const source = [quoteFileName(quote), quote.heading].filter(Boolean).join(', ')
+  const lines = quote.text.split('\n').map((line) => (line ? `> ${line}` : '>'))
+  return [...lines, `> — ${source}`].join('\n')
+}
+
 /**
- * The plain text of a message. Used for copy, email, download and for the history sent to the model,
- * so they all agree on what a message says. Only text parts: reasoning and tool parts are left out.
+ * The plain text of a message. Used for copy, email and download, so they all agree on what a message says. Only
+ * text parts: reasoning and tool parts are left out. Quotes of a user message come first, as blockquotes.
  */
 export const messageToText = (msg: ClientChatMessage): string => {
-  if (msg.role === 'user') return readMessageContent(msg)
+  if (msg.role === 'user') {
+    const text = readMessageContent(msg)
+    if (!msg.quotes?.length) return text
+    return [...msg.quotes.map(quoteToText), text].filter(Boolean).join('\n\n')
+  }
   return msg.parts.flatMap((part) => (part.type === 'text' ? [part.text] : [])).join('\n\n')
 }
 

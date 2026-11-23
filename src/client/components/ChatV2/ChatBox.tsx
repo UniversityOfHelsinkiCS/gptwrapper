@@ -20,6 +20,10 @@ import UsageSelector from './UsageSelector'
 import { ValidModelName } from '../../../config'
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat'
 import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
+import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
+import { quoteFileName, type Quote } from '@shared/quote'
+import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
+import type { PendingQuote } from '../FileViewer/selectionQuote'
 
 const skipLinkSx = {
   ...visuallyHidden,
@@ -54,6 +58,13 @@ export type QuizPrompt = 'reasoning' | 'unclear'
 export type ChatBoxActions = {
   /** Sends the text in the chat box as if Send was pressed, without moving focus to the chat box. */
   submit: () => void
+  /**
+   * Shows a quote from the file viewer as a chip above the input (replacing an earlier one), moves focus to the input
+   * and announces it. The next message is sent with it. Quick actions (05) extend this with `{ message, send }`.
+   */
+  addQuote: (pending: PendingQuote) => void
+  /** Removes the pending quote without announcing it (a new conversation). */
+  clearQuote: () => void
 }
 
 export const ChatBox = ({
@@ -88,7 +99,8 @@ export const ChatBox = ({
   setFileName: (name: string) => void
   handleCancel: (reason: 'canceled' | 'error') => void
   handleContinue: (message: string, ignoredWarnings: WarningType[]) => void
-  handleSubmit: (message: string) => void
+  /** `quotes` is the pending quote from the file viewer, if any. It stays pending while a quiz is being answered. */
+  handleSubmit: (message: string, quotes?: Quote[]) => void
   handleReset: () => void
   handleStop: () => void
   isMobile: boolean
@@ -114,6 +126,8 @@ export const ChatBox = ({
   const sendButtonRef = useRef<HTMLButtonElement>(null)
   const textFieldRef = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<string>('')
+  // A quote from the file viewer ("Ask…"), sent with the next message. Not persisted, like the draft.
+  const [pendingQuote, setPendingQuote] = useState<PendingQuote | null>(null)
 
   const attachmentChipRef = useRef<HTMLDivElement>(null)
   const focusAttachment = useRef(false)
@@ -178,7 +192,14 @@ export const ChatBox = ({
   const send = ({ focusInput }: { focusInput: boolean }) => {
     if (acuallyDisabled) return
 
-    handleSubmit(message)
+    // A quiz answer is not sent with the quote; it waits for the next message.
+    const quotes = pendingQuote && !quizPrompt ? [pendingQuote.quote] : undefined
+    if (quotes) {
+      handleSubmit(message, quotes)
+      setPendingQuote(null)
+    } else {
+      handleSubmit(message)
+    }
     refetchStatus()
     setMessage('')
 
@@ -196,7 +217,19 @@ export const ChatBox = ({
     send({ focusInput: true })
   }
 
-  useImperativeHandle(actionsRef, () => ({ submit: () => send({ focusInput: false }) }))
+  const addQuote = (pending: PendingQuote) => {
+    setPendingQuote(pending)
+    textFieldRef.current?.focus()
+    announceToScreenReader(t('fileViewer:quoteAdded'))
+  }
+
+  const removeQuote = () => {
+    setPendingQuote(null)
+    textFieldRef.current?.focus()
+    announceToScreenReader(t('fileViewer:quoteRemoved'))
+  }
+
+  useImperativeHandle(actionsRef, () => ({ submit: () => send({ focusInput: false }), addQuote, clearQuote: () => setPendingQuote(null) }))
 
   const quizPromptText = quizPrompt === 'unclear' ? t('chat:quizUnclearPrompt') : quizPrompt === 'reasoning' ? t('chat:quizReasoningPrompt') : undefined
 
@@ -303,6 +336,7 @@ export const ChatBox = ({
                 {t('chat:quizSendDescription')}
               </Box>
             )}
+            {pendingQuote && <QuoteChip pending={pendingQuote} onRemove={removeQuote} />}
             <TextField
               autoFocus={!isEmbedded}
               id="chat-input"
@@ -434,5 +468,35 @@ export const ChatBox = ({
         </Box>
       </Box>
     </Box>
+  )
+}
+
+/** The quote waiting to be sent: its file (and heading) and the start of its text. */
+const QuoteChip = ({ pending, onRemove }: { pending: PendingQuote; onRemove?: () => void }) => {
+  const { t } = useTranslation()
+  const { quote, truncated } = pending
+  const params = { name: quoteFileName(quote), interpolation: { escapeValue: false } }
+  const source = [t('fileViewer:quoteChip', params), quote.heading].filter(Boolean).join(' · ')
+  return (
+    <Chip
+      data-testid="quote-chip"
+      data-path={quote.path}
+      icon={<FormatQuoteIcon />}
+      onDelete={onRemove}
+      aria-label={[source, truncated ? t('fileViewer:truncated') : '', t('fileViewer:removeQuote')].filter(Boolean).join(', ')}
+      label={
+        <>
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            {source}
+          </Box>
+          {truncated && ` (${t('fileViewer:truncated')})`}
+          {': '}
+          <Box component="span" sx={{ fontStyle: 'italic' }}>
+            {quote.text}
+          </Box>
+        </>
+      }
+      sx={{ mx: '0.5rem', mt: '0.5rem', maxWidth: 'calc(100% - 1rem)', borderRadius: 100 }}
+    />
   )
 }

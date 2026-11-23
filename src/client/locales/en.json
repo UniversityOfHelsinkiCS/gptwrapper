@@ -1200,6 +1200,15 @@
     "tooLarge": "This file is too large to display.",
     "unsupported": "This type of file cannot be displayed.",
     "image": "Image (not shown)",
-    "imageAlt": "Image (not shown): {{alt}}"
+    "imageAlt": "Image (not shown): {{alt}}",
+    "ask": "Ask…",
+    "selectionActions": "Selection actions",
+    "quoteAdded": "Quote added to chat",
+    "quoteRemoved": "Quote removed",
+    "quoteChip": "Quote from {{name}}",
+    "truncated": "truncated",
+    "removeQuote": "Remove the quote by pressing Delete or Backspace",
+    "showMore": "Show more",
+    "showLess": "Show less"
   }
 }

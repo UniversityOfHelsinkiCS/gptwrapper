@@ -9,6 +9,7 @@ import type { AssistantMessageV2 } from '@shared/agentChat'
 import type { MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
 import { QUIZ_IDK, type QuizAnswer } from '@shared/quiz'
+import type { Quote } from '@shared/quote'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { useChatScroll } from './useChatScroll'
 import useCourse from '../../hooks/useCourse'
@@ -54,6 +55,7 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { AttachFolders, parseStoredFolders } from '../MyFiles/AttachFolders'
 import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
 import { FileViewerProvider, useFileViewer } from '../FileViewer/FileViewerContext'
+import type { PendingQuote } from '../FileViewer/selectionQuote'
 import { executeFileTool } from '../../util/myFiles/agentTools'
 import type { ClientTools } from './chatTransport'
 import { SHORT_VIEWPORT } from '../../theme'
@@ -193,6 +195,7 @@ const ChatV2Content = () => {
     quizAnswer?: QuizAnswer,
     /** A failed answer whose run the server can continue (it has a `resumeId`). */
     failedAnswer?: AssistantMessageV2,
+    quotes?: Quote[],
   ) => {
     if (!userStatus) return
 
@@ -259,6 +262,7 @@ const ChatV2Content = () => {
           attachments: file && fileName ? fileName : undefined,
           fileContent: parsedFileContent, // Store file content separately
           quizAnswer,
+          ...(quotes?.length ? { quotes } : {}),
         })
 
     setMessages(newMessages)
@@ -440,6 +444,7 @@ const ChatV2Content = () => {
     setMessageWarning({})
     setEndState('none')
     setQuizSelection(null)
+    chatBoxRef.current?.clearQuote()
     clearRetryTimeout()
     dispatchAnalytics({ type: 'RESET_CHAT' })
   }
@@ -467,10 +472,19 @@ const ChatV2Content = () => {
   const handleQuizSelect = useCallback((selection: QuizSelection) => setQuizSelection({ ...selection, messageIndex: messages.length - 1 }), [messages.length])
   const handleQuizSubmit = useCallback(() => chatBoxRef.current?.submit(), [])
 
-  /** Sends the chat box text: as the explanation of the quiz answer while an option is picked, otherwise as a message. */
-  const handleChatBoxSubmit = (message: string) => {
+  /** A quote from the file viewer goes to the chat box (the composer). On narrow screens the viewer covers the chat, so it closes. */
+  const addQuote = useCallback(
+    (pending: PendingQuote) => {
+      if (isMobile) fileViewer?.close()
+      chatBoxRef.current?.addQuote(pending)
+    },
+    [isMobile, fileViewer],
+  )
+
+  /** Sends the chat box text: as the explanation of the quiz answer while an option is picked, otherwise as a message (with its quotes). */
+  const handleChatBoxSubmit = (message: string, quotes?: Quote[]) => {
     if (!openQuizSelection || !openQuiz) {
-      handleSendMessage(message, false, [])
+      handleSendMessage(message, false, [], undefined, undefined, undefined, quotes)
       return
     }
     const explanation = message.trim().slice(0, 10_000)
@@ -835,7 +849,7 @@ const ChatV2Content = () => {
         (isMobile ? (
           <Drawer anchor="right" open onClose={closeViewer} sx={{ '& .MuiDrawer-paper': { width: '100%', maxWidth: '100%' } }}>
             <Suspense fallback={null}>
-              <FileViewer store={myFilesStore} target={viewerTarget} onClose={closeViewer} />
+              <FileViewer store={myFilesStore} target={viewerTarget} onClose={closeViewer} onAddQuote={addQuote} />
             </Suspense>
           </Drawer>
         ) : (
@@ -844,7 +858,7 @@ const ChatV2Content = () => {
             sx={{ flex: 3, minWidth: 0, height: '100vh', position: 'sticky', top: 0, borderLeft: '1px solid', borderLeftColor: 'divider' }}
           >
             <Suspense fallback={null}>
-              <FileViewer store={myFilesStore} target={viewerTarget} onClose={closeViewer} />
+              <FileViewer store={myFilesStore} target={viewerTarget} onClose={closeViewer} onAddQuote={addQuote} />
             </Suspense>
           </Box>
         ))}

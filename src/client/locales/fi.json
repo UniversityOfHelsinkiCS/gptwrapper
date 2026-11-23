@@ -1201,6 +1201,15 @@
     "tooLarge": "Tiedosto on liian suuri näytettäväksi.",
     "unsupported": "Tämän tyyppistä tiedostoa ei voi näyttää.",
     "image": "Kuva (ei näytetä)",
-    "imageAlt": "Kuva (ei näytetä): {{alt}}"
+    "imageAlt": "Kuva (ei näytetä): {{alt}}",
+    "ask": "Kysy…",
+    "selectionActions": "Valinnan toiminnot",
+    "quoteAdded": "Lainaus lisätty keskusteluun",
+    "quoteRemoved": "Lainaus poistettu",
+    "quoteChip": "Lainaus tiedostosta {{name}}",
+    "truncated": "lyhennetty",
+    "removeQuote": "Poista lainaus painamalla Delete tai Backspace",
+    "showMore": "Näytä lisää",
+    "showLess": "Näytä vähemmän"
   }
 }

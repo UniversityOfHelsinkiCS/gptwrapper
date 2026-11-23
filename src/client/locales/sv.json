@@ -1176,6 +1176,15 @@
     "tooLarge": "Filen är för stor för att visas.",
     "unsupported": "Den här typen av fil kan inte visas.",
     "image": "Bild (visas inte)",
-    "imageAlt": "Bild (visas inte): {{alt}}"
+    "imageAlt": "Bild (visas inte): {{alt}}",
+    "ask": "Fråga…",
+    "selectionActions": "Åtgärder för markeringen",
+    "quoteAdded": "Citatet har lagts till i chatten",
+    "quoteRemoved": "Citatet har tagits bort",
+    "quoteChip": "Citat från {{name}}",
+    "truncated": "förkortat",
+    "removeQuote": "Ta bort citatet genom att trycka på Delete eller Backspace",
+    "showMore": "Visa mer",
+    "showLess": "Visa mindre"
   }
 }
