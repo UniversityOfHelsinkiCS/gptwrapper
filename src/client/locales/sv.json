@@ -1201,6 +1201,10 @@
     "fitWidth": "Anpassa till bredd",
     "pdfPassword": "Den här PDF-filen är lösenordsskyddad och kan inte visas.",
     "pdfInvalid": "Filen kunde inte läsas som en PDF.",
-    "pageShort": "s. {{page}}"
+    "pageShort": "s. {{page}}",
+    "resizeSplit": "Ändra bredden på chatten och filen",
+    "splitValue": "Chatten {{percent}} % av bredden",
+    "backToChat": "Tillbaka till chatten",
+    "backToFile": "Tillbaka till {{name}}"
   }
 }

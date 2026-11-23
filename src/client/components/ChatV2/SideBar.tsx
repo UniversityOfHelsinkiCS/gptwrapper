@@ -35,6 +35,12 @@ const SideBar = ({
   const openButtonRef = useRef<HTMLButtonElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const prevOpenRef = useRef(open)
+  // Focus follows the sidebar's own open and close buttons, not other changes (opening a file collapses the sidebar).
+  const toggledHereRef = useRef(false)
+  const toggle = () => {
+    toggledHereRef.current = true
+    setOpen((prev) => !prev)
+  }
 
   useEffect(() => {
     if (autoFocus) closeButtonRef.current?.focus()
@@ -43,6 +49,8 @@ const SideBar = ({
   useEffect(() => {
     if (prevOpenRef.current === open) return
     prevOpenRef.current = open
+    if (!toggledHereRef.current) return
+    toggledHereRef.current = false
     if (open) {
       closeButtonRef.current?.focus()
     } else {
@@ -83,7 +91,7 @@ const SideBar = ({
         {!open ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
             <Tooltip arrow placement="right" title={t('sidebar:open')}>
-              <TextButton ref={openButtonRef} onClick={() => setOpen((prev) => !prev)}>
+              <TextButton ref={openButtonRef} onClick={toggle}>
                 <CustomIcon src={sidebarOpen} alt={t('sidebar:open')} />
               </TextButton>
             </Tooltip>
@@ -112,7 +120,7 @@ const SideBar = ({
               }}
             >
               <Tooltip arrow placement="right" title={t('sidebar:close')}>
-                <TextButton ref={closeButtonRef} onClick={() => setOpen((prev) => !prev)} sx={{ mr: 1 }} data-testid="left-panel-close">
+                <TextButton ref={closeButtonRef} onClick={toggle} sx={{ mr: 1 }} data-testid="left-panel-close">
                   <CustomIcon src={sidebarClose} alt={t('sidebar:close')} />
                 </TextButton>
               </Tooltip>

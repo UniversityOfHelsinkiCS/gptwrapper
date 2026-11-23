@@ -1226,6 +1226,10 @@
     "fitWidth": "Sovita leveyteen",
     "pdfPassword": "PDF on suojattu salasanalla, eikä sitä voi näyttää.",
     "pdfInvalid": "Tiedostoa ei voitu lukea PDF-tiedostona.",
-    "pageShort": "s. {{page}}"
+    "pageShort": "s. {{page}}",
+    "resizeSplit": "Muuta keskustelun ja tiedoston leveyttä",
+    "splitValue": "Keskustelu {{percent}} % leveydestä",
+    "backToChat": "Takaisin keskusteluun",
+    "backToFile": "Takaisin tiedostoon {{name}}"
   }
 }

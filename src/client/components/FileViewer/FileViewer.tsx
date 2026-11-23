@@ -1,4 +1,5 @@
 import Add from '@mui/icons-material/Add'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import Close from '@mui/icons-material/Close'
 import FitScreen from '@mui/icons-material/FitScreen'
 import Remove from '@mui/icons-material/Remove'
@@ -117,7 +118,10 @@ const useSelectionQuote = (contentRef: RefObject<HTMLElement | null>, path: stri
  * `target.page` opens a PDF at that page, also when the same file is opened again with another page.
  * With `onAddQuote`, selected text can be added to the chat as a quote ("Ask…") or sent right away with a fixed
  * message (Explain, Summarize, Translate; disabled with `quickActionsDisabled`, while a response streams), from a
- * toolbar floating next to a mouse selection or from the viewer toolbar (the keyboard and screen reader path).
+ * toolbar floating next to a mouse selection (unless `floatingToolbar` is false: narrow screens and touch, which use
+ * native selection) or from the viewer toolbar (the keyboard, screen reader and touch path).
+ * `onBackToChat` is given in narrow mode, where the viewer covers the chat: it adds a "Back to chat" button and leaves
+ * room at the top right for the global menu, which floats over the viewer there.
  */
 const FileViewer = ({
   store,
@@ -125,12 +129,16 @@ const FileViewer = ({
   onClose,
   onAddQuote,
   quickActionsDisabled = false,
+  floatingToolbar = true,
+  onBackToChat,
 }: {
   store: MyFilesStore
   target: ViewerTarget
   onClose: () => void
   onAddQuote?: (pending: PendingQuote, options?: AddQuoteOptions) => void
   quickActionsDisabled?: boolean
+  floatingToolbar?: boolean
+  onBackToChat?: () => void
 }) => {
   const { t } = useTranslation()
   const titleId = useId()
@@ -214,12 +222,19 @@ const FileViewer = ({
           alignItems: 'center',
           gap: 1,
           px: 2,
+          // The global menu button is about 40px wide, 15–20px from the edge.
+          pr: onBackToChat ? '72px' : 2,
           py: 1,
           bgcolor: 'background.paper',
           borderBottom: '1px solid',
           borderColor: 'divider',
         }}
       >
+        {onBackToChat && (
+          <Button size="small" startIcon={<ArrowBack />} onClick={onBackToChat} data-testid="file-viewer-back-to-chat" sx={{ flexShrink: 0 }}>
+            {t('fileViewer:backToChat')}
+          </Button>
+        )}
         <Tooltip title={target.path} describeChild>
           <Typography id={titleId} component="h2" variant="subtitle1" fontWeight={600} noWrap sx={{ minWidth: 0 }}>
             {name}
@@ -270,7 +285,7 @@ const FileViewer = ({
       </Box>
       <Box
         ref={contentRef}
-        onMouseUp={onAddQuote ? onMouseUp : undefined}
+        onMouseUp={onAddQuote && floatingToolbar ? onMouseUp : undefined}
         sx={isPdf ? { flex: 1, minHeight: 0, position: 'relative' } : { px: 3, py: 2, position: 'relative' }}
       >
         {isPdf && (
@@ -321,7 +336,7 @@ const FileViewer = ({
             </Box>
           ))}
         {/* Inside the region, not portalled to the body, so it stays in the landmark. */}
-        {onAddQuote && floating && selected && (
+        {onAddQuote && floatingToolbar && floating && selected && (
           <Paper
             role="toolbar"
             aria-label={t('fileViewer:selectionActions')}

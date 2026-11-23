@@ -1,7 +1,8 @@
-import { Box, Drawer, Paper, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { MapsUgc } from '@mui/icons-material'
+import { Box, Button, Drawer, Paper, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Description, MapsUgc } from '@mui/icons-material'
 import { enqueueSnackbar } from '../common/Snackbar'
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom'
 import { DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, DEFAULT_STREAM_TIMEOUT, isFreeModel, ValidModelNameSchema, getModelConfig } from '../../../config'
@@ -56,6 +57,8 @@ import { AttachFolders, parseStoredFolders } from '../MyFiles/AttachFolders'
 import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
 import { FileViewerProvider, useFileViewer } from '../FileViewer/FileViewerContext'
 import type { AddQuoteOptions, PendingQuote } from '../FileViewer/selectionQuote'
+import SplitSeparator, { MIN_CHAT_WIDTH, useSplitRatio } from '../FileViewer/SplitSeparator'
+import { baseName } from '../../util/myFiles/paths'
 import { executeFileTool } from '../../util/myFiles/agentTools'
 import type { ClientTools } from './chatTransport'
 import { SHORT_VIEWPORT } from '../../theme'
@@ -73,12 +76,17 @@ const FileViewer = lazy(() => import('../FileViewer/FileViewer'))
 // banner below them lets it use the full width instead of reserving room for the global menu.
 const bannerBelowFloatingButtonsSx = { pt: '64px', pr: 2 }
 
+/** Below this width the file viewer does not fit next to the chat: it covers the chat instead. */
+const NARROW_VIEWER_QUERY = '(max-width:1099.95px)'
+
 const ChatV2Content = () => {
   const { courseId } = useParams()
   const isEmbeddedMode = useIsEmbedded()
   const theme = useTheme()
   const chatScroll = useChatScroll()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isNarrow = useMediaQuery(NARROW_VIEWER_QUERY)
+  const isCoarsePointer = useMediaQuery('(pointer: coarse)')
   const { t, i18n } = useTranslation()
   const { promptInfo, isPromptHidden, activePrompt, isUrlPromptUnavailable } = usePromptState()
   const [setRetryTimeout, clearRetryTimeout] = useRetryTimeout()
@@ -143,6 +151,9 @@ const ChatV2Content = () => {
   }>({})
   const [activeToolResults, setActiveToolResults0] = useState<ToolCallResultEvent[] | undefined>()
   const [rightMenuExpanded, setRightMenuExpanded0] = useState<boolean>(false)
+  // On narrow screens the open file covers the chat ('viewer') or waits behind it ('chat').
+  const [narrowView, setNarrowView] = useState<'viewer' | 'chat'>('viewer')
+  const [splitRatio, setSplitRatio] = useSplitRatio()
   const [resetConfirmModalOpen, setResetConfirmModalOpen] = useState<boolean>(false)
   const [hasChanges, setHasChanges] = useState(false)
   const [cacheKey, setCacheKey] = useState('')
@@ -474,14 +485,14 @@ const ChatV2Content = () => {
 
   /**
    * A quote from the file viewer goes to the chat box (the composer), as a chip or sent right away (a quick action).
-   * On narrow screens the viewer covers the chat, so it closes.
+   * On narrow screens the viewer covers the chat, so the view switches to the chat first (the chat box focuses its input).
    */
   const addQuote = useCallback(
     (pending: PendingQuote, options?: AddQuoteOptions) => {
-      if (isMobile) fileViewer?.close()
+      if (isNarrow) flushSync(() => setNarrowView('chat'))
       chatBoxRef.current?.addQuote(pending, options)
     },
-    [isMobile, fileViewer],
+    [isNarrow],
   )
 
   /**
@@ -570,8 +581,13 @@ const ChatV2Content = () => {
 
   // layout
   const canShowToolResults = canManageCourse(chatInstance) || !(isPromptHidden || ragHidden) || activePrompt?.userId === user?.id
-  // The file viewer and the sources panel share the right slot: while a file is open the sources panel is not shown.
-  const hasToolResults = !!shownToolResults && shownToolResults.length > 0 && canShowToolResults && !viewerTarget
+  const hasToolResults = !!shownToolResults && shownToolResults.length > 0 && canShowToolResults
+  // Wide screens show an open file next to the chat (`splitView`), narrow ones over it (`narrowViewerShown`).
+  const splitView = !!viewerTarget && !isNarrow
+  const narrowViewerShown = !!viewerTarget && isNarrow && narrowView === 'viewer'
+  // The file viewer and the sources panel share the right slot: opening the sources swaps the slot to them, closing
+  // them brings the viewer back. The collapsed sources toggle stays in the rail next to the viewer.
+  const sourcesInSlot = splitView && hasToolResults && rightMenuExpanded
   const toolResultsKey = shownToolResults?.map((toolResult) => toolResult.callId).join(',')
   const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
   const showFloatingButtons = isMobile && !isEmbeddedMode
@@ -592,9 +608,44 @@ const ChatV2Content = () => {
     }
   }, [isEmbeddedMode])
 
+  // Opening a file collapses the sidebar to its rail (it is not restored on close), shows the file on narrow screens
+  // and takes the right slot back from the sources panel.
+  useEffect(() => {
+    if (!viewerTarget) return
+    setSideBarOpen(false)
+    setNarrowView('viewer')
+    setRightMenuExpanded0(false)
+  }, [viewerTarget])
+
+  // The chat's scroll position, kept while a narrow-screen file covers the chat and restored when the chat comes back.
+  const chatScrollY = useRef(0)
+  const chatHidden = useRef(false)
+  chatHidden.current = narrowViewerShown
+  useEffect(() => {
+    if (!viewerTarget || !isNarrow) return
+    const onScroll = () => {
+      if (!chatHidden.current) chatScrollY.current = window.scrollY
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [viewerTarget, isNarrow])
+  const wasChatHidden = useRef(false)
+  useLayoutEffect(() => {
+    if (wasChatHidden.current && !narrowViewerShown) window.scrollTo(0, chatScrollY.current)
+    wasChatHidden.current = narrowViewerShown
+  }, [narrowViewerShown])
+
   // The global menu floats at the top right; keep it clear of the collapsed sources panel and of the file viewer.
-  const [viewerWidth, setViewerWidth] = useState<number | null>(null)
-  const globalMenuOffset = viewerTarget && viewerWidth !== null ? `${viewerWidth}px` : rightPanelCollapsed ? 'var(--sidebar-width-collapsed)' : null
+  const [slotWidth, setSlotWidth] = useState<number | null>(null)
+  const globalMenuOffset =
+    splitView && slotWidth !== null
+      ? rightPanelCollapsed
+        ? `calc(${slotWidth}px + var(--sidebar-width-collapsed))`
+        : `${slotWidth}px`
+      : rightPanelCollapsed
+        ? 'var(--sidebar-width-collapsed)'
+        : null
   useEffect(() => {
     if (!globalMenuOffset) return
     document.documentElement.style.setProperty('--global-menu-right-offset', globalMenuOffset)
@@ -612,20 +663,48 @@ const ChatV2Content = () => {
     }
   }, [showFloatingButtons])
 
-  const measureViewerWidth = useCallback((node: HTMLDivElement | null) => {
+  const chatColumnRef = useRef<HTMLDivElement | null>(null)
+  const slotRef = useRef<HTMLDivElement | null>(null)
+  const viewerBoxRef = useRef<HTMLDivElement | null>(null)
+  const measureSlot = useCallback((node: HTMLDivElement | null) => {
+    slotRef.current = node
     if (!node || typeof ResizeObserver === 'undefined') return
-    const observer = new ResizeObserver(() => setViewerWidth(node.offsetWidth))
+    const observer = new ResizeObserver(() => setSlotWidth(node.offsetWidth))
     observer.observe(node)
     return () => {
       observer.disconnect()
-      setViewerWidth(null)
+      slotRef.current = null
+      setSlotWidth(null)
     }
   }, [])
+  // The separator splits the space from the start of the chat column to the end of the right slot.
+  const getSplitRange = useCallback(() => {
+    const chat = chatColumnRef.current?.getBoundingClientRect()
+    const slot = slotRef.current?.getBoundingClientRect()
+    return chat && slot ? { start: chat.left, end: slot.right } : null
+  }, [])
+
+  const focusViewer = () => viewerBoxRef.current?.querySelector<HTMLElement>('[data-testid="file-viewer"]')?.focus()
 
   const closeViewer = useCallback(() => {
     fileViewer?.close()
     document.getElementById('chat-input')?.focus()
   }, [fileViewer])
+
+  const showNarrowChat = useCallback(() => {
+    flushSync(() => setNarrowView('chat'))
+    document.getElementById('chat-input')?.focus()
+  }, [])
+
+  const showNarrowViewer = () => {
+    flushSync(() => setNarrowView('viewer'))
+    focusViewer()
+  }
+
+  const closeSourcesInSlot = () => {
+    flushSync(() => setRightMenuExpanded(false))
+    focusViewer()
+  }
 
   const measureChatBoxHeight = useCallback((node: HTMLDivElement | null) => {
     if (!node || typeof ResizeObserver === 'undefined') return
@@ -704,8 +783,16 @@ const ChatV2Content = () => {
       )}
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}
       {/* The banner spans the whole space between the side panels, the chat below it stays narrower */}
-      {/* With a file open, the chat gets about 40% and the viewer about 60% of the space next to the sidebar. */}
-      <Box sx={{ flex: viewerTarget && !isMobile ? 2 : 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+      {/* With a file open, the chat and the right slot split the space by the separator's ratio (40/60 by default). */}
+      <Box
+        ref={chatColumnRef}
+        id="chat-column"
+        sx={{
+          ...(splitView ? { flex: `${splitRatio} 1 0px`, minWidth: `${MIN_CHAT_WIDTH}px` } : { flex: 1, minWidth: 0 }),
+          display: narrowViewerShown ? 'none' : 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <NotificationBanner sx={showFloatingButtons ? bannerBelowFloatingButtonsSx : undefined} />
         <Box
           ref={chatContainerRef}
@@ -813,6 +900,20 @@ const ChatV2Content = () => {
                 padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
               }}
             >
+              {isNarrow && viewerTarget && narrowView === 'chat' && (
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<Description />}
+                    onClick={showNarrowViewer}
+                    data-testid="file-viewer-show"
+                    sx={{ textTransform: 'none' }}
+                  >
+                    {t('fileViewer:backToFile', { name: baseName(viewerTarget.path), interpolation: { escapeValue: false } })}
+                  </Button>
+                </Box>
+              )}
               <ChatBox
                 disabled={isStreaming}
                 isTokenLimitExceeded={tokenLimitExceeded}
@@ -849,25 +950,45 @@ const ChatV2Content = () => {
           </Box>
         </Box>
       </Box>
-      {/* File viewer column ---------------------------------------------------------------------------------------------- */}
-      {viewerTarget &&
-        myFilesStore &&
-        (isMobile ? (
-          <Drawer anchor="right" open onClose={closeViewer} sx={{ '& .MuiDrawer-paper': { width: '100%', maxWidth: '100%' } }}>
-            <Suspense fallback={null}>
-              <FileViewer store={myFilesStore} target={viewerTarget} onClose={closeViewer} onAddQuote={addQuote} quickActionsDisabled={isStreaming} />
-            </Suspense>
-          </Drawer>
-        ) : (
+      {/* File viewer slot ------------------------------------------------------------------------------------------------ */}
+      {/* Kept in the same place in every layout, so the viewer keeps its file and position when the layout changes. */}
+      {viewerTarget && myFilesStore && (
+        <>
+          {splitView && <SplitSeparator value={splitRatio} onChange={setSplitRatio} getRange={getSplitRange} controls="chat-column" />}
           <Box
-            ref={measureViewerWidth}
-            sx={{ flex: 3, minWidth: 0, height: '100vh', position: 'sticky', top: 0, borderLeft: '1px solid', borderLeftColor: 'divider' }}
+            ref={measureSlot}
+            data-testid="file-viewer-slot"
+            sx={{
+              flex: splitView ? `${1 - splitRatio} 1 0px` : 1,
+              minWidth: 0,
+              height: '100vh',
+              position: 'sticky',
+              top: 0,
+              display: splitView || narrowViewerShown ? 'flex' : 'none',
+              flexDirection: 'column',
+            }}
           >
-            <Suspense fallback={null}>
-              <FileViewer store={myFilesStore} target={viewerTarget} onClose={closeViewer} onAddQuote={addQuote} quickActionsDisabled={isStreaming} />
-            </Suspense>
+            <Box ref={viewerBoxRef} sx={{ flex: 1, minHeight: 0, display: sourcesInSlot ? 'none' : 'block' }}>
+              <Suspense fallback={null}>
+                <FileViewer
+                  store={myFilesStore}
+                  target={viewerTarget}
+                  onClose={closeViewer}
+                  onAddQuote={addQuote}
+                  quickActionsDisabled={isStreaming}
+                  floatingToolbar={!isNarrow && !isCoarsePointer}
+                  onBackToChat={isNarrow ? showNarrowChat : undefined}
+                />
+              </Suspense>
+            </Box>
+            {sourcesInSlot && (
+              <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', bgcolor: 'background.paper' }}>
+                <ToolResult key={toolResultsKey} toolResults={shownToolResults} open onToggle={closeSourcesInSlot} />
+              </Box>
+            )}
           </Box>
-        ))}
+        </>
+      )}
       {/* FileSearchResults columns ----------------------------------------------------------------------------------------------- */}
       {isMobile ? (
         <Drawer
@@ -897,7 +1018,8 @@ const ChatV2Content = () => {
           </Box>
         </Drawer>
       ) : (
-        hasToolResults && (
+        hasToolResults &&
+        !sourcesInSlot && (
           <Box
             sx={{
               width: rightPanelContentWidth,

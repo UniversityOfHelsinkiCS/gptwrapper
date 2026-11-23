@@ -1225,6 +1225,10 @@
     "fitWidth": "Fit to width",
     "pdfPassword": "This PDF is password-protected and cannot be displayed.",
     "pdfInvalid": "This file could not be read as a PDF.",
-    "pageShort": "p. {{page}}"
+    "pageShort": "p. {{page}}",
+    "resizeSplit": "Resize the chat and the file",
+    "splitValue": "Chat {{percent}}% of the width",
+    "backToChat": "Back to chat",
+    "backToFile": "Back to {{name}}"
   }
 }
