@@ -1,6 +1,7 @@
 import z from 'zod/v4'
 import { ValidModelNameSchema } from '../config'
 import { type QuizAnswer, QuizAnswerSchema } from './quiz'
+import { type Quote, QuotesSchema } from './quote'
 
 export type ToolCallInput = {
   query?: string
@@ -52,6 +53,8 @@ export type UserMessage = {
   fileContent?: string
   /** Set when the message is the student's answer to a quiz. `content` is then only for display and export; the server gives the model a text made from this. */
   quizAnswer?: QuizAnswer
+  /** Text the student quoted from their My files files. The server puts it before `content` for the model, marked as quoted material. */
+  quotes?: Quote[]
 }
 
 export const readMessageContent = (msg: Pick<Message, 'content'>): string => {
@@ -111,4 +114,5 @@ export const ChatMessageSchema = z.object({
   attachements: z.union([z.string(), z.array(z.string())]).optional(),
   fileContent: z.string().optional(),
   quizAnswer: QuizAnswerSchema.optional(),
+  quotes: QuotesSchema.optional(),
 })

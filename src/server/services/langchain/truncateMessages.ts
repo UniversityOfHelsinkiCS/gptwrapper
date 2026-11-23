@@ -1,8 +1,9 @@
-import getEncoding from "src/server/util/tiktoken";
-import { inputLimit, validModels } from "@config";
-import { Message, readMessageContent } from "@shared/chat";
+import getEncoding from 'src/server/util/tiktoken'
+import { inputLimit, validModels } from '@config'
+import { Message, readMessageContent } from '@shared/chat'
+import { withQuotes } from '../agent/quotes'
 
-export const truncateMessages = (modelConfig: typeof validModels[number], messages: Message[]): Message[] => {
+export const truncateMessages = (modelConfig: (typeof validModels)[number], messages: Message[]): Message[] => {
   let tokenCount = 0
   const encoding = getEncoding(modelConfig.name)
   const truncatedMessages: Message[] = []
@@ -20,8 +21,9 @@ export const truncateMessages = (modelConfig: typeof validModels[number], messag
   for (let i = messages.length - 1; i >= 0; i--) {
     const message = messages[i]
     const text = readMessageContent(message)
-    // Include fileContent in token calculation for user messages
-    const content = message.role === 'user' && message.fileContent ? `${text} ${message.fileContent}` : text
+    // Include quotes and fileContent in token calculation for user messages
+    const withQuoted = message.role === 'user' ? withQuotes(text, message.quotes) : text
+    const content = message.role === 'user' && message.fileContent ? `${withQuoted} ${message.fileContent}` : withQuoted
     const encoded = encoding.encode(content)
     const messageTokenCount = encoded.length
 
