@@ -92,6 +92,36 @@ adminTest('My files is hidden in embedded mode', async ({ page }) => {
   await expect(page.getByTestId('my-files-button')).toHaveCount(0)
 })
 
+adminTest('opens a Markdown file from My files in the viewer next to the chat', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-viewer-'))
+  try {
+    const folder = join(root, 'Course notes')
+    mkdirSync(folder, { recursive: true })
+    writeFileSync(join(folder, 'lecture.md'), '# Eigenvalues\n\nSome **bold** text.\n\n![chart](https://example.com/chart.png)')
+    writeFileSync(join(folder, 'book.pdf'), '%PDF-1.4')
+
+    const dialog = await openMyFiles(page)
+    await dialog.getByTestId('my-files-input-folder').setInputFiles(folder)
+    await expect(dialog.getByTestId('my-files-status')).toContainText('New: 2')
+    await dialog.getByRole('button', { name: /^Course notes/ }).click()
+    await expect(dialog.getByRole('button', { name: 'Open book.pdf' })).toHaveCount(0)
+    await dialog.getByRole('button', { name: 'Open lecture.md' }).click()
+    await expect(dialog).toBeHidden()
+
+    const viewer = page.getByRole('region', { name: 'lecture.md' })
+    await expect(viewer.getByRole('heading', { level: 1, name: 'Eigenvalues' })).toBeVisible()
+    await expect(viewer).toContainText('Image (not shown): chart')
+    await expect(viewer.locator('img')).toHaveCount(0)
+    await expect(viewer).toBeFocused()
+
+    await viewer.getByRole('button', { name: 'Close lecture.md' }).click()
+    await expect(page.getByTestId('file-viewer')).toHaveCount(0)
+    await expect(page.locator('#chat-input')).toBeFocused()
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
 const SECRET_TAIL = 'This last sentence must not be in the tool results of the history.'
 
 /** Copies a `Course notes` folder into My files and attaches it to the chat with the attach menu. */

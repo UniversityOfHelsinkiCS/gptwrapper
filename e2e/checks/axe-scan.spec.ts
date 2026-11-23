@@ -464,6 +464,33 @@ adminTest.describe('axe wcag scan for my files', () => {
       rmSync(root, { recursive: true, force: true })
     }
   })
+
+  adminTest('scan chat with a Markdown file open in the viewer', async ({ page }, testInfo) => {
+    const root = mkdtempSync(join(tmpdir(), 'axe-file-viewer-'))
+    try {
+      mkdirSync(join(root, 'Course notes'), { recursive: true })
+      writeFileSync(
+        join(root, 'Course notes', 'lecture.md'),
+        '# Eigenvalues\n\nSee [the notes](https://example.com) and [below](#example).\n\n## Example\n\n| a | b |\n| - | - |\n| 1 | 2 |\n\n```python\nprint(1)\n```\n\n![chart](https://example.com/chart.png)',
+      )
+
+      await page.goto('/general')
+      await acceptDisclaimer(page)
+      await page.getByTestId('my-files-button').click()
+      const dialog = page.getByRole('dialog', { name: 'My files' })
+      await dialog.getByTestId('my-files-input-folder').setInputFiles(join(root, 'Course notes'))
+      await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+      await dialog.getByRole('button', { name: /^Course notes/ }).click()
+      await dialog.getByRole('button', { name: 'Open lecture.md' }).click()
+      await expect(dialog).toBeHidden()
+      await expect(page.getByRole('region', { name: 'lecture.md' }).getByRole('heading', { name: 'Example' })).toBeVisible()
+      await page.mouse.move(0, 0)
+      await expect(page.getByRole('tooltip')).toHaveCount(0)
+      await scan(page, testInfo.title)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
 })
 
 adminTest.describe('axe wcag scan for chat with attached folders', () => {
