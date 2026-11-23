@@ -37,7 +37,11 @@ beforeAll(async () => {
 })
 afterEach(cleanup)
 
-const renderChatBox = ({ quizPrompt = null, budgetResetsAt = null }: { quizPrompt?: QuizPrompt | null; budgetResetsAt?: string | null } = {}) => {
+const renderChatBox = ({
+  quizPrompt = null,
+  budgetResetsAt = null,
+  disabled = false,
+}: { quizPrompt?: QuizPrompt | null; budgetResetsAt?: string | null; disabled?: boolean } = {}) => {
   const handleSubmit = vi.fn()
   const actionsRef = createRef<ChatBoxActions>()
   const fileInputRef = createRef<HTMLInputElement>()
@@ -45,7 +49,7 @@ const renderChatBox = ({ quizPrompt = null, budgetResetsAt = null }: { quizPromp
     <MemoryRouter>
       <I18nextProvider i18n={i18n}>
         <ChatBox
-          disabled={false}
+          disabled={disabled}
           isTokenLimitExceeded={false}
           budgetResetsAt={budgetResetsAt}
           fileInputRef={fileInputRef}
@@ -236,6 +240,39 @@ describe('ChatBox quote chip', () => {
     fireEvent.change(input(), { target: { value: 'now with the quote' } })
     fireEvent.click(sendButton())
     expect(handleSubmit).toHaveBeenLastCalledWith('now with the quote', [pending('quoted').quote])
+  })
+
+  test('a quick action sends the quote with its message right away, keeping the draft and the pending chip', () => {
+    const { actionsRef, handleSubmit } = renderChatBox()
+    act(() => actionsRef.current!.addQuote(pending('in the chip')))
+    fireEvent.change(input(), { target: { value: 'my draft' } })
+    vi.mocked(announceToScreenReader).mockClear()
+
+    const quick = pending('explain me')
+    act(() => actionsRef.current!.addQuote(quick, { message: 'Explain this passage.', send: true }))
+    expect(handleSubmit).toHaveBeenCalledWith('Explain this passage.', [quick.quote])
+    expect(input().value).toBe('my draft')
+    expect(chips()).toHaveLength(1)
+    expect(chips()[0].textContent).toContain('in the chip')
+    expect(announceToScreenReader).not.toHaveBeenCalled()
+  })
+
+  test('a quick action is not sent while a response streams or the budget is used up', () => {
+    const streaming = renderChatBox({ disabled: true })
+    act(() => streaming.actionsRef.current!.addQuote(pending('quoted'), { message: 'Explain this passage.', send: true }))
+    expect(streaming.handleSubmit).not.toHaveBeenCalled()
+    expect(chips()).toHaveLength(0)
+    cleanup()
+
+    const usedUp = renderChatBox({ budgetResetsAt: new Date(Date.now() + 86_400_000).toISOString() })
+    act(() => usedUp.actionsRef.current!.addQuote(pending('quoted'), { message: 'Explain this passage.', send: true }))
+    expect(usedUp.handleSubmit).not.toHaveBeenCalled()
+  })
+
+  test('a quick action is sent as a message while a quiz option is picked', () => {
+    const { actionsRef, handleSubmit } = renderChatBox({ quizPrompt: 'reasoning' })
+    act(() => actionsRef.current!.addQuote(pending('quoted'), { message: 'Summarize this passage.', send: true }))
+    expect(handleSubmit).toHaveBeenCalledWith('Summarize this passage.', [pending('quoted').quote])
   })
 
   test('clearQuote removes the chip', () => {

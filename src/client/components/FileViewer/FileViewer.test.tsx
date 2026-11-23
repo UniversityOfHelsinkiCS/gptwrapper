@@ -6,6 +6,8 @@ import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
 vi.mock('react-syntax-highlighter', () => ({ PrismAsync: () => null }))
 
 import en from '../../locales/en.json'
+import fi from '../../locales/fi.json'
+import sv from '../../locales/sv.json'
 import { createMemoryStore } from '../../util/myFiles/memoryStore'
 import type { MyFilesStore } from '../../util/myFiles/store'
 import MyFilesDialog from '../MyFiles/MyFilesDialog'
@@ -147,12 +149,12 @@ const selectText = (element: Element) => {
 describe('FileViewer Ask…', () => {
   afterEach(() => document.getSelection()?.removeAllRanges())
 
-  const renderWithAsk = async () => {
+  const renderWithAsk = async ({ quickActionsDisabled = false, lng = i18n } = {}) => {
     const store = await storeWith({ 'Course/notes.md': '# Week 3\n\nIntro\n\n## Eigenvalues\n\nAn eigenvector keeps its direction.' })
     const onAddQuote = vi.fn()
     render(
-      <I18nextProvider i18n={i18n}>
-        <FileViewer store={store} target={{ path: 'Course/notes.md' }} onClose={vi.fn()} onAddQuote={onAddQuote} />
+      <I18nextProvider i18n={lng}>
+        <FileViewer store={store} target={{ path: 'Course/notes.md' }} onClose={vi.fn()} onAddQuote={onAddQuote} quickActionsDisabled={quickActionsDisabled} />
       </I18nextProvider>,
     )
     const paragraph = await screen.findByText('An eigenvector keeps its direction.')
@@ -215,6 +217,60 @@ describe('FileViewer Ask…', () => {
       document.dispatchEvent(new Event('selectionchange'))
     })
     expect(screen.queryByTestId('file-viewer-selection-toolbar')).toBe(null)
+  })
+
+  const toolbarButton = (action: string) => screen.getByTestId(`file-viewer-${action}`) as HTMLButtonElement
+
+  test('the quick actions send the quote right away with a fixed message, from the toolbar and the floating toolbar', async () => {
+    const { onAddQuote, paragraph } = await renderWithAsk()
+    for (const action of ['explain', 'summarize', 'translate']) expect(toolbarButton(action).disabled).toBe(true)
+
+    selectText(paragraph)
+    fireEvent.click(toolbarButton('explain'))
+    expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, { message: 'Explain this passage.', send: true })
+    fireEvent.click(toolbarButton('summarize'))
+    expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, { message: 'Summarize this passage.', send: true })
+
+    fireEvent.mouseUp(paragraph)
+    const floating = screen.getByRole('toolbar', { name: 'Selection actions' })
+    expect(
+      within(floating)
+        .getAllByRole('button')
+        .map((button) => button.textContent),
+    ).toEqual(['Explain', 'Summarize', 'Translate', 'Ask…'])
+    fireEvent.click(within(floating).getByRole('button', { name: 'Translate' }))
+    expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, {
+      message: 'Translate this passage into English, unless our conversation suggests another language.',
+      send: true,
+    })
+    expect(screen.queryByTestId('file-viewer-selection-toolbar')).toBe(null)
+  })
+
+  test('the quick actions are disabled while a response streams, Ask… is not', async () => {
+    const { onAddQuote, paragraph } = await renderWithAsk({ quickActionsDisabled: true })
+    selectText(paragraph)
+    for (const action of ['explain', 'summarize', 'translate']) expect(toolbarButton(action).disabled).toBe(true)
+    expect(toolbarAsk().disabled).toBe(false)
+
+    fireEvent.mouseUp(paragraph)
+    const floating = screen.getByRole('toolbar', { name: 'Selection actions' })
+    expect((within(floating).getByRole('button', { name: 'Explain' }) as HTMLButtonElement).disabled).toBe(true)
+    fireEvent.click(within(floating).getByRole('button', { name: 'Ask…' }))
+    expect(onAddQuote).toHaveBeenCalledWith(expectedQuote)
+  })
+
+  test.each([
+    ['fi', fi, 'Selitä tämä kohta.', 'suomeksi'],
+    ['sv', sv, 'Förklara det här avsnittet.', 'till svenska'],
+  ])('in %s the messages are in the UI language and Translate names it', async (lng, resources, explain, language) => {
+    const localized = i18next.createInstance()
+    await localized.use(initReactI18next).init({ resources: { [lng]: resources }, lng, defaultNS: 'common' })
+    const { onAddQuote, paragraph } = await renderWithAsk({ lng: localized })
+    selectText(paragraph)
+    fireEvent.click(toolbarButton('explain'))
+    expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, { message: explain, send: true })
+    fireEvent.click(toolbarButton('translate'))
+    expect(onAddQuote.mock.lastCall![1].message).toContain(language)
   })
 
   test('without onAddQuote there is no Ask… action', async () => {

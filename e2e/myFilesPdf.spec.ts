@@ -251,3 +251,52 @@ adminTest('asks about text selected on a PDF page, quoted with its page number',
     rmSync(root, { recursive: true, force: true })
   }
 })
+
+adminTest('Explain sends a PDF selection right away, keeping the typed draft', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-pdf-explain-'))
+  const sentFrames: string[] = []
+  page.on('websocket', (ws) => ws.on('framesent', (frame) => sentFrames.push(String(frame.payload))))
+  try {
+    const folder = join(root, 'Course notes')
+    mkdirSync(folder, { recursive: true })
+    writeFileSync(join(folder, 'book.pdf'), makeTextPdf([['Entropy always grows in a closed system.']]))
+
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+    await page.locator('#chat-input').fill('my unsent draft')
+    await page.getByTestId('my-files-button').click()
+    const dialog = page.getByRole('dialog', { name: 'My files' })
+    await dialog.getByTestId('my-files-input-folder').setInputFiles(folder)
+    await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+    await dialog.getByRole('button', { name: /^Course notes/ }).click()
+    await dialog.getByRole('button', { name: 'Open book.pdf' }).click()
+    await expect(dialog).toBeHidden()
+
+    const viewer = page.getByRole('region', { name: 'book.pdf' })
+    const line = viewer.locator('.page[data-page-number="1"] .textLayer span', { hasText: 'Entropy always grows' })
+    await expect(line).toBeVisible()
+    const box = (await line.boundingBox())!
+    await page.mouse.move(box.x + 1, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width - 1, box.y + box.height / 2, { steps: 5 })
+    await page.mouse.up()
+
+    await viewer.getByRole('toolbar', { name: 'Selection actions' }).getByRole('button', { name: 'Explain' }).click()
+
+    const userMessage = page.getByTestId('user-message')
+    await expect(userMessage).toContainText('Explain this passage.')
+    const card = userMessage.getByTestId('quote-card')
+    await expect(card.getByTestId('quote-card-source')).toHaveText('📄 book.pdf · p. 1')
+    await expect(card.getByTestId('quote-card-text')).toContainText('Entropy always grows')
+    await expect(page.getByTestId('assistant-message')).toBeVisible()
+    await expect(page.locator('#chat-input')).toHaveValue('my unsent draft')
+    await expect(page.getByTestId('quote-chip')).toHaveCount(0)
+
+    const sent = sentFrames.find((frame) => frame.includes('Explain this passage.'))
+    expect(sent).toContain('"quotes":[{"kind":"text","path":"Course notes/book.pdf","page":1,"text":"Entropy always grows')
+    expect(sent).not.toContain('my unsent draft')
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
