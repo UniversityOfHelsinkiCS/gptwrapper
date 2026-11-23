@@ -1,3 +1,6 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { expect } from '@playwright/test'
 import { adminTest, teacherTest as test } from './fixtures'
 import { acceptDisclaimer, closeSendPreference, closeSnackbars, sendChatMessage, useMockModel } from './utils/test-helpers'
@@ -183,6 +186,69 @@ test.describe('Prompts', () => {
     await expect(page.getByTestId('sources-header')).toBeVisible()
     await page.getByTestId('toggle-source-details').click()
     await expect(page.locator('#tool-result-details')).toBeVisible()
+  })
+
+  test('RAG sources and an open file share the right slot', async ({ page }) => {
+    const root = mkdtempSync(join(tmpdir(), 'sources-viewer-'))
+    try {
+      await page.goto('/test-course-course-id')
+      await useMockModel(page)
+
+      const promptName = `testausprompti-${test.info().workerIndex}-rag-viewer`
+      await page.getByTestId('choose-prompt-button').click()
+      await page.getByTestId('create-course-prompt-test-course-course-id-button').click()
+      await page.getByTestId('prompt-name-input').fill(promptName)
+      await page.getByTestId('system-message-input').fill('what ever')
+      await page.getByTestId('rag-select').click()
+      await page.getByTestId(`source-material-rag-${test.info().workerIndex}-teacher`).click()
+      await page.getByRole('button', { name: 'Save' }).click()
+      await page.getByTestId(`prompt-row-${promptName}`).click()
+      await page.getByTestId(`change-to-prompt-button`).click()
+      await expect(page.getByTestId('prompt-name').first()).toContainText(promptName)
+
+      // Open a file from My files
+      mkdirSync(join(root, 'Course notes'), { recursive: true })
+      writeFileSync(join(root, 'Course notes', 'lecture.md'), '# Week 3')
+      await page.getByTestId('my-files-button').click()
+      const dialog = page.getByRole('dialog', { name: 'My files' })
+      await dialog.getByTestId('my-files-input-folder').setInputFiles(join(root, 'Course notes'))
+      await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+      await dialog.getByRole('button', { name: /^Course notes/ }).click()
+      await dialog.getByRole('button', { name: 'Open lecture.md' }).click()
+      const viewer = page.getByRole('region', { name: 'lecture.md' })
+      await expect(viewer).toBeVisible()
+
+      await sendChatMessage(page, 'rag')
+      await closeSendPreference(page)
+      await expect(page.getByTestId('assistant-message')).toContainText('Ok! Got some great results from that mock tool call!')
+
+      // The collapsed sources toggle is in the rail next to the viewer, opening it swaps the slot to the sources.
+      await closeSnackbars(page)
+      await expect(viewer).toBeVisible()
+      await expect(page.getByTestId('sources-header')).toBeHidden()
+      await page.getByTestId('open-annotations').click()
+      await expect(page.getByTestId('sources-header')).toBeVisible()
+      await expect(viewer).toBeHidden()
+
+      // Closing the sources brings the viewer back.
+      await page.getByTestId('close-annotations').click()
+      await expect(viewer).toBeVisible()
+      await expect(viewer).toBeFocused()
+      await expect(page.getByTestId('sources-header')).toBeHidden()
+      await expect(page.getByTestId('open-annotations')).toBeVisible()
+
+      // The sources link in the message swaps it too, and opening a file takes the slot back.
+      await page.getByTestId('file-search-sources').click()
+      await expect(page.getByTestId('sources-header')).toBeVisible()
+      await expect(viewer).toBeHidden()
+      await page.getByTestId('my-files-button').click()
+      await dialog.getByRole('button', { name: /^Course notes/ }).click()
+      await dialog.getByRole('button', { name: 'Open lecture.md' }).click()
+      await expect(viewer).toBeVisible()
+      await expect(page.getByTestId('sources-header')).toBeHidden()
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
   })
 })
 

@@ -149,12 +149,24 @@ const selectText = (element: Element) => {
 describe('FileViewer Ask…', () => {
   afterEach(() => document.getSelection()?.removeAllRanges())
 
-  const renderWithAsk = async ({ quickActionsDisabled = false, lng = i18n } = {}) => {
+  const renderWithAsk = async ({
+    quickActionsDisabled = false,
+    lng = i18n,
+    narrow,
+  }: { quickActionsDisabled?: boolean; lng?: typeof i18n; narrow?: { onBackToChat: () => void } } = {}) => {
     const store = await storeWith({ 'Course/notes.md': '# Week 3\n\nIntro\n\n## Eigenvalues\n\nAn eigenvector keeps its direction.' })
     const onAddQuote = vi.fn()
     render(
       <I18nextProvider i18n={lng}>
-        <FileViewer store={store} target={{ path: 'Course/notes.md' }} onClose={vi.fn()} onAddQuote={onAddQuote} quickActionsDisabled={quickActionsDisabled} />
+        <FileViewer
+          store={store}
+          target={{ path: 'Course/notes.md' }}
+          onClose={vi.fn()}
+          onAddQuote={onAddQuote}
+          quickActionsDisabled={quickActionsDisabled}
+          floatingToolbar={!narrow}
+          onBackToChat={narrow?.onBackToChat}
+        />
       </I18nextProvider>,
     )
     const paragraph = await screen.findByText('An eigenvector keeps its direction.')
@@ -271,6 +283,25 @@ describe('FileViewer Ask…', () => {
     expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, { message: explain, send: true })
     fireEvent.click(toolbarButton('translate'))
     expect(onAddQuote.mock.lastCall![1].message).toContain(language)
+  })
+
+  test('in narrow mode the toolbar has Back to chat and the actions, and a mouse selection shows no floating toolbar', async () => {
+    const onBackToChat = vi.fn()
+    const { onAddQuote, paragraph } = await renderWithAsk({ narrow: { onBackToChat } })
+
+    selectText(paragraph)
+    fireEvent.mouseUp(paragraph)
+    expect(screen.queryByTestId('file-viewer-selection-toolbar')).toBe(null)
+    fireEvent.click(toolbarButton('explain'))
+    expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, { message: 'Explain this passage.', send: true })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Back to chat' }))
+    expect(onBackToChat).toHaveBeenCalledOnce()
+  })
+
+  test('outside narrow mode there is no Back to chat', async () => {
+    await renderWithAsk()
+    expect(screen.queryByRole('button', { name: 'Back to chat' })).toBe(null)
   })
 
   test('without onAddQuote there is no Ask… action', async () => {

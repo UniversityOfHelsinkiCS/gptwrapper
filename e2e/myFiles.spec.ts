@@ -183,6 +183,105 @@ adminTest('asks about text selected in the viewer, sending it as a quote', async
   }
 })
 
+/** Copies a `Course notes` folder with `lecture.md` into My files and opens it in the viewer. */
+const openLectureInViewer = async (page: Page, root: string, text: string) => {
+  const folder = join(root, 'Course notes')
+  mkdirSync(folder, { recursive: true })
+  writeFileSync(join(folder, 'lecture.md'), text)
+  await page.getByTestId('my-files-button').click()
+  const dialog = page.getByRole('dialog', { name: 'My files' })
+  await dialog.getByTestId('my-files-input-folder').setInputFiles(folder)
+  await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+  await dialog.getByRole('button', { name: /^Course notes/ }).click()
+  await dialog.getByRole('button', { name: 'Open lecture.md' }).click()
+  await expect(dialog).toBeHidden()
+  return page.getByRole('region', { name: 'lecture.md' })
+}
+
+adminTest('the viewer collapses the sidebar and is resized with the separator, which remembers the split', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-split-'))
+  try {
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    await expect(page.getByTestId('left-panel-close')).toBeVisible()
+    const viewer = await openLectureInViewer(page, root, '# Week 3\n\nSome text.')
+    await expect(viewer).toBeFocused()
+    await expect(page.getByTestId('left-panel-close')).toBeHidden()
+
+    const separator = page.getByRole('separator', { name: 'Resize the chat and the file' })
+    await expect(separator).toHaveAttribute('aria-valuenow', '40')
+    const chat = page.locator('#chat-column')
+    const before = (await chat.boundingBox())!.width
+    await separator.focus()
+    await page.keyboard.press('ArrowRight')
+    await page.keyboard.press('ArrowRight')
+    await expect(separator).toHaveAttribute('aria-valuenow', '50')
+    await expect.poll(async () => (await chat.boundingBox())!.width).toBeGreaterThan(before + 50)
+
+    // Dragged far to the left, the chat stays at least 360px wide.
+    const box = (await separator.boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + 200)
+    await page.mouse.down()
+    await page.mouse.move(10, box.y + 200, { steps: 5 })
+    await page.mouse.up()
+    await expect.poll(async () => Math.round((await chat.boundingBox())!.width)).toBeGreaterThanOrEqual(360)
+    await expect(separator).not.toHaveAttribute('aria-valuenow', '50')
+    const dragged = await separator.getAttribute('aria-valuenow')
+
+    // Closing does not bring the sidebar back, and the split is remembered.
+    await viewer.getByRole('button', { name: 'Close lecture.md' }).click()
+    await expect(page.getByTestId('left-panel-close')).toBeHidden()
+    await page.reload()
+    await page.getByTestId('my-files-button').click()
+    const dialog = page.getByRole('dialog', { name: 'My files' })
+    await dialog.getByRole('button', { name: /^Course notes/ }).click()
+    await dialog.getByRole('button', { name: 'Open lecture.md' }).click()
+    await expect(separator).toHaveAttribute('aria-valuenow', dragged!)
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
+adminTest('on a narrow screen the viewer covers the chat, and Ask… goes back to the chat', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-narrow-'))
+  try {
+    await page.setViewportSize({ width: 800, height: 900 })
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    await page.getByTestId('left-panel-open').click()
+    const viewer = await openLectureInViewer(page, root, '# Week 3\n\n## Eigenvalues\n\nAn eigenvector keeps its direction.')
+
+    const paragraph = viewer.getByText('An eigenvector keeps its direction.')
+    await expect(paragraph).toBeVisible()
+    await expect(page.locator('#chat-input')).toBeHidden()
+    await expect(page.getByRole('separator')).toHaveCount(0)
+    expect((await viewer.boundingBox())!.width).toBeGreaterThan(780)
+
+    // Back to chat and to the file again.
+    await viewer.getByRole('button', { name: 'Back to chat' }).click()
+    await expect(viewer).toBeHidden()
+    await expect(page.locator('#chat-input')).toBeFocused()
+    await page.getByRole('button', { name: 'Back to lecture.md' }).click()
+    await expect(viewer).toBeFocused()
+
+    // A mouse selection shows no floating toolbar; the toolbar actions are there instead.
+    const box = (await paragraph.boundingBox())!
+    await page.mouse.move(box.x + 1, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width - 1, box.y + box.height / 2, { steps: 5 })
+    await page.mouse.up()
+    await expect(viewer.getByTestId('file-viewer-ask')).toBeEnabled()
+    await expect(viewer.getByRole('toolbar', { name: 'Selection actions' })).toHaveCount(0)
+    await viewer.getByTestId('file-viewer-ask').click()
+
+    await expect(viewer).toBeHidden()
+    await expect(page.getByTestId('quote-chip')).toContainText('Quote from lecture.md · Eigenvalues')
+    await expect(page.locator('#chat-input')).toBeFocused()
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
 const SECRET_TAIL = 'This last sentence must not be in the tool results of the history.'
 
 /** Copies a `Course notes` folder into My files and attaches it to the chat with the attach menu. */

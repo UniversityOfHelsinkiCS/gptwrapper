@@ -492,6 +492,34 @@ adminTest.describe('axe wcag scan for my files', () => {
     }
   })
 
+  adminTest('scan a file open in the viewer on a narrow screen', async ({ page }, testInfo) => {
+    const root = mkdtempSync(join(tmpdir(), 'axe-narrow-viewer-'))
+    try {
+      mkdirSync(join(root, 'Course notes'), { recursive: true })
+      writeFileSync(join(root, 'Course notes', 'lecture.md'), '# Eigenvalues\n\nAn eigenvector keeps its direction.')
+
+      await page.setViewportSize({ width: 800, height: 900 })
+      await page.goto('/general')
+      await acceptDisclaimer(page)
+      await page.getByTestId('left-panel-open').click()
+      await page.getByTestId('my-files-button').click()
+      const dialog = page.getByRole('dialog', { name: 'My files' })
+      await dialog.getByTestId('my-files-input-folder').setInputFiles(join(root, 'Course notes'))
+      await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+      await dialog.getByRole('button', { name: /^Course notes/ }).click()
+      await dialog.getByRole('button', { name: 'Open lecture.md' }).click()
+      await expect(dialog).toBeHidden()
+      const viewer = page.getByRole('region', { name: 'lecture.md' })
+      await expect(viewer.getByRole('heading', { name: 'Eigenvalues' })).toBeVisible()
+      await expect(viewer.getByRole('button', { name: 'Back to chat' })).toBeVisible()
+      await page.mouse.move(0, 0)
+      await expect(page.getByRole('tooltip')).toHaveCount(0)
+      await scan(page, testInfo.title)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+
   adminTest('scan chat with a PDF open in the viewer', async ({ page }, testInfo) => {
     const root = mkdtempSync(join(tmpdir(), 'axe-pdf-viewer-'))
     try {
