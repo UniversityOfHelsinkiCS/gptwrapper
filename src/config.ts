@@ -194,6 +194,8 @@ export const models: ModelConfig[] = [
   },
   {
     name: 'gpt-6.2-sol',
+    enabled: true,
+    price: { input: 2.16, cachedInput: 0.11, cacheWrite: 2.7, output: 10.78 },
     displayName: 'GPT-6.2 Sol',
     // Window is 1_050_000, but input over 272k is billed at 2x; 400k - 128k output keeps input at 272k.
     context: 400_000,
