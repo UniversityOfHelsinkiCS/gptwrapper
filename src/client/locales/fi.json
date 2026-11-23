@@ -1210,6 +1210,15 @@
     "truncated": "lyhennetty",
     "removeQuote": "Poista lainaus painamalla Delete tai Backspace",
     "showMore": "Näytä lisää",
-    "showLess": "Näytä vähemmän"
+    "showLess": "Näytä vähemmän",
+    "pdfPage": "Sivu {{page}}",
+    "pdfPages": "PDF-sivut",
+    "pageOf": "Sivu {{page}} / {{count}}",
+    "zoomIn": "Lähennä",
+    "zoomOut": "Loitonna",
+    "zoomPercent": "{{percent}} %",
+    "fitWidth": "Sovita leveyteen",
+    "pdfPassword": "PDF on suojattu salasanalla, eikä sitä voi näyttää.",
+    "pdfInvalid": "Tiedostoa ei voitu lukea PDF-tiedostona."
   }
 }

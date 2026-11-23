@@ -1185,6 +1185,15 @@
     "truncated": "förkortat",
     "removeQuote": "Ta bort citatet genom att trycka på Delete eller Backspace",
     "showMore": "Visa mer",
-    "showLess": "Visa mindre"
+    "showLess": "Visa mindre",
+    "pdfPage": "Sida {{page}}",
+    "pdfPages": "PDF-sidor",
+    "pageOf": "Sida {{page}} / {{count}}",
+    "zoomIn": "Zooma in",
+    "zoomOut": "Zooma ut",
+    "zoomPercent": "{{percent}} %",
+    "fitWidth": "Anpassa till bredd",
+    "pdfPassword": "Den här PDF-filen är lösenordsskyddad och kan inte visas.",
+    "pdfInvalid": "Filen kunde inte läsas som en PDF."
   }
 }

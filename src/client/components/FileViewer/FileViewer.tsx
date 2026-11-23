@@ -1,4 +1,7 @@
+import Add from '@mui/icons-material/Add'
 import Close from '@mui/icons-material/Close'
+import FitScreen from '@mui/icons-material/FitScreen'
+import Remove from '@mui/icons-material/Remove'
 import { Box, Button, IconButton, LinearProgress, Paper, Tooltip, Typography } from '@mui/material'
 import { useCallback, useEffect, useId, useRef, useState, type MouseEvent, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -11,6 +14,8 @@ import { ExperimentalChip } from '../MyFiles/ExperimentalChip'
 import { MAX_VIEWER_TEXT_BYTES, viewerFileKind } from './fileKind'
 import type { ViewerTarget } from './FileViewerContext'
 import { selectionToQuote, type PendingQuote } from './selectionQuote'
+import { usePdfViewer } from './usePdfViewer'
+import { PDF_VIEWER_SCOPE_CLASS } from '../../util/pdfjs'
 
 type Content =
   | { state: 'loading' }
@@ -20,10 +25,11 @@ type Content =
   | { state: 'error' }
   | { state: 'unsupported' }
 
-/** Reads the target file from the store, again whenever the path changes. */
-const useFileText = (store: MyFilesStore, path: string): Content => {
+/** Reads the target file from the store, again whenever the path changes. PDFs are read by `usePdfViewer` instead. */
+const useFileText = (store: MyFilesStore, path: string, enabled: boolean): Content => {
   const [content, setContent] = useState<Content>({ state: 'loading' })
   useEffect(() => {
+    if (!enabled) return
     let cancelled = false
     setContent({ state: 'loading' })
     void (async () => {
@@ -42,7 +48,7 @@ const useFileText = (store: MyFilesStore, path: string): Content => {
     return () => {
       cancelled = true
     }
-  }, [store, path])
+  }, [store, path, enabled])
   return content
 }
 
@@ -94,7 +100,9 @@ const useSelectionQuote = (contentRef: RefObject<HTMLElement | null>, path: stri
 
 /**
  * A My files file shown next to the chat: Markdown rendered like chat answers (without loading images), text in a
- * wrapping monospace block. The whole panel is one labelled, focusable region that scrolls under a sticky toolbar.
+ * wrapping monospace block, PDFs in pdf.js's viewer (with page and zoom controls in the toolbar). The whole panel is one
+ * labelled, focusable region; it scrolls under a sticky toolbar, except a PDF, which scrolls in its own container.
+ * `target.page` opens a PDF at that page, also when the same file is opened again with another page.
  * With `onAddQuote`, selected text can be added to the chat as a quote ("Ask…"), from a toolbar floating next to a
  * mouse selection or from the viewer toolbar (the keyboard and screen reader path).
  */
@@ -116,8 +124,19 @@ const FileViewer = ({
   const { selected, floating, onMouseUp, hideFloating } = useSelectionQuote(contentRef, target.path)
   const name = baseName(target.path)
   const kind = viewerFileKind(target.path)
-  const content = useFileText(store, target.path)
+  const isPdf = kind === 'pdf'
+  const content = useFileText(store, target.path, !isPdf)
   const params = { name, interpolation: { escapeValue: false } }
+  const pdfContainerRef = useRef<HTMLDivElement>(null)
+  const pdfViewerRef = useRef<HTMLDivElement>(null)
+  const pageLabel = useCallback((page: number) => t('fileViewer:pdfPage', { page }), [t])
+  const pdf = usePdfViewer({ store, path: target.path, containerRef: pdfContainerRef, viewerRef: pdfViewerRef, pageLabel })
+  const { goToPage } = pdf
+
+  // A target page (a quote's source, a remembered position) is applied whenever a target is opened.
+  useEffect(() => {
+    if (target.page) goToPage(target.page)
+  }, [target, goToPage])
 
   // Opening a file moves focus to it, so keyboard and screen reader users land in the viewer.
   useEffect(() => {
@@ -147,7 +166,13 @@ const FileViewer = ({
       data-path={target.path}
       onScroll={floating ? hideFloating : undefined}
       onKeyDown={floating ? (event) => event.key === 'Escape' && hideFloating() : undefined}
-      sx={{ height: '100%', overflow: 'auto', bgcolor: 'background.paper', ...focusIndicatorStyle() }}
+      sx={{
+        height: '100%',
+        overflow: isPdf ? 'hidden' : 'auto',
+        bgcolor: 'background.paper',
+        ...(isPdf ? { display: 'flex', flexDirection: 'column' } : {}),
+        ...focusIndicatorStyle(),
+      }}
     >
       <Box
         sx={{
@@ -155,6 +180,7 @@ const FileViewer = ({
           top: 0,
           zIndex: 1,
           display: 'flex',
+          flexWrap: 'wrap',
           alignItems: 'center',
           gap: 1,
           px: 2,
@@ -170,6 +196,26 @@ const FileViewer = ({
           </Typography>
         </Tooltip>
         <ExperimentalChip sx={{ ml: 0, flexShrink: 0 }} />
+        {/* The PDF controls get their own row, after the close button. */}
+        {isPdf && pdf.status.state === 'ready' && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, order: 1, width: '100%' }}>
+            <Typography variant="body2" color="text.secondary" data-testid="file-viewer-pdf-page" sx={{ mx: 0.5, whiteSpace: 'nowrap' }}>
+              {t('fileViewer:pageOf', { page: pdf.page, count: pdf.status.pageCount })}
+            </Typography>
+            <IconButton size="small" onClick={pdf.zoomOut} aria-label={t('fileViewer:zoomOut')} data-testid="file-viewer-zoom-out">
+              <Remove fontSize="small" />
+            </IconButton>
+            <Typography variant="body2" color="text.secondary" data-testid="file-viewer-zoom" sx={{ minWidth: '3.5em', textAlign: 'center' }}>
+              {t('fileViewer:zoomPercent', { percent: Math.round(pdf.scale * 100) })}
+            </Typography>
+            <IconButton size="small" onClick={pdf.zoomIn} aria-label={t('fileViewer:zoomIn')} data-testid="file-viewer-zoom-in">
+              <Add fontSize="small" />
+            </IconButton>
+            <IconButton size="small" onClick={pdf.fitWidth} aria-label={t('fileViewer:fitWidth')} data-testid="file-viewer-fit-width">
+              <FitScreen fontSize="small" />
+            </IconButton>
+          </Box>
+        )}
         {onAddQuote && (
           <Button
             size="small"
@@ -187,13 +233,45 @@ const FileViewer = ({
           <Close />
         </IconButton>
       </Box>
-      <Box ref={contentRef} onMouseUp={onAddQuote ? onMouseUp : undefined} sx={{ px: 3, py: 2, position: 'relative' }}>
-        {content.state === 'loading' && <LinearProgress aria-label={t('common:loading')} />}
-        {content.state === 'missing' && message(t('myFiles:fileMissing', params), true)}
-        {content.state === 'tooLarge' && message(t('fileViewer:tooLarge'))}
-        {content.state === 'unsupported' && message(t('fileViewer:unsupported'))}
-        {content.state === 'error' && message(t('myFiles:error'), true)}
-        {content.state === 'ready' &&
+      <Box
+        ref={contentRef}
+        onMouseUp={onAddQuote ? onMouseUp : undefined}
+        sx={isPdf ? { flex: 1, minHeight: 0, position: 'relative' } : { px: 3, py: 2, position: 'relative' }}
+      >
+        {isPdf && (
+          <>
+            {/* pdf.js needs an absolutely positioned scroll container; its styles are scoped to it. */}
+            <Box
+              ref={pdfContainerRef}
+              className={PDF_VIEWER_SCOPE_CLASS}
+              role="region"
+              aria-label={t('fileViewer:pdfPages')}
+              tabIndex={0}
+              data-testid="file-viewer-pdf"
+              data-page={pdf.status.state === 'ready' ? pdf.page : undefined}
+              onScroll={floating ? hideFloating : undefined}
+              sx={{ position: 'absolute', inset: 0, overflow: 'auto', bgcolor: 'action.hover', ...focusIndicatorStyle() }}
+            >
+              <div ref={pdfViewerRef} className="pdfViewer" />
+            </Box>
+            {pdf.status.state !== 'ready' && (
+              <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1, bgcolor: 'background.paper' }}>
+                {pdf.status.state === 'loading' && <LinearProgress aria-label={t('common:loading')} />}
+                {pdf.status.state === 'missing' && message(t('myFiles:fileMissing', params), true)}
+                {pdf.status.state === 'password' && message(t('fileViewer:pdfPassword'), true)}
+                {pdf.status.state === 'invalid' && message(t('fileViewer:pdfInvalid'), true)}
+                {pdf.status.state === 'error' && message(t('myFiles:error'), true)}
+              </Box>
+            )}
+          </>
+        )}
+        {!isPdf && content.state === 'loading' && <LinearProgress aria-label={t('common:loading')} />}
+        {!isPdf && content.state === 'missing' && message(t('myFiles:fileMissing', params), true)}
+        {!isPdf && content.state === 'tooLarge' && message(t('fileViewer:tooLarge'))}
+        {!isPdf && content.state === 'unsupported' && message(t('fileViewer:unsupported'))}
+        {!isPdf && content.state === 'error' && message(t('myFiles:error'), true)}
+        {!isPdf &&
+          content.state === 'ready' &&
           (kind === 'markdown' ? (
             <Box data-testid="file-viewer-markdown" sx={(theme) => ({ wordBreak: 'break-word', ...theme.applyStyles('dark', darkModeLinkColors) })}>
               <MarkdownContent text={content.text} source="file" />

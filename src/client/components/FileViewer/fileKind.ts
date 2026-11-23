@@ -1,5 +1,5 @@
-/** The kinds of My files files the viewer can show. PDF comes later. */
-export type ViewerFileKind = 'markdown' | 'text'
+/** The kinds of My files files the viewer can show. */
+export type ViewerFileKind = 'markdown' | 'text' | 'pdf'
 
 /** Text files larger than this are not rendered (about 5 MB). */
 export const MAX_VIEWER_TEXT_BYTES = 5 * 1024 * 1024
@@ -9,5 +9,6 @@ export const viewerFileKind = (path: string): ViewerFileKind | null => {
   const extension = path.toLowerCase().match(/\.([^./]+)$/)?.[1]
   if (extension === 'md') return 'markdown'
   if (extension === 'txt') return 'text'
+  if (extension === 'pdf') return 'pdf'
   return null
 }

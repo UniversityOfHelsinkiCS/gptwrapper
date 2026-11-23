@@ -1209,6 +1209,15 @@
     "truncated": "truncated",
     "removeQuote": "Remove the quote by pressing Delete or Backspace",
     "showMore": "Show more",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "pdfPage": "Page {{page}}",
+    "pdfPages": "PDF pages",
+    "pageOf": "Page {{page}} / {{count}}",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "zoomPercent": "{{percent}}%",
+    "fitWidth": "Fit to width",
+    "pdfPassword": "This PDF is password-protected and cannot be displayed.",
+    "pdfInvalid": "This file could not be read as a PDF."
   }
 }

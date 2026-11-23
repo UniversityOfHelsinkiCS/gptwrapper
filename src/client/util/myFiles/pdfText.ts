@@ -19,6 +19,13 @@ export class PdfParseError extends Error {
   }
 }
 
+/** The reason a pdf.js `getDocument` failure is reported with: a password exception, or anything else as invalid. */
+export const toPdfParseError = (error: unknown): PdfParseError => {
+  const name = (error as { name?: string } | null)?.name
+  if (name === 'PasswordException') return new PdfParseError('password', 'the PDF is password-protected')
+  return new PdfParseError('invalid', 'it could not be parsed as a PDF')
+}
+
 /** The text of each page of a PDF, in order. A page without a text layer is ''. */
 export type PdfTextExtractor = (bytes: Uint8Array) => Promise<string[]>
 
@@ -48,9 +55,7 @@ export const extractPdfPagesWith = async (pdfjs: PdfjsLike, bytes: Uint8Array): 
   try {
     doc = await task.promise
   } catch (error) {
-    const name = (error as { name?: string } | null)?.name
-    if (name === 'PasswordException') throw new PdfParseError('password', 'the PDF is password-protected')
-    throw new PdfParseError('invalid', 'it could not be parsed as a PDF')
+    throw toPdfParseError(error)
   }
   try {
     const pages: string[] = []
