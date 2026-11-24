@@ -641,175 +641,177 @@ const ChatV2Content = () => {
       sx={{
         minHeight: '100vh',
         position: 'relative',
-        display: 'flex',
+        display: 'grid',
+        gridTemplateColumns: 'auto minmax(0, 1fr) auto',
+        gridTemplateRows: 'auto 1fr',
       }}
     >
+      <NotificationBanner sx={[{ gridColumn: 2, gridRow: 1 }, showFloatingButtons ? bannerBelowFloatingButtonsSx : {}]} />
       {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
-      {/* Embedded chat keeps the collapsed sidebar visible so that no floating buttons cover the conversation */}
-      {isEmbeddedMode && <SideBar open={false} setOpen={setSideBarOpen} user={user} handleReset={handleResetRequest} messages={messages} />}
-      {isEmbeddedMode || isMobile ? (
-        <Drawer
-          open={sideBarOpen}
-          onClose={() => {
-            setSideBarOpen(!sideBarOpen)
-          }}
-          sx={{ '& .MuiDrawer-paper': { maxWidth: '100vw' } }}
-        >
-          <SideBar
-            open={true} // always open in drawer
-            autoFocus
-            setOpen={setSideBarOpen}
-            user={user}
-            handleReset={handleResetRequest}
-            messages={messages}
-          />
-        </Drawer>
-      ) : (
-        <SideBar open={sideBarOpen} setOpen={setSideBarOpen} user={user} handleReset={handleResetRequest} messages={messages} />
-      )}
-      {/* Chat view column ------------------------------------------------------------------------------------------------ */}
-      {/* The banner spans the whole space between the side panels, the chat below it stays narrower */}
-      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-        <NotificationBanner sx={showFloatingButtons ? bannerBelowFloatingButtonsSx : undefined} />
-        <Box
-          ref={chatContainerRef}
-          data-skip-target
-          tabIndex={-1}
-          sx={{
-            '&:focus-visible': { outline: 'none' },
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            // the parent flex column already gets the space left over by the side panels
-            width: '100%',
-            maxWidth: '1080px',
-            marginLeft: 'auto',
-            marginRight: 'auto',
-          }}
-        >
-          {showFloatingButtons && (
-            <Box
-              sx={{
-                position: 'fixed',
-                left: 15,
-                top: 10,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                zIndex: 999,
-                [SHORT_VIEWPORT]: { position: 'absolute' },
-              }}
-            >
-              <OutlineButtonBlack onClick={() => setSideBarOpen(true)} data-testid="left-panel-open">
-                <CustomIcon src={sidebarOpen} alt={t('sidebar:open')} />
-              </OutlineButtonBlack>
-              <OutlineButtonBlack onClick={handleResetRequest} aria-label={t('sidebar:chatNew')} data-testid="new-conversation-button">
-                <MapsUgc fontSize="small" />
-              </OutlineButtonBlack>
-            </Box>
-          )}
-          <Box
-            sx={{
-              height: '100%',
-              width: '100%',
-              margin: '0 auto',
-              overflow: 'hidden',
-              paddingLeft: '1rem',
-              paddingRight: '1rem',
-              paddingTop: '1rem',
-              maxWidth: '1000px',
+      <Box sx={{ gridColumn: 1, gridRow: '1 / span 2' }}>
+        {/* Embedded chat keeps the collapsed sidebar visible so that no floating buttons cover the conversation */}
+        {isEmbeddedMode && <SideBar open={false} setOpen={setSideBarOpen} user={user} handleReset={handleResetRequest} messages={messages} />}
+        {isEmbeddedMode || isMobile ? (
+          <Drawer
+            open={sideBarOpen}
+            onClose={() => {
+              setSideBarOpen(!sideBarOpen)
             }}
-            ref={scrollRef}
+            sx={{ '& .MuiDrawer-paper': { maxWidth: '100vw' } }}
           >
-            {chatInstance?.saveDiscussions && (
-              <Paper
-                variant="outlined"
-                sx={{
-                  padding: 2,
-                  mt: showFloatingButtons ? 6 : 2,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 2,
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Typography component="h2" variant="body1" fontWeight={600}>
-                    {t('course:isSavedNotOptOut')}
-                  </Typography>
-                </Box>
-              </Paper>
-            )}
-
-            <Conversation
-              initial={
-                <ConversationSplash
-                  courseName={courseName}
-                  courseDate={chatInstance?.activityPeriod}
-                  promptName={promptInfo?.type === 'saved' ? promptInfo.name : undefined}
-                />
-              }
+            <SideBar
+              open={true} // always open in drawer
+              autoFocus
+              setOpen={setSideBarOpen}
+              user={user}
+              handleReset={handleResetRequest}
               messages={messages}
-              streamingParts={shownStreamingParts}
-              generationInfo={generationInfo}
-              isStreaming={isStreaming}
-              endState={endState}
-              setActiveToolResults={canShowToolResults ? openToolResults : undefined}
-              isMobile={isMobile}
-              onRetry={handleRetry}
-              quizSelection={openQuizSelection}
-              onQuizSelect={handleQuizSelect}
-              onQuizSubmit={handleQuizSubmit}
-              latestResponseIndex={latestResponseIndex}
-              latestResponseRef={latestResponseRef}
             />
-          </Box>
+          </Drawer>
+        ) : (
+          <SideBar open={sideBarOpen} setOpen={setSideBarOpen} user={user} handleReset={handleResetRequest} messages={messages} />
+        )}
+      </Box>
+      {/* Chat view column ------------------------------------------------------------------------------------------------ */}
+      <Box
+        ref={chatContainerRef}
+        data-skip-target
+        tabIndex={-1}
+        sx={{
+          '&:focus-visible': { outline: 'none' },
+          gridColumn: 2,
+          gridRow: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          // the parent flex column already gets the space left over by the side panels
+          width: '100%',
+          maxWidth: '1080px',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}
+      >
+        {showFloatingButtons && (
           <Box
-            ref={measureChatBoxHeight}
             sx={{
-              width: '100%',
-              position: 'sticky',
-              bottom: 0,
-              [SHORT_VIEWPORT]: { position: 'static' },
+              position: 'fixed',
+              left: 15,
+              top: 10,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              zIndex: 999,
+              [SHORT_VIEWPORT]: { position: 'absolute' },
             }}
           >
-            <Box
+            <OutlineButtonBlack onClick={() => setSideBarOpen(true)} data-testid="left-panel-open">
+              <CustomIcon src={sidebarOpen} alt={t('sidebar:open')} />
+            </OutlineButtonBlack>
+            <OutlineButtonBlack onClick={handleResetRequest} aria-label={t('sidebar:chatNew')} data-testid="new-conversation-button">
+              <MapsUgc fontSize="small" />
+            </OutlineButtonBlack>
+          </Box>
+        )}
+        <Box
+          sx={{
+            height: '100%',
+            width: '100%',
+            margin: '0 auto',
+            overflow: 'hidden',
+            paddingLeft: '1rem',
+            paddingRight: '1rem',
+            paddingTop: '1rem',
+            maxWidth: '1000px',
+          }}
+          ref={scrollRef}
+        >
+          {chatInstance?.saveDiscussions && (
+            <Paper
+              variant="outlined"
               sx={{
-                padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
+                padding: 2,
+                mt: showFloatingButtons ? 6 : 2,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
               }}
             >
-              <ChatBox
-                disabled={isStreaming}
-                isTokenLimitExceeded={tokenLimitExceeded}
-                budgetResetsAt={budgetResetsAt}
-                fileInputRef={fileInputRef}
-                fileName={fileName}
-                setFileName={setFileName}
-                messageWarning={messageWarning}
-                handleCancel={handleCancel}
-                handleContinue={(_, ignoredWarnings) => {
-                  handleSendMessage('', true, ignoredWarnings)
-                  document.getElementById('chat-input')?.focus()
-                }}
-                handleSubmit={handleChatBoxSubmit}
-                handleReset={handleResetRequest}
-                handleStop={() => {
-                  streamControllerRef.current?.abort('user_aborted')
-                  setEndState('canceled')
-                }}
-                isMobile={isMobile}
-                currentModel={activeModel}
-                setModel={setActiveModel}
-                isNewResponseAvailable={isNewResponseAvailable}
-                onGoToLatestResponse={handleGoToLatestResponse}
-                quizPrompt={quizPrompt}
-                actionsRef={chatBoxRef}
-                folderControls={
-                  canAttachFolders && myFilesStore ? (
-                    <AttachFolders store={myFilesStore} attachedFolders={attachedFolders} onChange={setAttachedFolders} />
-                  ) : undefined
-                }
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Typography component="h2" variant="body1" fontWeight={600}>
+                  {t('course:isSavedNotOptOut')}
+                </Typography>
+              </Box>
+            </Paper>
+          )}
+
+          <Conversation
+            initial={
+              <ConversationSplash
+                courseName={courseName}
+                courseDate={chatInstance?.activityPeriod}
+                promptName={promptInfo?.type === 'saved' ? promptInfo.name : undefined}
               />
-            </Box>
+            }
+            messages={messages}
+            streamingParts={shownStreamingParts}
+            generationInfo={generationInfo}
+            isStreaming={isStreaming}
+            endState={endState}
+            setActiveToolResults={canShowToolResults ? openToolResults : undefined}
+            isMobile={isMobile}
+            onRetry={handleRetry}
+            quizSelection={openQuizSelection}
+            onQuizSelect={handleQuizSelect}
+            onQuizSubmit={handleQuizSubmit}
+            latestResponseIndex={latestResponseIndex}
+            latestResponseRef={latestResponseRef}
+          />
+        </Box>
+        <Box
+          ref={measureChatBoxHeight}
+          sx={{
+            width: '100%',
+            position: 'sticky',
+            bottom: 0,
+            [SHORT_VIEWPORT]: { position: 'static' },
+          }}
+        >
+          <Box
+            sx={{
+              padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
+            }}
+          >
+            <ChatBox
+              disabled={isStreaming}
+              isTokenLimitExceeded={tokenLimitExceeded}
+              budgetResetsAt={budgetResetsAt}
+              fileInputRef={fileInputRef}
+              fileName={fileName}
+              setFileName={setFileName}
+              messageWarning={messageWarning}
+              handleCancel={handleCancel}
+              handleContinue={(_, ignoredWarnings) => {
+                handleSendMessage('', true, ignoredWarnings)
+                document.getElementById('chat-input')?.focus()
+              }}
+              handleSubmit={handleChatBoxSubmit}
+              handleReset={handleResetRequest}
+              handleStop={() => {
+                streamControllerRef.current?.abort('user_aborted')
+                setEndState('canceled')
+              }}
+              isMobile={isMobile}
+              currentModel={activeModel}
+              setModel={setActiveModel}
+              isNewResponseAvailable={isNewResponseAvailable}
+              onGoToLatestResponse={handleGoToLatestResponse}
+              quizPrompt={quizPrompt}
+              actionsRef={chatBoxRef}
+              folderControls={
+                canAttachFolders && myFilesStore ? (
+                  <AttachFolders store={myFilesStore} attachedFolders={attachedFolders} onChange={setAttachedFolders} />
+                ) : undefined
+              }
+            />
           </Box>
         </Box>
       </Box>
@@ -845,6 +847,9 @@ const ChatV2Content = () => {
         hasToolResults && (
           <Box
             sx={{
+              gridColumn: 3,
+              gridRow: '1 / span 2',
+              alignSelf: 'start',
               width: rightPanelContentWidth,
               height: '100vh',
               display: 'flex',
