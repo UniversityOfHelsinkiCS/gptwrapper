@@ -4,25 +4,27 @@ import type { ChatMessage, Message } from '@shared/chat'
 import getEncoding from '../../util/tiktoken'
 import { calculateUsage } from '../chatInstances/usage'
 import { truncateMessages } from '../langchain/truncateMessages'
-import { quotesToModelText, withQuotes } from './quotes'
+import { userMessagePreamble, withQuotes } from './quotes'
 
 /**
- * Prepares chat messages for the LLM: quotes go before the user's text (delimited, see `quotesToModelText`) and file
- * content after it. The merged message no longer carries `quotes`, so the token estimate counts them once.
+ * Prepares chat messages for the LLM: the file open in the viewer and the quotes go before the user's text (see
+ * `userMessagePreamble`) and file content after it. The merged message no longer carries `quotes` or `viewerFile`, so
+ * the token estimate counts them once.
  */
 export const prepareMessagesForLLM = (messages: ChatMessage[]): ChatMessage[] => {
   return messages.map((msg) => {
     if (msg.role !== 'user') return msg
-    const { quotes, ...rest } = msg
+    const { quotes, viewerFile, ...rest } = msg
     let content = rest.content
-    if (quotes?.length) {
-      content = typeof content === 'string' ? withQuotes(content, quotes) : [{ type: 'text', text: quotesToModelText(quotes) }, ...content]
+    const preamble = userMessagePreamble(quotes, viewerFile)
+    if (preamble) {
+      content = typeof content === 'string' ? withQuotes(content, quotes, viewerFile) : [{ type: 'text', text: preamble }, ...content]
     }
     if (msg.fileContent && typeof content === 'string') {
       // Combine the user's message with the file content for the LLM
       content = `${content} ${msg.fileContent}`
     }
-    return content === msg.content && !quotes ? msg : { ...rest, content }
+    return content === msg.content && !quotes && !viewerFile ? msg : { ...rest, content }
   })
 }
 

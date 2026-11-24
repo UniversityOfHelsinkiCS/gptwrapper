@@ -450,14 +450,16 @@ const resolvePrompt = async (
 
 /**
  * The history as the model gets it: assistant messages with `parts` become text, tool parts summarised by their
- * tool module. A quiz answer becomes a text made from the answer and its quiz, instead of its display `content`.
+ * tool module. A quiz answer becomes a text made from the answer and its quiz, instead of its display `content` (keeping
+ * its open file).
  */
 const toModelHistory = (chatMessages: RunAgentRequest['options']['chatMessages']): ChatMessage[] =>
   chatMessages.map((message, index): ChatMessage => {
     if ('parts' in message) return { role: 'assistant', content: historyMessageToText(message) }
     if (message.role === 'user' && message.quizAnswer) {
       const earlierParts = chatMessages.slice(0, index).flatMap((earlier) => ('parts' in earlier ? [earlier.parts] : []))
-      return { role: 'user', content: quizAnswerToText(message.quizAnswer, findQuizPart(earlierParts, message.quizAnswer.callId)) }
+      const content = quizAnswerToText(message.quizAnswer, findQuizPart(earlierParts, message.quizAnswer.callId))
+      return { role: 'user', content, ...(message.viewerFile ? { viewerFile: message.viewerFile } : {}) }
     }
     return message
   })

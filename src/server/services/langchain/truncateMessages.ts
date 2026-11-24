@@ -21,8 +21,8 @@ export const truncateMessages = (modelConfig: (typeof validModels)[number], mess
   for (let i = messages.length - 1; i >= 0; i--) {
     const message = messages[i]
     const text = readMessageContent(message)
-    // Include quotes and fileContent in token calculation for user messages
-    const withQuoted = message.role === 'user' ? withQuotes(text, message.quotes) : text
+    // Include the open file, quotes and fileContent in token calculation for user messages
+    const withQuoted = message.role === 'user' ? withQuotes(text, message.quotes, message.viewerFile) : text
     const content = message.role === 'user' && message.fileContent ? `${withQuoted} ${message.fileContent}` : withQuoted
     const encoded = encoding.encode(content)
     const messageTokenCount = encoded.length
