@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
 import queryClient from '../util/queryClient'
-import { queryKey } from './useUsers'
 import apiClient from '../util/apiClient'
 import type { ResetAllUsageResponse } from '@shared/usage'
 
@@ -12,15 +11,7 @@ const useResetUsageMutation = () => {
     return res
   }
 
-  const mutation = useMutation({
-    mutationFn,
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey,
-      }),
-  })
-
-  return mutation
+  return useMutation({ mutationFn })
 }
 
 export default useResetUsageMutation

@@ -169,12 +169,6 @@ export type ChatInstanceUsage = {
 /** `mode` tells whether `usage`/`limit` are weekly tokens or the weekly cost budget (€). */
 export type UserStatus = UserStatusResponse
 
-export interface Faculty {
-  code: string
-  name: Locales
-  iams: string[]
-}
-
 export interface CourseStatistics {
   average: number
   usagePercentage: number
