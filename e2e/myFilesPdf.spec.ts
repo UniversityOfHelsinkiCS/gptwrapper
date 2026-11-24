@@ -329,10 +329,10 @@ adminTest('the open PDF and its page are remembered over a reload and a chat res
     await expect(pdf.locator('.page[data-page-number="8"] .textLayer')).toContainText('Chapter 8: Thermodynamics.')
 
     // Resetting the chat keeps the file open.
-    // (The open file is named before the text, so the mock model's prefix triggers do not fire: any answer will do.)
     await sendChatMessage(page, 'say hello')
     await closeSendPreference(page)
-    await expect(page.getByTestId('assistant-message')).toBeVisible()
+    await expect(page.getByTestId('assistant-message')).toContainText('hello')
+    await expect(page.getByTestId('assistant-message')).not.toContainText('mock endpoint')
     await page.getByTestId('new-conversation-button').click()
     await page.getByTestId('submit-confirm-reset').click()
     await expect(page.getByTestId('assistant-message')).toHaveCount(0)

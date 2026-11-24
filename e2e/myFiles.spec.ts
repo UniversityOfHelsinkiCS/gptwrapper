@@ -442,12 +442,10 @@ adminTest('the agent file steps and the outputs list open their files in the vie
     const output = page.getByRole('region', { name: 'study-plan.md' })
     await expect(output).toBeVisible()
     await expect(output).toContainText('A file written by the mock model.')
-    // Minimized, the next message is the bare text the mock model reacts to
     await output.getByRole('button', { name: 'Minimize study-plan.md' }).press('Enter')
     await expect(output).toBeHidden()
     await page.getByTestId('output-files').getByRole('button', { name: 'Open study-plan.md' }).click()
     await expect(output).toBeVisible()
-    await output.getByRole('button', { name: 'Minimize study-plan.md' }).press('Enter')
 
     // A read file: its step in the activity group opens it
     await sendChatMessage(page, 'files Course notes')

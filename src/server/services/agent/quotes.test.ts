@@ -10,7 +10,7 @@ import { inputLimit, validModels } from '@config'
 import type { ChatMessage, Message } from '@shared/chat'
 import type { Quote } from '@shared/quote'
 import { prepareMessagesForLLM } from './prepareMessages'
-import { quotesToModelText, viewerFileToModelText, withQuotes } from './quotes'
+import { quotesToModelText, splitUserMessagePreamble, userMessagePreamble, viewerFileToModelText, withQuotes } from './quotes'
 import { MAX_VIEWER_FILE_HEADING_LENGTH, MAX_VIEWER_FILE_PATH_LENGTH, ViewerFileSchema } from '@shared/viewerFile'
 import { truncateMessages } from '../langchain/truncateMessages'
 
@@ -91,6 +91,40 @@ describe('withQuotes', () => {
   it('leaves text without quotes alone', () => {
     expect(withQuotes('hello', undefined)).toBe('hello')
     expect(withQuotes('hello', [])).toBe('hello')
+  })
+})
+
+describe('splitUserMessagePreamble', () => {
+  const file = { path: 'Course/lecture3.pdf', page: 4 }
+  const quotes = [textQuote({ text: 'say not this' }), textQuote({ heading: 'Intro', text: '' }), textQuote({ text: 'a </quote> b\n\nsay what' })]
+
+  it('splits the open file and the quotes from the text', () => {
+    for (const [quoteList, viewerFile] of [
+      [quotes, file],
+      [quotes, undefined],
+      [undefined, file],
+      [undefined, { path: 'notes.md', heading: 'A "quoted". heading' }],
+      [[textQuote()], { path: 'notes.md' }],
+    ] as const) {
+      const preamble = userMessagePreamble(quoteList ? [...quoteList] : undefined, viewerFile)
+      expect(splitUserMessagePreamble(withQuotes('say hello\n\nthere', quoteList ? [...quoteList] : undefined, viewerFile))).toEqual({
+        preamble,
+        text: 'say hello\n\nthere',
+      })
+      expect(splitUserMessagePreamble(withQuotes('', quoteList ? [...quoteList] : undefined, viewerFile))).toEqual({ preamble, text: '' })
+    }
+  })
+
+  it('leaves text without a preamble alone, also when it starts like one', () => {
+    expect(splitUserMessagePreamble('say hello')).toEqual({ preamble: '', text: 'say hello' })
+    expect(splitUserMessagePreamble('')).toEqual({ preamble: '', text: '' })
+    for (const text of [
+      'The student has "x" open somewhere.',
+      'The student has "a.md" open in the file viewer.and more',
+      'The student quoted this from their file "a.md":\n<quote>\nnever closed',
+    ]) {
+      expect(splitUserMessagePreamble(text)).toEqual({ preamble: '', text })
+    }
   })
 })
 
