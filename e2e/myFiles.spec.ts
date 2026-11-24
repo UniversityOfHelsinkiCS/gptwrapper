@@ -425,6 +425,47 @@ adminTest('the agent writes a file into Outputs, downloaded from the chat and fr
   await expect(page.getByTestId('output-files')).toHaveCount(1)
 })
 
+adminTest('the agent file steps and the outputs list open their files in the viewer', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-step-links-'))
+  try {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+    await attachCourseNotes(page, root)
+
+    // A written output: the step and the outputs list open it
+    await sendChatMessage(page, 'writeout study-plan.md')
+    await closeSendPreference(page)
+    const writeStep = page.locator('[data-testid="tool-part"][data-tool-name="write_file"]')
+    await expect(writeStep).toHaveAttribute('data-tool-status', 'ok')
+    await writeStep.getByRole('button', { name: 'Open study-plan.md' }).click()
+    const output = page.getByRole('region', { name: 'study-plan.md' })
+    await expect(output).toBeVisible()
+    await expect(output).toContainText('A file written by the mock model.')
+    // Minimized, the next message is the bare text the mock model reacts to
+    await output.getByRole('button', { name: 'Minimize study-plan.md' }).press('Enter')
+    await expect(output).toBeHidden()
+    await page.getByTestId('output-files').getByRole('button', { name: 'Open study-plan.md' }).click()
+    await expect(output).toBeVisible()
+    await output.getByRole('button', { name: 'Minimize study-plan.md' }).press('Enter')
+
+    // A read file: its step in the activity group opens it
+    await sendChatMessage(page, 'files Course notes')
+    await expect(page.getByTestId('assistant-message').nth(1)).toContainText('The exam is on Friday the 13th.')
+    await page.getByRole('button', { name: '2 steps' }).click()
+    const readStep = page.locator('[data-testid="tool-part"][data-tool-name="read_file"]')
+    await expect(readStep).toHaveAttribute('data-tool-status', 'ok')
+    // ls has no file to open
+    await expect(page.locator('[data-testid="tool-part"][data-tool-name="ls"]').getByTestId('open-file-link')).toHaveCount(0)
+    await readStep.getByRole('button', { name: 'Open syllabus.md' }).click()
+    const syllabus = page.getByRole('region', { name: 'syllabus.md' })
+    await expect(syllabus).toBeVisible()
+    await expect(syllabus).toContainText('The exam is on Friday the 13th.')
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
 adminTest('notes written in one chat are read by the agent in a new chat, and export and import as a zip', async ({ page }) => {
   const root = mkdtempSync(join(tmpdir(), 'my-files-notes-'))
   try {
