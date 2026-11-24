@@ -99,7 +99,7 @@ export const readPdf: SubagentToolModule = {
   name: READ_PDF,
   kind: 'subagent',
   executor: 'server',
-  access: 'admin',
+  access: 'everyone',
   maturity: 'experimental',
   instructions,
   model: pdfReaderModel,

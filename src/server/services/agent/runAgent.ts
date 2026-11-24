@@ -67,7 +67,7 @@ export type RunAgentParams = {
   onStart: () => void
   emit: (event: ChatEvent) => Promise<void>
   /**
-   * Client-executed tools, only for runs over the chat socket by admins: the My files tools on the attached folders
+   * Client-executed tools, for runs over the chat socket (any user, not the HTTP route): the My files tools on the attached folders
    * (maybe none) and `Outputs/` and `Agent notes/`, called in the browser through `call`.
    */
   clientTools?: { attachedFolders: string[]; call: ClientToolCaller }
