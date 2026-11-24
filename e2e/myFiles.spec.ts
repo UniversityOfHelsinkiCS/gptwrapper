@@ -507,3 +507,71 @@ adminTest('a minimized viewer stays minimized after a reload and expands at its 
     rmSync(root, { recursive: true, force: true })
   }
 })
+
+adminTest('switches between the files of the chat from the file name menu and removes them', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-list-'))
+  try {
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    const text = Array.from({ length: 80 }, (_, n) => `## Section ${n + 1}\n\nParagraph ${n + 1}.`).join('\n\n')
+    const folder = join(root, 'Course notes')
+    mkdirSync(folder, { recursive: true })
+    writeFileSync(join(folder, 'lecture.md'), text)
+    writeFileSync(join(folder, 'summary.md'), '# Summary\n\nShort.')
+    await page.getByTestId('my-files-button').click()
+    const dialog = page.getByRole('dialog', { name: 'My files' })
+    await dialog.getByTestId('my-files-input-folder').setInputFiles(folder)
+    await expect(dialog.getByTestId('my-files-status')).toContainText('New: 2')
+    await dialog.getByRole('button', { name: /^Course notes/ }).click()
+    await dialog.getByRole('button', { name: 'Open lecture.md' }).click()
+    await expect(dialog).toBeHidden()
+    const lecture = page.getByRole('region', { name: 'lecture.md' })
+    await expect(lecture.getByText('Paragraph 80.')).toBeAttached()
+    const fraction = (region: HTMLElement) => region.scrollTop / (region.scrollHeight - region.clientHeight)
+    await lecture.evaluate((region) => region.scrollTo({ top: (region.scrollHeight - region.clientHeight) / 2 }))
+    await page.waitForTimeout(500) // the position is saved once scrolling pauses
+    // One file: the name is plain text.
+    await expect(page.getByTestId('file-viewer-files-button')).toHaveCount(0)
+
+    await page.getByTestId('my-files-button').click()
+    await dialog.getByRole('button', { name: /^Course notes/ }).click()
+    await dialog.getByRole('button', { name: 'Open summary.md' }).click()
+    const summary = page.getByRole('region', { name: 'summary.md' })
+    await expect(summary.getByRole('heading', { level: 1, name: 'Summary' })).toBeVisible()
+
+    // Switching back opens the lecture where it was left.
+    await summary.getByRole('button', { name: 'summary.md', exact: true }).click()
+    const menu = page.getByRole('menu', { name: 'Files in this chat' })
+    await expect(menu.getByRole('menuitemradio')).toHaveCount(2)
+    await expect(menu.getByRole('menuitemradio', { name: /summary\.md/ })).toHaveAttribute('aria-checked', 'true')
+    await menu.getByRole('menuitemradio', { name: /lecture\.md/ }).click()
+    await expect(menu).toBeHidden()
+    await expect(lecture).toBeFocused()
+    await expect.poll(() => lecture.evaluate(fraction)).toBeCloseTo(0.5, 1)
+
+    // The rail button counts the files.
+    await lecture.getByRole('button', { name: 'Minimize lecture.md' }).click()
+    await page.getByRole('button', { name: 'Open lecture.md (2 files in this chat)' }).click()
+    await expect(lecture).toBeFocused()
+
+    // Removing the open file (Delete on its item) opens the next one, removing the last one closes the viewer.
+    await lecture.getByRole('button', { name: 'lecture.md', exact: true }).click()
+    await expect(menu.getByRole('menuitemradio', { name: /lecture\.md/ })).toBeFocused()
+    await page.keyboard.press('Delete')
+    // The menu is open (the page behind it is hidden from assistive technology), and the next file is shown.
+    await expect(page.getByTestId('file-viewer')).toHaveAttribute('data-path', 'Course notes/summary.md')
+    await expect(menu.getByRole('menuitemradio', { name: /summary\.md/ })).toBeFocused()
+    await expect(menu.getByRole('menuitemradio')).toHaveCount(1)
+    await menu.getByRole('menuitemradio', { name: /summary\.md/ }).hover()
+    await menu.getByTestId('file-viewer-files-remove').click()
+    await expect(page.getByTestId('file-viewer')).toHaveCount(0)
+    await expect(page.getByTestId('right-rail')).toHaveCount(0)
+    await expect(page.locator('#chat-input')).toBeFocused()
+
+    await page.reload()
+    await expect(page.locator('#chat-input')).toBeVisible()
+    await expect(page.getByTestId('file-viewer')).toHaveCount(0)
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})

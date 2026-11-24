@@ -24,3 +24,24 @@ describe('FileRailButton', () => {
     expect(onExpand).toHaveBeenCalledOnce()
   })
 })
+
+describe('FileRailButton count', () => {
+  test('has a badge and says the count with two or more files', () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <FileRailButton path="lecture.md" count={3} onExpand={vi.fn()} />
+      </I18nextProvider>,
+    )
+    const button = screen.getByRole('button', { name: 'Open lecture.md (3 files in this chat)' })
+    expect(button.textContent).toBe('3')
+  })
+
+  test('has no badge with one file', () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <FileRailButton path="lecture.md" count={1} onExpand={vi.fn()} />
+      </I18nextProvider>,
+    )
+    expect(screen.getByRole('button', { name: 'Open lecture.md' }).textContent).toBe('')
+  })
+})
