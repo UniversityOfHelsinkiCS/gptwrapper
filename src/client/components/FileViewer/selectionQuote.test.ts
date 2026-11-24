@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from 'vitest'
 import { MAX_QUOTE_LENGTH } from '@shared/quote'
-import { nearestHeading, pdfPageOf, selectionToQuote } from './selectionQuote'
+import { headingInView, nearestHeading, pdfPageOf, selectionToQuote } from './selectionQuote'
 
 afterEach(() => {
   document.getSelection()?.removeAllRanges()
@@ -112,5 +112,16 @@ describe('nearestHeading', () => {
   test('is undefined without headings', () => {
     const content = setup('<p id="a">Text</p>')
     expect(nearestHeading(content, byId('a'))).toBe(undefined)
+  })
+})
+
+describe('headingInView', () => {
+  test('is the last heading starting above the top of the visible area, or just below it', () => {
+    const content = setup('<h1 id="h1">Intro</h1><p>a</p><h2 id="h2">  Part 2 </h2><p>b</p><h3 id="h3">Part 3</h3>')
+    const tops: Record<string, number> = { h1: -400, h2: -100, h3: 200 }
+    for (const [id, top] of Object.entries(tops)) byId(id).getBoundingClientRect = () => ({ top }) as DOMRect
+    expect(headingInView(content, 0)).toBe('Part 2')
+    expect(headingInView(content, 190)).toBe('Part 3')
+    expect(headingInView(content, -500)).toBe(undefined)
   })
 })

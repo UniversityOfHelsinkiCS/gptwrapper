@@ -72,7 +72,8 @@ import en from '../../locales/en.json'
 import { createMemoryStore } from '../../util/myFiles/memoryStore'
 import type { MyFilesStore } from '../../util/myFiles/store'
 import FileViewer from './FileViewer'
-import type { ViewerTarget } from './FileViewerContext'
+import { MyFilesStoreProvider } from '../MyFiles/MyFilesStoreContext'
+import { FileViewerProvider, useFileViewer, type ViewerTarget } from './FileViewerContext'
 import type { PendingQuote } from './selectionQuote'
 
 const i18n = i18next.createInstance()
@@ -154,6 +155,30 @@ describe('FileViewer PDFs', () => {
     expect(screen.getByTestId('file-viewer-zoom').textContent).toBe('150%')
     fireEvent.click(screen.getByRole('button', { name: 'Fit to width' }))
     expect(viewer.currentScaleValue).toBe('page-width')
+  })
+
+  test('tells the chat the current page', async () => {
+    fake.state.getDocument = loading(7)
+    const store = await storeWithPdf()
+    let readPosition: ((path: string) => unknown) | undefined
+    const Probe = () => {
+      readPosition = useFileViewer()?.readPosition
+      return null
+    }
+    render(
+      <MyFilesStoreProvider store={store}>
+        <FileViewerProvider available>
+          <Probe />
+          {ui(store, { path: 'Course/book.pdf' })}
+        </FileViewerProvider>
+      </MyFilesStoreProvider>,
+    )
+    expect(readPosition?.('Course/book.pdf')).toEqual({ path: 'Course/book.pdf' })
+    await screen.findByTestId('file-viewer-pdf-page')
+    act(() => fake.state.bus!.dispatch('pagesinit'))
+    expect(readPosition?.('Course/book.pdf')).toEqual({ path: 'Course/book.pdf', page: 1 })
+    act(() => fake.state.bus!.dispatch('pagechanging', { pageNumber: 3 }))
+    expect(readPosition?.('Course/book.pdf')).toEqual({ path: 'Course/book.pdf', page: 3 })
   })
 
   test('a selection on a page is quoted with that page, and the floating toolbar hides on scroll of the PDF', async () => {

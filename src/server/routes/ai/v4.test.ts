@@ -79,6 +79,7 @@ const stream = ({
   history = [],
   quizAnswer,
   quotes,
+  viewerFile,
   resumeRunId,
 }: {
   message?: string
@@ -88,6 +89,7 @@ const stream = ({
   history?: unknown[]
   quizAnswer?: unknown
   quotes?: unknown
+  viewerFile?: unknown
   resumeRunId?: string
 } = {}) => {
   const form = new FormData()
@@ -95,7 +97,16 @@ const stream = ({
     'data',
     JSON.stringify({
       options: {
-        chatMessages: [...history, { role: 'user', content: message, ...(quizAnswer ? { quizAnswer } : {}), ...(quotes ? { quotes } : {}) }],
+        chatMessages: [
+          ...history,
+          {
+            role: 'user',
+            content: message,
+            ...(quizAnswer ? { quizAnswer } : {}),
+            ...(quotes ? { quotes } : {}),
+            ...(viewerFile ? { viewerFile } : {}),
+          },
+        ],
         generationInfo: {
           model,
           promptInfo: promptId ? { type: 'saved', id: promptId, name: 'Essay helper' } : { type: 'custom', systemMessage: 'You are helpful' },
@@ -239,6 +250,28 @@ describe('POST /ai/v4/stream', () => {
     const quote = { kind: 'text', path: 'notes.md', text: 'x' }
     const response = await stream({ message: 'hi', quotes: [quote, quote, quote, quote] })
     expect(response.status).toBe(400)
+  })
+
+  test('names the file open in the viewer before the quotes and the question', async () => {
+    const spy = vi.spyOn(MockModel.prototype, '_streamResponseChunks')
+    const quotes = [{ kind: 'text', path: 'Course/book.pdf', page: 3, text: 'A lemma.' }]
+
+    const response = await stream({ message: 'explain', quotes, viewerFile: { path: 'Course/book.pdf', page: 3 } })
+    await response.text()
+    const messages = spy.mock.calls[0][0] as { type: string; content: unknown }[]
+    spy.mockRestore()
+
+    expect(response.status).toBe(200)
+    expect(messages.at(-1)).toMatchObject({
+      type: 'human',
+      content:
+        'The student has "Course/book.pdf" open in the file viewer, at page 3.\n\nThe student quoted this from their file "Course/book.pdf", page 3:\n<quote>\nA lemma.\n</quote>\n\nexplain',
+    })
+  })
+
+  test('rejects an invalid open file', async () => {
+    expect((await stream({ message: 'hi', viewerFile: { path: 'a.pdf', page: 0 } })).status).toBe(400)
+    expect((await stream({ message: 'hi', viewerFile: { path: '' } })).status).toBe(400)
   })
 
   test('sends earlier tool parts to the model as text summaries, not tool calls', async () => {

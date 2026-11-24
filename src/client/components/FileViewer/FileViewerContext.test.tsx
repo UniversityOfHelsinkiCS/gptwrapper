@@ -1,9 +1,11 @@
+import { useEffect } from 'react'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { createMemoryStore } from '../../util/myFiles/memoryStore'
 import type { MyFilesStore } from '../../util/myFiles/store'
 import { MyFilesStoreProvider } from '../MyFiles/MyFilesStoreContext'
-import { FileViewerProvider, useFileViewer } from './FileViewerContext'
+import { activeViewerFile, FileViewerProvider, useFileViewer, type FileViewerControls, type ViewerPositionReader } from './FileViewerContext'
+import { MAX_VIEWER_FILE_HEADING_LENGTH, MAX_VIEWER_FILE_PATH_LENGTH, type ViewerFile } from '@shared/viewerFile'
 import { openFileStorageKey, readChatFiles, readMinimized, writeChatFiles, writeMinimized } from './viewerPersistence'
 
 beforeEach(() => localStorage.clear())
@@ -22,6 +24,7 @@ const Controls = () => {
       {['a.md', 'b.md', 'c.md'].map((path) => (
         <button key={path} data-testid={`remove-${path}`} onClick={() => viewer?.remove(path)} />
       ))}
+      <output data-testid="active">{JSON.stringify(activeViewerFile(viewer) ?? null)}</output>
       <button data-testid="minimize" onClick={() => viewer?.minimize()} />
       <button data-testid="expand" onClick={() => viewer?.expand()} />
     </>
@@ -201,5 +204,65 @@ describe('FileViewerProvider minimize', () => {
     render(ui(store, 'course-1'))
     click('minimize')
     expect(readMinimized('course-1')).toBe(false)
+  })
+})
+
+describe('activeViewerFile', () => {
+  /** Registers a position reader like the shown FileViewer does, and reads the active file on click (as sending does). */
+  const Probe = ({ reader }: { reader: ViewerPositionReader }) => {
+    const viewer = useFileViewer()
+    const setPositionReader = viewer?.setPositionReader
+    useEffect(() => {
+      setPositionReader?.(reader)
+      return () => setPositionReader?.(null)
+    }, [setPositionReader, reader])
+    return <button data-testid="read" onClick={(event) => (event.currentTarget.dataset.read = JSON.stringify(activeViewerFile(viewer) ?? null))} />
+  }
+  const read = () => {
+    click('read')
+    return JSON.parse(screen.getByTestId('read').dataset.read!)
+  }
+  const withProbe = (store: MyFilesStore, reader: ViewerPositionReader) => (
+    <MyFilesStoreProvider store={store}>
+      <FileViewerProvider available chatContext="course-1">
+        <Controls />
+        <Probe reader={reader} />
+      </FileViewerProvider>
+    </MyFilesStoreProvider>
+  )
+
+  test('is the open file while it is not minimized', async () => {
+    const store = await storeWith('a.md')
+    render(ui(store, 'course-1'))
+    expect(JSON.parse(screen.getByTestId('active').textContent!)).toBe(null)
+    click('open-a.md')
+    expect(JSON.parse(screen.getByTestId('active').textContent!)).toEqual({ path: 'a.md' })
+    click('minimize')
+    expect(JSON.parse(screen.getByTestId('active').textContent!)).toBe(null)
+    click('expand')
+    expect(JSON.parse(screen.getByTestId('active').textContent!)).toEqual({ path: 'a.md' })
+  })
+
+  test('has the position the viewer reads at that moment, only for the open file', async () => {
+    const store = await storeWith('a.md', 'b.md')
+    let position = { path: 'a.md', heading: 'Intro' }
+    const reader = () => position
+    render(withProbe(store, reader))
+    click('open-a.md')
+    expect(read()).toEqual({ path: 'a.md', heading: 'Intro' })
+    position = { path: 'a.md', heading: 'Part 2' }
+    expect(read()).toEqual({ path: 'a.md', heading: 'Part 2' })
+    // A reader still telling about the previous file is not used.
+    click('open-b.md')
+    expect(read()).toEqual({ path: 'b.md' })
+  })
+
+  test('cuts a long heading and leaves out a path too long to send', () => {
+    const controls = (path: string, position: ViewerFile): FileViewerControls =>
+      ({ target: { path }, minimized: false, readPosition: () => position }) as unknown as FileViewerControls
+    const heading = 'h'.repeat(MAX_VIEWER_FILE_HEADING_LENGTH + 10)
+    expect(activeViewerFile(controls('a.md', { path: 'a.md', heading }))).toEqual({ path: 'a.md', heading: heading.slice(0, MAX_VIEWER_FILE_HEADING_LENGTH) })
+    const longPath = 'a'.repeat(MAX_VIEWER_FILE_PATH_LENGTH + 1)
+    expect(activeViewerFile(controls(longPath, { path: longPath }))).toBe(undefined)
   })
 })

@@ -329,9 +329,10 @@ adminTest('the open PDF and its page are remembered over a reload and a chat res
     await expect(pdf.locator('.page[data-page-number="8"] .textLayer')).toContainText('Chapter 8: Thermodynamics.')
 
     // Resetting the chat keeps the file open.
+    // (The open file is named before the text, so the mock model's prefix triggers do not fire: any answer will do.)
     await sendChatMessage(page, 'say hello')
     await closeSendPreference(page)
-    await expect(page.getByTestId('assistant-message')).toContainText('hello')
+    await expect(page.getByTestId('assistant-message')).toBeVisible()
     await page.getByTestId('new-conversation-button').click()
     await page.getByTestId('submit-confirm-reset').click()
     await expect(page.getByTestId('assistant-message')).toHaveCount(0)
@@ -402,6 +403,54 @@ adminTest('the source of a PDF quote opens the file at the quoted page', async (
     await expect(viewer.getByTestId('file-viewer-pdf-page')).toHaveText('Page 1 / 6')
     await source.click()
     await expect(viewer.getByTestId('file-viewer-pdf-page')).toHaveText('Page 4 / 6')
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
+adminTest('a message names the open PDF and its page, not when the viewer is minimized', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-pdf-open-note-'))
+  const sentFrames: string[] = []
+  page.on('websocket', (ws) => ws.on('framesent', (frame) => sentFrames.push(String(frame.payload))))
+  /** The last user message of the run started with `text`. */
+  const sentMessage = (text: string) => {
+    const frame = sentFrames
+      .map((payload) => JSON.parse(payload))
+      .find((sent) => sent.type === 'run.start' && sent.input.options.chatMessages.at(-1)?.content === text)
+    return frame?.input.options.chatMessages.at(-1)
+  }
+  try {
+    const folder = join(root, 'Course notes')
+    mkdirSync(folder, { recursive: true })
+    const pages = Array.from({ length: 5 }, (_, n) => [`Chapter ${n + 1}: Thermodynamics.`])
+    writeFileSync(join(folder, 'book.pdf'), makeTextPdf(pages, { links: [{ page: 1, text: 'Go to chapter 3', to: 3 }] }))
+
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+    await page.getByTestId('my-files-button').click()
+    const dialog = page.getByRole('dialog', { name: 'My files' })
+    await dialog.getByTestId('my-files-input-folder').setInputFiles(folder)
+    await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+    await dialog.getByRole('button', { name: /^Course notes/ }).click()
+    await dialog.getByRole('button', { name: 'Open book.pdf' }).click()
+
+    const viewer = page.getByRole('region', { name: 'book.pdf' })
+    const pdf = viewer.getByTestId('file-viewer-pdf')
+    await pdf.locator('.page[data-page-number="1"] .annotationLayer a').first().click()
+    await expect(pdf).toHaveAttribute('data-page', '3')
+
+    await sendChatMessage(page, 'what is on this page?')
+    await closeSendPreference(page)
+    await expect(page.getByTestId('assistant-message')).toHaveCount(1)
+    await expect.poll(() => sentMessage('what is on this page?')?.viewerFile).toEqual({ path: 'Course notes/book.pdf', page: 3 })
+
+    await viewer.getByRole('button', { name: 'Minimize book.pdf' }).press('Enter')
+    await expect(viewer).toBeHidden()
+    await sendChatMessage(page, 'and in general?')
+    await expect(page.getByTestId('assistant-message')).toHaveCount(2)
+    await expect.poll(() => sentMessage('and in general?')).toBeTruthy()
+    expect(sentMessage('and in general?')).not.toHaveProperty('viewerFile')
   } finally {
     rmSync(root, { recursive: true, force: true })
   }

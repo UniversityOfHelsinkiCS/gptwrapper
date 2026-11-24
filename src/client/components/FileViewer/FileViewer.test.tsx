@@ -447,4 +447,58 @@ describe('FileViewer reading position', () => {
     expect(region.scrollTop).toBe(292)
     rect.mockRestore()
   })
+
+  test('tells the chat the Markdown heading of the section in view, also while hidden behind the chat', async () => {
+    const store = await storeWith({ 'notes.md': '# Part 1\n\ntext\n\n## Part 2\n\nmore' })
+    let readPosition: ((path: string) => unknown) | undefined
+    const Probe = () => {
+      readPosition = useFileViewer()?.readPosition
+      return null
+    }
+    render(
+      <MyFilesStoreProvider store={store}>
+        <FileViewerProvider available>
+          <Probe />
+          {ui(store, { path: 'notes.md' })}
+        </FileViewerProvider>
+      </MyFilesStoreProvider>,
+    )
+    const region = withLayout(screen.getByTestId('file-viewer'))
+    await screen.findByRole('heading', { name: 'Part 2' })
+    let part2Top = 300
+    const rect = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      return { top: this.tagName === 'H2' ? part2Top : this.tagName === 'H1' ? -50 : 0 } as DOMRect
+    })
+
+    expect(readPosition?.('notes.md')).toEqual({ path: 'notes.md', heading: 'Part 1' })
+    // A heading just below the top of the visible area starts the section in view.
+    part2Top = 10
+    expect(readPosition?.('notes.md')).toEqual({ path: 'notes.md', heading: 'Part 2' })
+
+    // Hidden (narrow mode showing the chat), it cannot be measured: the last heading in view stays.
+    Object.defineProperty(region, 'clientHeight', { value: 0, configurable: true })
+    part2Top = 300
+    expect(readPosition?.('notes.md')).toEqual({ path: 'notes.md', heading: 'Part 2' })
+    rect.mockRestore()
+  })
+
+  test('tells the chat no position for a text file', async () => {
+    const store = await storeWith({ 'a.txt': '# not a heading' })
+    let readPosition: ((path: string) => unknown) | undefined
+    const Probe = () => {
+      readPosition = useFileViewer()?.readPosition
+      return null
+    }
+    render(
+      <MyFilesStoreProvider store={store}>
+        <FileViewerProvider available>
+          <Probe />
+          {ui(store, { path: 'a.txt' })}
+        </FileViewerProvider>
+      </MyFilesStoreProvider>,
+    )
+    withLayout(screen.getByTestId('file-viewer'))
+    await screen.findByTestId('file-viewer-text')
+    expect(readPosition?.('a.txt')).toEqual({ path: 'a.txt' })
+  })
 })
