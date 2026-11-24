@@ -492,6 +492,33 @@ adminTest.describe('axe wcag scan for my files', () => {
     }
   })
 
+  adminTest('scan chat with the file viewer minimized to the rail', async ({ page }, testInfo) => {
+    const root = mkdtempSync(join(tmpdir(), 'axe-viewer-rail-'))
+    try {
+      mkdirSync(join(root, 'Course notes'), { recursive: true })
+      writeFileSync(join(root, 'Course notes', 'lecture.md'), '# Eigenvalues\n\nAn eigenvector keeps its direction.')
+
+      await page.goto('/general')
+      await acceptDisclaimer(page)
+      await page.getByTestId('my-files-button').click()
+      const dialog = page.getByRole('dialog', { name: 'My files' })
+      await dialog.getByTestId('my-files-input-folder').setInputFiles(join(root, 'Course notes'))
+      await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+      await dialog.getByRole('button', { name: /^Course notes/ }).click()
+      await dialog.getByRole('button', { name: 'Open lecture.md' }).click()
+      await expect(dialog).toBeHidden()
+      const viewer = page.getByRole('region', { name: 'lecture.md' })
+      await viewer.getByRole('button', { name: 'Minimize lecture.md' }).click()
+      await expect(viewer).toBeHidden()
+      await expect(page.getByTestId('right-rail').getByRole('button', { name: 'Open lecture.md' })).toBeVisible()
+      await page.mouse.move(0, 0)
+      await expect(page.getByRole('tooltip')).toHaveCount(0)
+      await scan(page, testInfo.title)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+
   adminTest('scan a file open in the viewer on a narrow screen', async ({ page }, testInfo) => {
     const root = mkdtempSync(join(tmpdir(), 'axe-narrow-viewer-'))
     try {

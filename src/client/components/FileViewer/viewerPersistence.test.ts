@@ -1,10 +1,13 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 import {
   MAX_READING_POSITIONS,
+  minimizedStorageKey,
   openFileStorageKey,
   readingPositionKey,
+  readMinimized,
   readOpenFile,
   readReadingPosition,
+  writeMinimized,
   writeOpenFile,
   writeReadingPosition,
 } from './viewerPersistence'
@@ -23,6 +26,18 @@ describe('open file per chat context', () => {
     writeOpenFile('general', null)
     expect(readOpenFile('general')).toBe(null)
     expect(readOpenFile('hy-opt-cur-1')).toBe('Course/notes.md')
+  })
+})
+
+describe('minimized per chat context', () => {
+  test('is stored only while minimized', () => {
+    writeMinimized('general', true)
+    expect(localStorage.getItem(minimizedStorageKey('general'))).toBe('true')
+    expect(readMinimized('general')).toBe(true)
+    expect(readMinimized('otm-2')).toBe(false)
+    writeMinimized('general', false)
+    expect(localStorage.getItem(minimizedStorageKey('general'))).toBe(null)
+    expect(readMinimized('general')).toBe(false)
   })
 })
 

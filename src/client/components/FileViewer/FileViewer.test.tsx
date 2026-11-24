@@ -23,13 +23,13 @@ beforeAll(async () => {
 })
 afterEach(cleanup)
 
-const renderViewer = (store: MyFilesStore, path: string, onClose = vi.fn()) => {
+const renderViewer = (store: MyFilesStore, path: string, onMinimize = vi.fn()) => {
   render(
     <I18nextProvider i18n={i18n}>
-      <FileViewer store={store} target={{ path }} onClose={onClose} />
+      <FileViewer store={store} target={{ path }} onMinimize={onMinimize} />
     </I18nextProvider>,
   )
-  return onClose
+  return onMinimize
 }
 
 const storeWith = async (files: Record<string, string>) => {
@@ -123,14 +123,42 @@ describe('FileViewer', () => {
     expect((await screen.findByTestId('file-viewer-message')).textContent).toBe('gone.md is no longer in My files.')
   })
 
-  test('has a toolbar with the file name and a close button', async () => {
+  test('has a toolbar with the file name and a minimize button', async () => {
     const store = await storeWith({ 'Course/notes.md': 'Hello' })
-    const onClose = renderViewer(store, 'Course/notes.md')
+    const onMinimize = renderViewer(store, 'Course/notes.md')
     expect(screen.getByRole('region', { name: 'notes.md' })).toBeTruthy()
     expect(screen.getByText('Experimental')).toBeTruthy()
     await screen.findByText('Hello')
-    fireEvent.click(screen.getByRole('button', { name: 'Close notes.md' }))
-    expect(onClose).toHaveBeenCalledOnce()
+    fireEvent.click(screen.getByRole('button', { name: 'Minimize notes.md' }))
+    expect(onMinimize).toHaveBeenCalledOnce()
+  })
+
+  test('has no minimize button in narrow mode, where Back to chat does it', async () => {
+    const store = await storeWith({ 'notes.md': 'Hello' })
+    render(
+      <I18nextProvider i18n={i18n}>
+        <FileViewer store={store} target={{ path: 'notes.md' }} onBackToChat={vi.fn()} />
+      </I18nextProvider>,
+    )
+    await screen.findByText('Hello')
+    expect(screen.getByRole('button', { name: 'Back to chat' })).toBeTruthy()
+    expect(screen.queryByTestId('file-viewer-minimize')).toBe(null)
+  })
+
+  test('takes the focus when a file is opened, but not when it is restored', async () => {
+    const store = await storeWith({ 'a.md': 'A', 'b.md': 'B' })
+    const ui = (target: ViewerTarget, focusOnOpen: boolean) => (
+      <I18nextProvider i18n={i18n}>
+        <FileViewer store={store} target={target} focusOnOpen={focusOnOpen} />
+      </I18nextProvider>
+    )
+    const { rerender } = render(ui({ path: 'a.md' }, false))
+    await screen.findByText('A')
+    expect(document.activeElement).toBe(document.body)
+
+    rerender(ui({ path: 'b.md' }, true))
+    await screen.findByText('B')
+    expect(document.activeElement).toBe(screen.getByTestId('file-viewer'))
   })
 })
 
@@ -161,7 +189,6 @@ describe('FileViewer Ask…', () => {
         <FileViewer
           store={store}
           target={{ path: 'Course/notes.md' }}
-          onClose={vi.fn()}
           onAddQuote={onAddQuote}
           quickActionsDisabled={quickActionsDisabled}
           floatingToolbar={!narrow}
@@ -378,7 +405,7 @@ describe('FileViewer reading position', () => {
 
   const ui = (store: MyFilesStore, target: ViewerTarget) => (
     <I18nextProvider i18n={i18n}>
-      <FileViewer store={store} target={target} onClose={vi.fn()} />
+      <FileViewer store={store} target={target} />
     </I18nextProvider>
   )
 

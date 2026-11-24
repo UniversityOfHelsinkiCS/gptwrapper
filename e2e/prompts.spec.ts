@@ -237,6 +237,21 @@ test.describe('Prompts', () => {
       await expect(page.getByTestId('sources-header')).toBeHidden()
       await expect(page.getByTestId('open-annotations')).toBeVisible()
 
+      // A minimized file shares the rail with the sources toggle, and expanding either one takes the slot.
+      await viewer.getByRole('button', { name: 'Minimize lecture.md' }).click()
+      await expect(viewer).toBeHidden()
+      const rail = page.getByTestId('right-rail')
+      await expect(rail.getByTestId('open-annotations')).toBeVisible()
+      await expect(rail.getByRole('button', { name: 'Open lecture.md' })).toBeVisible()
+      await rail.getByTestId('open-annotations').click()
+      await expect(page.getByTestId('sources-header')).toBeVisible()
+      await expect(viewer).toBeHidden()
+      await rail.getByRole('button', { name: 'Open lecture.md' }).click()
+      await expect(viewer).toBeVisible()
+      await expect(viewer).toBeFocused()
+      await expect(page.getByTestId('sources-header')).toBeHidden()
+      await expect(rail.getByTestId('open-annotations')).toBeVisible()
+
       // The sources link in the message swaps it too, and opening a file takes the slot back.
       await page.getByTestId('file-search-sources').click()
       await expect(page.getByTestId('sources-header')).toBeVisible()

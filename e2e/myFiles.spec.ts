@@ -114,9 +114,15 @@ adminTest('opens a Markdown file from My files in the viewer next to the chat', 
     await expect(viewer.locator('img')).toHaveCount(0)
     await expect(viewer).toBeFocused()
 
-    await viewer.getByRole('button', { name: 'Close lecture.md' }).click()
-    await expect(page.getByTestId('file-viewer')).toHaveCount(0)
-    await expect(page.locator('#chat-input')).toBeFocused()
+    // Minimizing keeps the file in the rail, and the rail button brings it back.
+    await viewer.getByRole('button', { name: 'Minimize lecture.md' }).click()
+    await expect(viewer).toBeHidden()
+    const expand = page.getByTestId('right-rail').getByRole('button', { name: 'Open lecture.md' })
+    await expect(expand).toBeFocused()
+    await expand.click()
+    await expect(viewer).toBeVisible()
+    await expect(viewer).toBeFocused()
+    await expect(page.getByTestId('right-rail')).toHaveCount(0)
   } finally {
     rmSync(root, { recursive: true, force: true })
   }
@@ -228,8 +234,8 @@ adminTest('the viewer collapses the sidebar and is resized with the separator, w
     await expect(separator).not.toHaveAttribute('aria-valuenow', '50')
     const dragged = await separator.getAttribute('aria-valuenow')
 
-    // Closing does not bring the sidebar back, and the split is remembered.
-    await viewer.getByRole('button', { name: 'Close lecture.md' }).click()
+    // Minimizing does not bring the sidebar back, and the split is remembered.
+    await viewer.getByRole('button', { name: 'Minimize lecture.md' }).click()
     await expect(page.getByTestId('left-panel-close')).toBeHidden()
     await page.reload()
     await page.getByTestId('my-files-button').click()
@@ -464,6 +470,38 @@ adminTest('a Markdown file reopens after a reload scrolled where it was left', a
 
     await page.reload()
     await expect(viewer.getByText('Paragraph 80.')).toBeAttached()
+    await expect.poll(() => viewer.evaluate(fraction)).toBeCloseTo(0.5, 1)
+    // Restoring the file does not move the focus into it.
+    await expect(viewer).not.toBeFocused()
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
+adminTest('a minimized viewer stays minimized after a reload and expands at its position', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-minimize-'))
+  try {
+    await page.goto('/general')
+    await acceptDisclaimer(page)
+    const text = Array.from({ length: 80 }, (_, n) => `## Section ${n + 1}\n\nParagraph ${n + 1}.`).join('\n\n')
+    const viewer = await openLectureInViewer(page, root, text)
+    await expect(viewer.getByText('Paragraph 80.')).toBeAttached()
+    const fraction = (region: HTMLElement) => region.scrollTop / (region.scrollHeight - region.clientHeight)
+    await viewer.evaluate((region) => region.scrollTo({ top: (region.scrollHeight - region.clientHeight) / 2 }))
+    await page.waitForTimeout(500) // the position is saved once scrolling pauses
+
+    await viewer.getByRole('button', { name: 'Minimize lecture.md' }).click()
+    await expect(viewer).toBeHidden()
+    await expect(page.getByRole('separator', { name: 'Resize the chat and the file' })).toHaveCount(0)
+    const expand = page.getByRole('button', { name: 'Open lecture.md' })
+    await expect(expand).toBeVisible()
+
+    await page.reload()
+    await expect(expand).toBeVisible()
+    await expect(viewer).toBeHidden()
+    await expand.click()
+    await expect(viewer).toBeVisible()
+    await expect(viewer).toBeFocused()
     await expect.poll(() => viewer.evaluate(fraction)).toBeCloseTo(0.5, 1)
   } finally {
     rmSync(root, { recursive: true, force: true })

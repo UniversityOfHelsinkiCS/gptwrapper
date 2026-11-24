@@ -4,7 +4,7 @@ import { createMemoryStore } from '../../util/myFiles/memoryStore'
 import type { MyFilesStore } from '../../util/myFiles/store'
 import { MyFilesStoreProvider } from '../MyFiles/MyFilesStoreContext'
 import { FileViewerProvider, useFileViewer } from './FileViewerContext'
-import { readOpenFile, writeOpenFile } from './viewerPersistence'
+import { readMinimized, readOpenFile, writeMinimized, writeOpenFile } from './viewerPersistence'
 
 beforeEach(() => localStorage.clear())
 afterEach(cleanup)
@@ -14,7 +14,10 @@ const Controls = () => {
   return (
     <>
       <output data-testid="target">{viewer?.target?.path ?? ''}</output>
+      <output data-testid="state">{viewer ? `${viewer.minimized ? 'minimized' : 'expanded'} ${viewer.restored ? 'restored' : 'opened'}` : ''}</output>
       <button data-testid="open" onClick={() => viewer?.open({ path: 'b.md' })} />
+      <button data-testid="minimize" onClick={() => viewer?.minimize()} />
+      <button data-testid="expand" onClick={() => viewer?.expand()} />
       <button data-testid="close" onClick={() => viewer?.close()} />
     </>
   )
@@ -29,6 +32,7 @@ const ui = (store: MyFilesStore, chatContext: string, available = true) => (
 )
 
 const target = () => screen.getByTestId('target').textContent
+const state = () => screen.getByTestId('state').textContent
 
 const storeWith = async (...paths: string[]) => {
   const store = createMemoryStore()
@@ -82,5 +86,61 @@ describe('FileViewerProvider persistence', () => {
     await act(async () => {})
     expect(target()).toBe('')
     expect(readOpenFile('course-1')).toBe('a.md')
+  })
+
+  test('a restored file is marked restored, an opened one is not', async () => {
+    const store = await storeWith('a.md', 'b.md')
+    writeOpenFile('course-1', 'a.md')
+    render(ui(store, 'course-1'))
+    await waitFor(() => expect(target()).toBe('a.md'))
+    expect(state()).toBe('expanded restored')
+    fireEvent.click(screen.getByTestId('open'))
+    expect(state()).toBe('expanded opened')
+  })
+})
+
+describe('FileViewerProvider minimize', () => {
+  test('minimizes and expands the open file, remembered per chat context', async () => {
+    const store = await storeWith('a.md', 'b.md')
+    const { rerender } = render(ui(store, 'course-1'))
+    fireEvent.click(screen.getByTestId('open'))
+    fireEvent.click(screen.getByTestId('minimize'))
+    expect(target()).toBe('b.md')
+    expect(state()).toBe('minimized opened')
+    expect(readMinimized('course-1')).toBe(true)
+
+    rerender(ui(store, 'general'))
+    expect(state()).toBe('expanded opened')
+    expect(readMinimized('general')).toBe(false)
+
+    rerender(ui(store, 'course-1'))
+    await waitFor(() => expect(target()).toBe('b.md'))
+    expect(state()).toBe('minimized restored')
+
+    fireEvent.click(screen.getByTestId('expand'))
+    expect(state()).toBe('expanded restored')
+    expect(readMinimized('course-1')).toBe(false)
+  })
+
+  test('opening a file expands a minimized viewer', async () => {
+    const store = await storeWith('a.md', 'b.md')
+    writeOpenFile('course-1', 'a.md')
+    writeMinimized('course-1', true)
+    render(ui(store, 'course-1'))
+    await waitFor(() => expect(state()).toBe('minimized restored'))
+    fireEvent.click(screen.getByTestId('open'))
+    expect(target()).toBe('b.md')
+    expect(state()).toBe('expanded opened')
+    expect(readMinimized('course-1')).toBe(false)
+  })
+
+  test('closing forgets the minimized state', async () => {
+    const store = await storeWith('b.md')
+    render(ui(store, 'course-1'))
+    fireEvent.click(screen.getByTestId('open'))
+    fireEvent.click(screen.getByTestId('minimize'))
+    fireEvent.click(screen.getByTestId('close'))
+    expect(target()).toBe('')
+    expect(readMinimized('course-1')).toBe(false)
   })
 })

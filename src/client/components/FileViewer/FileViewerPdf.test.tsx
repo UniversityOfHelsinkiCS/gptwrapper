@@ -92,7 +92,7 @@ const loading = (numPages: number) => () => ({ promise: Promise.resolve({ numPag
 
 const ui = (store: MyFilesStore, target: ViewerTarget, onAddQuote?: (pending: PendingQuote) => void) => (
   <I18nextProvider i18n={i18n}>
-    <FileViewer store={store} target={target} onClose={vi.fn()} onAddQuote={onAddQuote} />
+    <FileViewer store={store} target={target} onAddQuote={onAddQuote} />
   </I18nextProvider>
 )
 
