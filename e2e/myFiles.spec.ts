@@ -622,9 +622,9 @@ adminTest('switches between the files of the chat from the file name menu and re
     await page.keyboard.press('Escape')
     await expect(menu).toBeHidden()
 
-    // The rail button counts the files.
+    // The rail button expands the viewer back.
     await lecture.getByRole('button', { name: 'Minimize lecture.md' }).click()
-    await page.getByRole('button', { name: 'Open lecture.md (2 files in this chat)' }).click()
+    await page.getByRole('button', { name: 'Open lecture.md' }).click()
     await expect(lecture).toBeFocused()
 
     // Removing the open file (Delete on its item) opens the next one, removing the last one closes the viewer.
