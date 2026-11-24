@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { visuallyHidden } from '@mui/utils'
 import { useTranslation } from 'react-i18next'
 import { TableBody, TableCell, TableHead, TableRow, Table, Link, Paper, Typography, Box, Stack } from '@mui/material'
 import ReactMarkdown from 'react-markdown'
@@ -64,16 +65,34 @@ const exportDiscussions = (course: Course, discussers: { user_id: string }[], di
 const DiscussionView: React.FC<{ courseId?: string }> = ({ courseId: courseIdProp }) => {
   const { courseId: routeCourseId } = useParams<{ courseId: string }>()
   const courseId = courseIdProp ?? routeCourseId
-  const [selectedUserId, setSelectedUserId] = useState<string | undefined>(undefined)
+  const [selected, setSelected] = useState<{ userId: string; studentNumber: number } | undefined>(undefined)
 
-  if (selectedUserId) {
-    return <DiscussionDetail courseId={courseId} userId={selectedUserId} onBack={() => setSelectedUserId(undefined)} />
+  const [lastSelectedUserId, setLastSelectedUserId] = useState<string | undefined>(undefined)
+
+  if (selected) {
+    return (
+      <DiscussionDetail
+        courseId={courseId}
+        userId={selected.userId}
+        studentNumber={selected.studentNumber}
+        onBack={() => {
+          setLastSelectedUserId(selected.userId)
+          setSelected(undefined)
+        }}
+      />
+    )
   }
 
-  return <DiscussionList courseId={courseId} onSelectUser={setSelectedUserId} />
+  return (
+    <DiscussionList courseId={courseId} focusUserId={lastSelectedUserId} onSelectUser={(userId, studentNumber) => setSelected({ userId, studentNumber })} />
+  )
 }
 
-const DiscussionList: React.FC<{ courseId?: string; onSelectUser: (userId: string) => void }> = ({ courseId, onSelectUser }) => {
+const DiscussionList: React.FC<{
+  courseId?: string
+  focusUserId?: string
+  onSelectUser: (userId: string, studentNumber: number) => void
+}> = ({ courseId, focusUserId, onSelectUser }) => {
   const { t, i18n } = useTranslation()
   const { language } = i18n
   const { user, isLoading: isUserLoading } = useCurrentUser()
@@ -116,15 +135,19 @@ const DiscussionList: React.FC<{ courseId?: string; onSelectUser: (userId: strin
             borderRadius: '1.25rem',
           }}
         >
-          <Typography variant="h6">{t('course:reseachCourse')}</Typography>
+          <Typography variant="h6" component="h3">
+            {t('course:reseachCourse')}
+          </Typography>
           <InfoBox severity="warning" sx={{ my: 2.5 }}>
             <Typography>{t('course:isSavedNotOptOut')}</Typography>
           </InfoBox>
         </Paper>
       )}
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-        <h2>{course.name[language]}</h2>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mt: 2 }}>
+        <Typography variant="h4" component="h3">
+          {course.name[language]}
+        </Typography>
         {discussers.length > 0 && (
           <BlueButton startIcon={<DownloadIcon />} onClick={handleDownloadAll} disabled={isExporting}>
             {t('course:downloadAllDiscussions')}
@@ -143,7 +166,11 @@ const DiscussionList: React.FC<{ courseId?: string; onSelectUser: (userId: strin
           {discussers.map((d, idx) => (
             <TableRow key={d.user_id}>
               <TableCell>
-                <Link component="button" onClick={() => onSelectUser(d.user_id)}>
+                <Link
+                  component="button"
+                  onClick={() => onSelectUser(d.user_id, idx + 1)}
+                  ref={d.user_id === focusUserId ? (el: HTMLButtonElement | null) => el?.focus() : undefined}
+                >
                   {t('course:student')} {idx + 1}
                 </Link>
               </TableCell>
@@ -156,17 +183,37 @@ const DiscussionList: React.FC<{ courseId?: string; onSelectUser: (userId: strin
   )
 }
 
-const DiscussionDetail: React.FC<{ courseId?: string; userId: string; onBack: () => void }> = ({ courseId, userId, onBack }) => {
+const DiscussionDetail: React.FC<{ courseId?: string; userId: string; studentNumber: number; onBack: () => void }> = ({
+  courseId,
+  userId,
+  studentNumber,
+  onBack,
+}) => {
   const { t } = useTranslation()
   const { data: discussions, isLoading } = useCourseDiscussion(courseId ?? '', userId ?? '')
+  const containerRef = useRef<HTMLElement>(null)
+
+  // Move focus into the opened view so screen readers announce it (the region's label is read out)
+  useEffect(() => {
+    if (!isLoading) containerRef.current?.focus()
+  }, [isLoading])
 
   if (!courseId || !userId || isLoading) return null
 
+  const regionProps = {
+    component: 'section' as const,
+    ref: containerRef,
+    tabIndex: -1,
+    'aria-label': `${t('course:student')} ${studentNumber}: ${t('course:discussions')}`,
+    py: 3,
+    sx: { '&:focus': { outline: 'none' } },
+  }
+
   if (!discussions || discussions.length === 0) {
     return (
-      <Box py={3}>
+      <Box {...regionProps}>
         <Box sx={{ position: 'sticky', top: 0, zIndex: 1, py: 1 }}>
-          <BlueButton onClick={onBack}>← {t('common:back')}</BlueButton>
+          <BlueButton onClick={onBack}>{t('common:back')}</BlueButton>
         </Box>
         <Typography mt={2}>{t('course:noDiscussions')}</Typography>
       </Box>
@@ -176,16 +223,19 @@ const DiscussionDetail: React.FC<{ courseId?: string; userId: string; onBack: ()
   const sessions = getSessions(discussions)
 
   return (
-    <Box py={3}>
+    <Box {...regionProps}>
       <Box sx={{ position: 'sticky', top: 0, zIndex: 1, py: 1 }}>
-        <BlueButton onClick={onBack}>← {t('common:back')}</BlueButton>
+        <BlueButton onClick={onBack}>{t('common:back')}</BlueButton>
       </Box>
 
       <Stack spacing={4} mt={2} sx={{ maxWidth: '900px', mx: 'auto' }}>
-        {sessions.map((discussion) => {
+        {sessions.map((discussion, sessionIdx) => {
           const messages = [...getChatMessages(discussion), { role: 'assistant', content: discussion.response }]
           return (
             <Paper key={discussion.id} elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+              <Typography variant="h6" component="h3" sx={visuallyHidden}>
+                {t('chat:conversation')} {sessionIdx + 1}
+              </Typography>
               <Typography variant="caption" color="text.secondary">
                 {new Date(discussion.createdAt).toLocaleString()}
               </Typography>
