@@ -3,6 +3,7 @@ import FolderOutlined from '@mui/icons-material/FolderOutlined'
 import { useTranslation } from 'react-i18next'
 import type { ToolPart } from '../../../../shared/agentChat'
 import type { FileToolSummary } from '../../../../shared/fileTools'
+import { OpenFileLink, toolFileToOpen } from './OpenFileLink'
 import { ToolPartRow } from './ToolPartRow'
 
 const str = (value: unknown) => (typeof value === 'string' ? value : '')
@@ -16,7 +17,10 @@ const readSummary = (part: ToolPart): Extract<FileToolSummary, { tool: 'read_fil
 
 const WRITE_TOOLS = ['write_file', 'edit_file', 'delete_file']
 
-/** A My files tool call in its place in the answer: what the agent looked at, wrote or deleted. */
+/**
+ * A My files tool call in its place in the answer: what the agent looked at, wrote or deleted, with a link to open the
+ * file it read, or wrote for the student, in the viewer.
+ */
 export const FileToolPart = ({ part }: { part: ToolPart }) => {
   const { t } = useTranslation()
   const input = inputOf(part)
@@ -56,6 +60,7 @@ export const FileToolPart = ({ part }: { part: ToolPart }) => {
       label={t('myFiles:title')}
       icon={WRITE_TOOLS.includes(part.name) ? <EditNoteOutlined fontSize="small" /> : <FolderOutlined fontSize="small" />}
       text={text}
+      action={<OpenFileLink target={toolFileToOpen(part)} />}
     />
   )
 }

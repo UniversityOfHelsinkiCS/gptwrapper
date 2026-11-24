@@ -1,33 +1,12 @@
 import { Box, Button, Link, Tooltip, Typography } from '@mui/material'
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useId, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { quoteFileName, type Quote } from '@shared/quote'
-import { useFileViewer } from '../FileViewer/FileViewerContext'
-import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
+import { useOpenableFile } from '../FileViewer/useOpenableFile'
 
 const CLAMPED_LINES = 6
 
 const clampSx = { display: '-webkit-box', WebkitLineClamp: CLAMPED_LINES, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as const
-
-/** Whether the quoted file can be opened: the viewer is available here and the file is still in My files. */
-const useCanOpenSource = (path: string) => {
-  const store = useMyFilesStore()
-  const open = useFileViewer()?.open
-  const [exists, setExists] = useState(false)
-  useEffect(() => {
-    setExists(false)
-    if (!store || !open) return
-    let cancelled = false
-    store.stat(path).then(
-      (entry) => !cancelled && setExists(entry?.kind === 'file'),
-      () => {},
-    )
-    return () => {
-      cancelled = true
-    }
-  }, [store, open, path])
-  return exists && open ? open : null
-}
 
 /**
  * A quote sent with a user message, above its text: the source file (and PDF page or heading) with the full path in a tooltip, and
@@ -40,7 +19,7 @@ export const QuoteCard = ({ quote }: { quote: Quote }) => {
   const textRef = useRef<HTMLElement | null>(null)
   const [expanded, setExpanded] = useState(false)
   const [overflowing, setOverflowing] = useState(false)
-  const openSource = useCanOpenSource(quote.path)
+  const openSource = useOpenableFile(quote.path)
 
   // Only offer "Show more" when the clamp actually hides text, at the bubble's current width.
   const measure = useCallback(() => {

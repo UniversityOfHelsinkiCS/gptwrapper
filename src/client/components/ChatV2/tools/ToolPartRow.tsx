@@ -5,9 +5,10 @@ import type { ToolPart } from '../../../../shared/agentChat'
 
 /**
  * The compact line a tool part shows in its place in the answer. `label` names the tool for screen readers
- * (the group's accessible name); `text` says what it did. The status icon is decorative.
+ * (the group's accessible name); `text` says what it did. The status icon is decorative. `action` follows the text
+ * (a link to open the file the tool read or wrote).
  */
-export const ToolPartRow = ({ part, label, icon, text }: { part: ToolPart; label: string; icon: ReactNode; text: string }) => (
+export const ToolPartRow = ({ part, label, icon, text, action }: { part: ToolPart; label: string; icon: ReactNode; text: string; action?: ReactNode }) => (
   <Box
     role="group"
     aria-label={label}
@@ -22,5 +23,6 @@ export const ToolPartRow = ({ part, label, icon, text }: { part: ToolPart; label
     <Typography component="span" variant="body2" sx={{ fontStyle: 'italic', wordBreak: 'break-word' }}>
       {text}
     </Typography>
+    {action}
   </Box>
 )
