@@ -1163,6 +1163,7 @@
     "syncFolderNamed": "Sync folder {{name}}",
     "attachFolders": "Attach folders from My files",
     "attachedFolder": "Attached folder {{name}}",
+    "folderAttachedOnOpen": "Folder {{name}} attached to the chat",
     "detachFolder": "press Delete to detach",
     "noFoldersToAttach": "Add folders in My files first.",
     "actions": "Actions",

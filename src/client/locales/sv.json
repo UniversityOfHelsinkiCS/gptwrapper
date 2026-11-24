@@ -1139,6 +1139,7 @@
     "syncFolderNamed": "Synkronisera mappen {{name}}",
     "attachFolders": "Bifoga mappar från Mina filer",
     "attachedFolder": "Bifogad mapp {{name}}",
+    "folderAttachedOnOpen": "Mappen {{name}} bifogad till chatten",
     "detachFolder": "tryck på Delete för att ta bort",
     "noFoldersToAttach": "Lägg först till mappar i Mina filer.",
     "actions": "Åtgärder",

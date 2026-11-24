@@ -1164,6 +1164,7 @@
     "syncFolderNamed": "Synkronoi kansio {{name}}",
     "attachFolders": "Liitä kansioita Omista tiedostoista",
     "attachedFolder": "Liitetty kansio {{name}}",
+    "folderAttachedOnOpen": "Kansio {{name}} liitetty keskusteluun",
     "detachFolder": "poista liitos Delete-näppäimellä",
     "noFoldersToAttach": "Lisää ensin kansioita Omiin tiedostoihin.",
     "actions": "Toiminnot",

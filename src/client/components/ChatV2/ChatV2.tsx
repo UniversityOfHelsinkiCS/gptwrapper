@@ -54,6 +54,7 @@ import NotificationBanner from '../common/NotificationBanner'
 import { PromptEditorState } from '../Prompt/context'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { AttachFolders, parseStoredFolders } from '../MyFiles/AttachFolders'
+import { useAttachOpenedFolder } from '../MyFiles/attachOpenedFolder'
 import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
 import { activeViewerFile, FileViewerProvider, useFileViewer } from '../FileViewer/FileViewerContext'
 import type { AddQuoteOptions, PendingQuote } from '../FileViewer/selectionQuote'
@@ -144,6 +145,8 @@ const ChatV2Content = () => {
   const viewerMinimized = !!viewerTarget && !!fileViewer?.minimized
   const [storedAttachedFolders, setAttachedFolders] = useLocalStorageState<unknown>(`${localStoragePrefix}-attached-folders`, [])
   const attachedFolders = useMemo(() => parseStoredFolders(storedAttachedFolders), [storedAttachedFolders])
+  // Opening a file in the viewer attaches its folder, so the agent can read the rest of it.
+  useAttachOpenedFolder(canAttachFolders ? fileViewer : null, attachedFolders, setAttachedFolders)
 
   const { tokenLimitExceeded, budgetResetsAt } = useUsageLimit(userStatus, setActiveModel)
 
