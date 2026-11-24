@@ -9,12 +9,9 @@ export const AZURE_API_KEY = getEnv('AZURE_API_KEY', 'placeholder')
 
 export const AZURE_RESOURCE = getEnv('AZURE_RESOURCE', 'placeholder')
 
-export const GOOGLE_CLOUD_PROJECT_ID = getEnv('GOOGLE_CLOUD_PROJECT_ID', '') 
+export const GOOGLE_CLOUD_PROJECT_ID = getEnv('GOOGLE_CLOUD_PROJECT_ID', '')
 
 export const DATABASE_URL = getEnv('DATABASE_URL', 'placeholder-this-needs-to-be-set')
-
-export const JAMI_URL =
-  inProduction || inDevelopment ? 'https://api-toska.apps.ocp-prod-0.k8s.it.helsinki.fi/jami/' : 'https://api-toska.apps.ocp-test-0.k8s.it.helsinki.fi/jami'
 
 export const PATE_URL =
   inProduction || inDevelopment ? 'https://api-toska.apps.ocp-prod-0.k8s.it.helsinki.fi/pate/' : 'https://api-toska.apps.ocp-test-0.k8s.it.helsinki.fi/pate/'
@@ -30,7 +27,6 @@ export const VECTORDB_PASSWORD = getEnv('VECTORDB_PASSWORD', 'postgres')
 export const VECTORDB_DATABASE = getEnv('VECTORDB_DATABASE', 'postgres')
 export const VECTORDB_PORT = 5432
 export const USE_DALAI_PROCESSING = getEnv('USE_DALAI_PROCESSING', 'false') === 'true'
-
 
 export const REDIS_HOST = getEnv('REDIS_HOST', 'redis')
 

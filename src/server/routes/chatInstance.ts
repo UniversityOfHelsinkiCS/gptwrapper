@@ -3,7 +3,7 @@ import { Op } from 'sequelize'
 import { addMonths } from 'date-fns'
 import { z } from 'zod/v4'
 
-import { ChatInstance, Responsibility, User, UserChatInstanceUsage } from '../db/models'
+import { ChatInstance, Responsibility, UserChatInstanceUsage } from '../db/models'
 import { DEFAULT_TOKEN_LIMIT } from '../../config'
 import { sequelize } from '../db/connection'
 import { ApplicationError } from '../util/ApplicationError'
@@ -211,56 +211,6 @@ chatInstanceRouter.get('/:id', async (req, res) => {
   }
 
   res.send(chatInstance)
-})
-
-chatInstanceRouter.get('/:id/usages', async (req, res) => {
-  const { id } = req.params
-
-  const chatInstance = await ChatInstance.findByPk(id)
-  if (!chatInstance) {
-    throw ApplicationError.NotFound('ChatInstance not found')
-  }
-
-  const { user } = req as RequestWithUser<{ id: string }>
-  await requireFullAccess(user, chatInstance)
-
-  const usage = (await UserChatInstanceUsage.findAll({
-    where: {
-      chatInstanceId: id,
-    },
-    include: [
-      {
-        model: User,
-        as: 'user',
-        attributes: ['id', 'student_number', 'last_name', 'first_names', 'username'],
-      },
-      {
-        model: ChatInstance,
-        as: 'chatInstance',
-      },
-    ],
-  })) as any[]
-
-  const anon_user = {
-    id: 'hidden',
-    student_number: 'hidden',
-    last_name: 'hidden',
-    first_names: 'hidden',
-    username: 'hidden',
-  }
-
-  const usageLimit = chatInstance.usageLimit
-  const saveDiscussions = chatInstance.saveDiscussions
-
-  const sanitizedUsage = usage.map((u) => {
-    return {
-      ...u.toJSON(),
-      user: saveDiscussions ? anon_user : u.user,
-      userId: !saveDiscussions || u.usageCount > 0.8 * usageLimit ? u.userId : 'hidden',
-    }
-  })
-
-  res.status(200).send(sanitizedUsage)
 })
 
 chatInstanceRouter.delete('/usage/:id', async (req, res) => {

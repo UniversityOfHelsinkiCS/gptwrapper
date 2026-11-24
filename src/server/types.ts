@@ -55,20 +55,6 @@ export interface CourseUnit {
   }[]
 }
 
-type Programme = {
-  key: string
-  name: Locales
-  level: string
-  companionFaculties: Array<string>
-  international: boolean
-}
-
-export interface OrganisationData {
-  code: string
-  name: Locales
-  programmes: Array<Programme>
-}
-
 export interface SisuCourseUnit {
   id: string
   name: Locales

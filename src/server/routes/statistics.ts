@@ -3,7 +3,7 @@ import express from 'express'
 import { sequelize } from '../db/connection'
 
 import { RequestWithUser } from '../types'
-import { ChatInstance, UserChatInstanceUsage, User, Prompt, RagIndex, Enrolment } from '../db/models'
+import { ChatInstance, Prompt, RagIndex, Enrolment } from '../db/models'
 import { statsViewerIams } from '../util/config'
 import { generateTerms, getTermsOf } from '../util/util'
 import { ApplicationError } from '../util/ApplicationError'
@@ -141,31 +141,6 @@ statisticsRouter.get('/statistics', [adminMiddleware], async (req, res) => {
     data: await mangelStats(),
     terms: allTerms,
   })
-})
-
-statisticsRouter.get('/chatinstances/usage', async (_, res) => {
-  const usage = await UserChatInstanceUsage.findAll({
-    include: [
-      {
-        model: User,
-        as: 'user',
-      },
-      {
-        model: ChatInstance,
-        as: 'chatInstance',
-      },
-    ],
-  })
-
-  res.send(usage)
-})
-
-statisticsRouter.get('/users', async (_, res) => {
-  const usage = await User.findAll({
-    attributes: ['id', 'username', 'iamGroups', 'usage'],
-  })
-
-  res.send(usage)
 })
 
 export default statisticsRouter

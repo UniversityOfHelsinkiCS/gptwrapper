@@ -15,7 +15,6 @@ import courseRouter from './course'
 import promptRouter from './prompt'
 import emailRouter from './email'
 import adminRouter from './admin'
-import facultyRouter from './faculty'
 import feedbackRouter from './feedback'
 import notificationRouter from './notifications'
 import changelogRouter from './changelog'
@@ -62,7 +61,6 @@ router.use('/prompts', promptRouter)
 router.use('/email', emailRouter)
 router.use('/admin', adminRouter)
 router.use('/statistics', statisticsRouter)
-router.use('/faculties', facultyRouter)
 router.use('/feedback', feedbackRouter)
 router.use('/notifications', notificationRouter)
 router.use('/changelog', changelogRouter)
