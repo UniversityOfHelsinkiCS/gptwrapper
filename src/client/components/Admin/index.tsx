@@ -31,6 +31,7 @@ export function Component() {
   const tabs = [
     { path: 'usersearch', label: t('admin:searchUsers') },
     { path: 'chatinstancesearch', label: t('admin:chatInstance') },
+    { path: 'usage', label: t('admin:usage') },
     { path: 'notifications', label: t('admin:notifications') },
     { path: 'uniprompts', label: t('admin:uniPrompts') },
     { path: 'feedbacks', label: t('admin:feedbacks') },
