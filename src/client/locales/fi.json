@@ -1197,7 +1197,9 @@
     "openNamed": "Avaa {{name}}"
   },
   "fileViewer": {
-    "closeNamed": "Sulje {{name}}",
+    "minimize": "Pienennä",
+    "minimizeNamed": "Pienennä {{name}}",
+    "expandNamed": "Avaa {{name}}",
     "tooLarge": "Tiedosto on liian suuri näytettäväksi.",
     "unsupported": "Tämän tyyppistä tiedostoa ei voi näyttää.",
     "image": "Kuva (ei näytetä)",

@@ -58,6 +58,8 @@ import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
 import { FileViewerProvider, useFileViewer } from '../FileViewer/FileViewerContext'
 import type { AddQuoteOptions, PendingQuote } from '../FileViewer/selectionQuote'
 import SplitSeparator, { MIN_CHAT_WIDTH, useSplitRatio } from '../FileViewer/SplitSeparator'
+import FileRailButton from '../FileViewer/FileRailButton'
+import { rightSideLayout } from './rightSideLayout'
 import { baseName } from '../../util/myFiles/paths'
 import { executeFileTool } from '../../util/myFiles/agentTools'
 import type { ClientTools } from './chatTransport'
@@ -139,6 +141,7 @@ const ChatV2Content = () => {
   const canAttachFolders = !isEmbeddedMode && !!myFilesStore
   const fileViewer = useFileViewer()
   const viewerTarget = myFilesStore ? fileViewer?.target ?? null : null
+  const viewerMinimized = !!viewerTarget && !!fileViewer?.minimized
   const [storedAttachedFolders, setAttachedFolders] = useLocalStorageState<unknown>(`${localStoragePrefix}-attached-folders`, [])
   const attachedFolders = useMemo(() => parseStoredFolders(storedAttachedFolders), [storedAttachedFolders])
 
@@ -582,20 +585,29 @@ const ChatV2Content = () => {
   // layout
   const canShowToolResults = canManageCourse(chatInstance) || !(isPromptHidden || ragHidden) || activePrompt?.userId === user?.id
   const hasToolResults = !!shownToolResults && shownToolResults.length > 0 && canShowToolResults
-  // Wide screens show an open file next to the chat (`splitView`), narrow ones over it (`narrowViewerShown`).
+  // Wide screens show an open file next to the chat (`splitView`), narrow ones over it (`narrowViewerShown`). A
+  // minimized file waits in the rail on wide screens, and behind the chat on narrow ones.
   const splitView = !!viewerTarget && !isNarrow
-  const narrowViewerShown = !!viewerTarget && isNarrow && narrowView === 'viewer'
-  // The file viewer and the sources panel share the right slot: opening the sources swaps the slot to them, closing
-  // them brings the viewer back. The collapsed sources toggle stays in the rail next to the viewer.
-  const sourcesInSlot = splitView && hasToolResults && rightMenuExpanded
+  const narrowViewerShown = !!viewerTarget && isNarrow && narrowView === 'viewer' && !viewerMinimized
+  // The file viewer and the sources panel share the right slot: whichever is expanded takes it, the other one waits in
+  // the rail.
+  const rightSide = rightSideLayout({
+    splitView,
+    minimized: viewerMinimized,
+    hasSources: hasToolResults,
+    sourcesExpanded: rightMenuExpanded,
+    isMobile,
+  })
+  const slotShown = rightSide.slot !== null
+  const sourcesInSlot = rightSide.slot === 'sources'
   const toolResultsKey = shownToolResults?.map((toolResult) => toolResult.callId).join(',')
   const defaultCollapsedSidebar = user?.preferences?.collapsedSidebarDefault ?? false
   const showFloatingButtons = isMobile && !isEmbeddedMode
   const [sideBarOpen, setSideBarOpen] = useState<boolean>(() => {
     return isMobile || isEmbeddedMode ? false : !defaultCollapsedSidebar
   })
-  const rightPanelContentWidth = !hasToolResults || isMobile ? '0px' : rightMenuExpanded ? 'var(--right-menu-width)' : 'var(--sidebar-width-collapsed)'
-  const rightPanelCollapsed = !isMobile && hasToolResults && !rightMenuExpanded
+  const rightPanelContentWidth = rightSide.sourcesPanel === 'expanded' ? 'var(--right-menu-width)' : 'var(--sidebar-width-collapsed)'
+  const railShown = rightSide.railFile || rightSide.sourcesPanel === 'collapsed'
 
   useEffect(() => {
     if (!isEmbeddedMode) return
@@ -636,16 +648,10 @@ const ChatV2Content = () => {
     wasChatHidden.current = narrowViewerShown
   }, [narrowViewerShown])
 
-  // The global menu floats at the top right; keep it clear of the collapsed sources panel and of the file viewer.
+  // The global menu floats at the top right; keep it clear of the rail and of the right slot.
   const [slotWidth, setSlotWidth] = useState<number | null>(null)
-  const globalMenuOffset =
-    splitView && slotWidth !== null
-      ? rightPanelCollapsed
-        ? `calc(${slotWidth}px + var(--sidebar-width-collapsed))`
-        : `${slotWidth}px`
-      : rightPanelCollapsed
-        ? 'var(--sidebar-width-collapsed)'
-        : null
+  const railOffset = railShown ? 'var(--sidebar-width-collapsed)' : null
+  const globalMenuOffset = slotShown && slotWidth !== null ? (railOffset ? `calc(${slotWidth}px + ${railOffset})` : `${slotWidth}px`) : railOffset
   useEffect(() => {
     if (!globalMenuOffset) return
     document.documentElement.style.setProperty('--global-menu-right-offset', globalMenuOffset)
@@ -666,6 +672,7 @@ const ChatV2Content = () => {
   const chatColumnRef = useRef<HTMLDivElement | null>(null)
   const slotRef = useRef<HTMLDivElement | null>(null)
   const viewerBoxRef = useRef<HTMLDivElement | null>(null)
+  const railFileButtonRef = useRef<HTMLButtonElement | null>(null)
   const measureSlot = useCallback((node: HTMLDivElement | null) => {
     slotRef.current = node
     if (!node || typeof ResizeObserver === 'undefined') return
@@ -686,10 +693,20 @@ const ChatV2Content = () => {
 
   const focusViewer = () => viewerBoxRef.current?.querySelector<HTMLElement>('[data-testid="file-viewer"]')?.focus()
 
-  const closeViewer = useCallback(() => {
-    fileViewer?.close()
-    document.getElementById('chat-input')?.focus()
+  // Minimizing moves focus to the rail button that expands the file again.
+  const minimizeViewer = useCallback(() => {
+    flushSync(() => fileViewer?.minimize())
+    railFileButtonRef.current?.focus()
   }, [fileViewer])
+
+  // Expanding takes the slot back from the sources.
+  const expandViewer = () => {
+    flushSync(() => {
+      fileViewer?.expand()
+      setRightMenuExpanded(false)
+    })
+    focusViewer()
+  }
 
   const showNarrowChat = useCallback(() => {
     flushSync(() => setNarrowView('chat'))
@@ -697,13 +714,18 @@ const ChatV2Content = () => {
   }, [])
 
   const showNarrowViewer = () => {
-    flushSync(() => setNarrowView('viewer'))
+    flushSync(() => {
+      setNarrowView('viewer')
+      fileViewer?.expand()
+    })
     focusViewer()
   }
 
+  // Closing the sources brings the viewer back, unless it is minimized: then both wait in the rail.
   const closeSourcesInSlot = () => {
     flushSync(() => setRightMenuExpanded(false))
-    focusViewer()
+    if (viewerMinimized) document.getElementById('right-sidebar-toggle')?.focus()
+    else focusViewer()
   }
 
   const measureChatBoxHeight = useCallback((node: HTMLDivElement | null) => {
@@ -788,7 +810,7 @@ const ChatV2Content = () => {
         ref={chatColumnRef}
         id="chat-column"
         sx={{
-          ...(splitView ? { flex: `${splitRatio} 1 0px`, minWidth: `${MIN_CHAT_WIDTH}px` } : { flex: 1, minWidth: 0 }),
+          ...(slotShown ? { flex: `${splitRatio} 1 0px`, minWidth: `${MIN_CHAT_WIDTH}px` } : { flex: 1, minWidth: 0 }),
           display: narrowViewerShown ? 'none' : 'flex',
           flexDirection: 'column',
         }}
@@ -900,7 +922,7 @@ const ChatV2Content = () => {
                 padding: isMobile ? '0rem 1rem 1rem 1rem' : '0rem 2rem 2rem 2rem',
               }}
             >
-              {isNarrow && viewerTarget && narrowView === 'chat' && (
+              {isNarrow && viewerTarget && !narrowViewerShown && (
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
                   <Button
                     size="small"
@@ -954,26 +976,27 @@ const ChatV2Content = () => {
       {/* Kept in the same place in every layout, so the viewer keeps its file and position when the layout changes. */}
       {viewerTarget && myFilesStore && (
         <>
-          {splitView && <SplitSeparator value={splitRatio} onChange={setSplitRatio} getRange={getSplitRange} controls="chat-column" />}
+          {slotShown && <SplitSeparator value={splitRatio} onChange={setSplitRatio} getRange={getSplitRange} controls="chat-column" />}
           <Box
             ref={measureSlot}
             data-testid="file-viewer-slot"
             sx={{
-              flex: splitView ? `${1 - splitRatio} 1 0px` : 1,
+              flex: slotShown ? `${1 - splitRatio} 1 0px` : 1,
               minWidth: 0,
               height: '100vh',
               position: 'sticky',
               top: 0,
-              display: splitView || narrowViewerShown ? 'flex' : 'none',
+              display: slotShown || narrowViewerShown ? 'flex' : 'none',
               flexDirection: 'column',
             }}
           >
-            <Box ref={viewerBoxRef} sx={{ flex: 1, minHeight: 0, display: sourcesInSlot ? 'none' : 'block' }}>
+            <Box ref={viewerBoxRef} sx={{ flex: 1, minHeight: 0, display: rightSide.slot === 'viewer' || narrowViewerShown ? 'block' : 'none' }}>
               <Suspense fallback={null}>
                 <FileViewer
                   store={myFilesStore}
                   target={viewerTarget}
-                  onClose={closeViewer}
+                  onMinimize={isNarrow ? undefined : minimizeViewer}
+                  focusOnOpen={!fileViewer?.restored}
                   onAddQuote={addQuote}
                   quickActionsDisabled={isStreaming}
                   floatingToolbar={!isNarrow && !isCoarsePointer}
@@ -981,7 +1004,7 @@ const ChatV2Content = () => {
                 />
               </Suspense>
             </Box>
-            {sourcesInSlot && (
+            {sourcesInSlot && shownToolResults && (
               <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', bgcolor: 'background.paper' }}>
                 <ToolResult key={toolResultsKey} toolResults={shownToolResults} open onToggle={closeSourcesInSlot} />
               </Box>
@@ -1018,9 +1041,9 @@ const ChatV2Content = () => {
           </Box>
         </Drawer>
       ) : (
-        hasToolResults &&
-        !sourcesInSlot && (
+        (rightSide.sourcesPanel || rightSide.railFile) && (
           <Box
+            data-testid="right-rail"
             sx={{
               width: rightPanelContentWidth,
               height: '100vh',
@@ -1033,12 +1056,21 @@ const ChatV2Content = () => {
               bgcolor: 'background.paper',
             }}
           >
-            <ToolResult
-              key={toolResultsKey}
-              toolResults={shownToolResults}
-              open={rightMenuExpanded}
-              onToggle={() => setRightMenuExpanded(!rightMenuExpanded)}
-            />
+            {rightSide.sourcesPanel && shownToolResults && (
+              <Box sx={{ flex: rightSide.railFile ? '0 0 auto' : 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                <ToolResult
+                  key={toolResultsKey}
+                  toolResults={shownToolResults}
+                  open={rightSide.sourcesPanel === 'expanded'}
+                  onToggle={() => setRightMenuExpanded(!rightMenuExpanded)}
+                />
+              </Box>
+            )}
+            {rightSide.railFile && viewerTarget && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', pt: rightSide.sourcesPanel ? 1 : 3 }}>
+                <FileRailButton path={viewerTarget.path} onExpand={expandViewer} buttonRef={railFileButtonRef} />
+              </Box>
+            )}
           </Box>
         )
       )}

@@ -1172,7 +1172,9 @@
     "openNamed": "Öppna {{name}}"
   },
   "fileViewer": {
-    "closeNamed": "Stäng {{name}}",
+    "minimize": "Minimera",
+    "minimizeNamed": "Minimera {{name}}",
+    "expandNamed": "Öppna {{name}}",
     "tooLarge": "Filen är för stor för att visas.",
     "unsupported": "Den här typen av fil kan inte visas.",
     "image": "Bild (visas inte)",

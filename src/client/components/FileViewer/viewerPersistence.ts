@@ -1,14 +1,15 @@
 import safeLocalStorage from '../../util/safeLocalStorage'
 
 /**
- * What the file viewer remembers in local storage: the file open in each chat context (a course, or the general chat)
- * and a reading position per file version.
+ * What the file viewer remembers in local storage: the file open in each chat context (a course, or the general chat),
+ * whether it is minimized there, and a reading position per file version.
  */
 
 /** At most this many reading positions are kept; the least recently saved ones are dropped first. */
 export const MAX_READING_POSITIONS = 50
 
 const OPEN_FILE_KEY_PREFIX = 'file-viewer-open-'
+const MINIMIZED_KEY_PREFIX = 'file-viewer-minimized-'
 const POSITIONS_KEY = 'file-viewer-positions'
 
 /** Where a file was being read: a PDF page, or how far down (0–1) a Markdown or text file was scrolled. */
@@ -30,6 +31,16 @@ export const readOpenFile = (chatContext: string): string | null => {
 export const writeOpenFile = (chatContext: string, path: string | null) => {
   if (path) safeLocalStorage.setItem(openFileStorageKey(chatContext), path)
   else safeLocalStorage.removeItem(openFileStorageKey(chatContext))
+}
+
+/** Whether the viewer is minimized to the rail in a chat context. */
+export const minimizedStorageKey = (chatContext: string) => `${MINIMIZED_KEY_PREFIX}${chatContext}`
+
+export const readMinimized = (chatContext: string): boolean => safeLocalStorage.getItem(minimizedStorageKey(chatContext)) === 'true'
+
+export const writeMinimized = (chatContext: string, minimized: boolean) => {
+  if (minimized) safeLocalStorage.setItem(minimizedStorageKey(chatContext), 'true')
+  else safeLocalStorage.removeItem(minimizedStorageKey(chatContext))
 }
 
 /**

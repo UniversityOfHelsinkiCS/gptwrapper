@@ -1196,7 +1196,9 @@
     "openNamed": "Open {{name}}"
   },
   "fileViewer": {
-    "closeNamed": "Close {{name}}",
+    "minimize": "Minimize",
+    "minimizeNamed": "Minimize {{name}}",
+    "expandNamed": "Open {{name}}",
     "tooLarge": "This file is too large to display.",
     "unsupported": "This type of file cannot be displayed.",
     "image": "Image (not shown)",

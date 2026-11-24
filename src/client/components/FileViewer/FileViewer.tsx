@@ -1,7 +1,7 @@
 import Add from '@mui/icons-material/Add'
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import Close from '@mui/icons-material/Close'
 import FitScreen from '@mui/icons-material/FitScreen'
+import KeyboardDoubleArrowRight from '@mui/icons-material/KeyboardDoubleArrowRight'
 import Remove from '@mui/icons-material/Remove'
 import { Box, Button, IconButton, LinearProgress, Paper, Tooltip, Typography } from '@mui/material'
 import { useCallback, useEffect, useId, useRef, useState, type MouseEvent, type RefObject } from 'react'
@@ -133,13 +133,16 @@ const useSelectionQuote = (contentRef: RefObject<HTMLElement | null>, path: stri
  * message (Explain, Summarize, Translate; disabled with `quickActionsDisabled`, while a response streams), from a
  * toolbar floating next to a mouse selection (unless `floatingToolbar` is false: narrow screens and touch, which use
  * native selection) or from the viewer toolbar (the keyboard, screen reader and touch path).
- * `onBackToChat` is given in narrow mode, where the viewer covers the chat: it adds a "Back to chat" button and leaves
- * room at the top right for the global menu, which floats over the viewer there.
+ * `onMinimize` adds a minimize button to the toolbar. `onBackToChat` is given in narrow mode instead, where the viewer
+ * covers the chat: it adds a "Back to chat" button and leaves room at the top right for the global menu, which floats
+ * over the viewer there.
+ * Opening a file (a new `target`) moves focus into the viewer, unless `focusOnOpen` is false (a file restored on load).
  */
 const FileViewer = ({
   store,
   target,
-  onClose,
+  onMinimize,
+  focusOnOpen = true,
   onAddQuote,
   quickActionsDisabled = false,
   floatingToolbar = true,
@@ -147,7 +150,8 @@ const FileViewer = ({
 }: {
   store: MyFilesStore
   target: ViewerTarget
-  onClose: () => void
+  onMinimize?: () => void
+  focusOnOpen?: boolean
   onAddQuote?: (pending: PendingQuote, options?: AddQuoteOptions) => void
   quickActionsDisabled?: boolean
   floatingToolbar?: boolean
@@ -220,7 +224,10 @@ const FileViewer = ({
   }, [isPdf, positionKey, target, applyPendingScroll])
 
   // Opening a file (or the open one at another position) moves focus to it, so keyboard and screen reader users land
-  // in the viewer. A hidden viewer cannot take focus: it is focused when it is shown.
+  // in the viewer. A hidden viewer cannot take focus: it is focused when it is shown. A restored file leaves the focus
+  // where the page puts it.
+  const focusOnOpenRef = useRef(focusOnOpen)
+  focusOnOpenRef.current = focusOnOpen
   const pendingFocus = useRef(false)
   const applyPendingFocus = useCallback(() => {
     const region = regionRef.current
@@ -229,7 +236,7 @@ const FileViewer = ({
     if (document.activeElement === region) pendingFocus.current = false
   }, [])
   useEffect(() => {
-    pendingFocus.current = true
+    pendingFocus.current = focusOnOpenRef.current
     applyPendingFocus()
   }, [target, applyPendingFocus])
 
@@ -373,9 +380,18 @@ const FileViewer = ({
             ))}
           </Box>
         )}
-        <IconButton onClick={onClose} aria-label={t('fileViewer:closeNamed', params)} data-testid="file-viewer-close" sx={{ ml: onAddQuote ? 0 : 'auto' }}>
-          <Close />
-        </IconButton>
+        {onMinimize && (
+          <Tooltip title={t('fileViewer:minimize')} describeChild>
+            <IconButton
+              onClick={onMinimize}
+              aria-label={t('fileViewer:minimizeNamed', params)}
+              data-testid="file-viewer-minimize"
+              sx={{ ml: onAddQuote ? 0 : 'auto' }}
+            >
+              <KeyboardDoubleArrowRight />
+            </IconButton>
+          </Tooltip>
+        )}
       </Box>
       <Box
         ref={contentRef}
