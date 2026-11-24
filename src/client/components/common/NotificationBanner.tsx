@@ -1,4 +1,4 @@
-import { Alert, IconButton, Stack, Box, type SxProps, type Theme } from '@mui/material'
+import { Alert, IconButton, Stack, Box, darken, lighten, useTheme, type SxProps, type Theme } from '@mui/material'
 import { memo, useEffect, useState } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
@@ -10,6 +10,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useNotifications } from '../../hooks/useNotifications'
 import useLocalStorageState from '../../hooks/useLocalStorageState'
+import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 
 // Same icons that MUI's Alert uses by default, rendered next to the centered text instead of at the left edge
 const severityIcons = {
@@ -24,6 +25,8 @@ const announcedIds = new Set<string>()
 
 const NotificationBanner = ({ sx }: { sx?: SxProps<Theme> }) => {
   const { i18n, t } = useTranslation()
+  const theme = useTheme()
+  const isEmbedded = useIsEmbedded()
   const { notifications, isLoading } = useNotifications()
   const [dismissedIds, setDismissedIds] = useLocalStorageState<string[]>('dismissed-notifications', [])
   const [previouslyAnnouncedIds] = useState(() => new Set(announcedIds))
@@ -49,7 +52,7 @@ const NotificationBanner = ({ sx }: { sx?: SxProps<Theme> }) => {
   }
 
   return (
-    <Box sx={[{ position: 'relative', width: '100%', pr: '80px', pl: 2, pt: 1 }, ...(Array.isArray(sx) ? sx : [sx])]}>
+    <Box sx={[{ position: 'relative', width: '100%', pr: isEmbedded ? 1.5 : '80px', pl: 2, pt: 1 }, ...(Array.isArray(sx) ? sx : [sx])]}>
       <Stack spacing={2} sx={{ mb: 2 }}>
         {activeNotifications.map((notification) => {
           const severity = getSeverity(notification.priority)
@@ -65,6 +68,7 @@ const NotificationBanner = ({ sx }: { sx?: SxProps<Theme> }) => {
               icon={false}
               sx={{
                 alignItems: 'center',
+                backgroundColor: theme.palette.mode === 'light' ? lighten(theme.palette[severity].main, 0.85) : darken(theme.palette[severity].main, 0.7),
                 '& .MuiAlert-message': {
                   display: 'flex',
                   alignItems: 'center',
