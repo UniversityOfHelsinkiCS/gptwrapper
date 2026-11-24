@@ -6,6 +6,7 @@ import { fakeModel } from 'langchain'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { PRESENT_QUIZ } from '@shared/quiz'
 import { READ_PDF } from '@shared/readPdf'
+import { splitUserMessagePreamble } from '../agent/quotes'
 import { QUIZ_ANSWER_PREFIX } from '../agent/tools/presentQuiz'
 import { pdfPathOfTask, pdfReaderSystemPrompt } from '../agent/tools/readPdfPrompt'
 import {
@@ -46,7 +47,18 @@ export const MOCK_FLAKY_PREFIX = 'flaky'
 export const MOCK_FLAKY_ERROR = '429 Mock rate limit reached'
 const flakyFailures = new Set<string>()
 
-const lastHumanText = (messages: BaseMessage[]): string => (messages.findLast(isHumanMessage)?.content ?? '') as string
+/**
+ * The student's own text in the last user message, which the triggers below are matched on: without the open file and
+ * the quotes put before it (see `withQuotes`). A message with file content is a list of blocks, the preamble first.
+ */
+const lastHumanText = (messages: BaseMessage[]): string => {
+  const content = messages.findLast(isHumanMessage)?.content ?? ''
+  const text =
+    typeof content === 'string'
+      ? content
+      : content.flatMap((block) => (block.type === 'text' && typeof block.text === 'string' ? [block.text] : [])).join('\n\n')
+  return splitUserMessagePreamble(text).text
+}
 
 /** `think <answer>` reasons first (in several chunks), then answers with `<answer>`. Not for tool results: the agent's second call answers normally. */
 const isThinkRequest = (messages: BaseMessage[]) => {
