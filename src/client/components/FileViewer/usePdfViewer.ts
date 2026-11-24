@@ -111,7 +111,8 @@ export const usePdfViewer = ({
 
         let lastWidth = container.clientWidth
         resizeObserver = new ResizeObserver(() => {
-          if (container.clientWidth === lastWidth || viewer.pagesCount === 0) return
+          // A hidden viewer (minimized, or the sources in its slot) has no width: fitting to it would lose the page.
+          if (container.clientWidth === 0 || container.clientWidth === lastWidth || viewer.pagesCount === 0) return
           lastWidth = container.clientWidth
           // Re-fits a preset zoom ("page-width") to the new width; a chosen zoom stays.
           if (viewer.currentScaleValue === 'page-width') viewer.currentScaleValue = 'page-width'
