@@ -367,6 +367,29 @@ studentTest('students can attach folders', async ({ page }) => {
   await expect(page.getByTestId('attach-folders-button')).toBeVisible()
 })
 
+adminTest('opening a file attaches its folder to the chat', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-auto-attach-'))
+  const sentFrames: string[] = []
+  page.on('websocket', (ws) => ws.on('framesent', (frame) => sentFrames.push(String(frame.payload))))
+  try {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+    await expect(page.getByTestId('attached-folder')).toHaveCount(0)
+    const viewer = await openLectureInViewer(page, root, '# Week 3\n\nSome text.')
+    await expect(viewer).toBeVisible()
+    await expect(page.getByTestId('attached-folder')).toHaveAttribute('data-folder', 'Course notes')
+
+    await sendChatMessage(page, 'say hello')
+    await closeSendPreference(page)
+    await expect(page.getByTestId('assistant-message')).toBeVisible()
+    const runStart = sentFrames.map((frame) => JSON.parse(frame)).find((message) => message.type === 'run.start')
+    expect(runStart.attachedFolders).toEqual(['Course notes'])
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
 adminTest('the agent writes a file into Outputs, downloaded from the chat and from My files', async ({ page }) => {
   await page.goto('/test-course-course-id')
   await acceptDisclaimer(page)

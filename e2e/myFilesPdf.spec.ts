@@ -439,6 +439,9 @@ adminTest('a message names the open PDF and its page, not when the viewer is min
     const pdf = viewer.getByTestId('file-viewer-pdf')
     await pdf.locator('.page[data-page-number="1"] .annotationLayer a').first().click()
     await expect(pdf).toHaveAttribute('data-page', '3')
+    // Opening the PDF attached its folder; detached, the file tool instructions do not fill the mock model's small context.
+    await page.getByTestId('attached-folder').press('Delete')
+    await expect(page.getByTestId('attached-folder')).toHaveCount(0)
 
     await sendChatMessage(page, 'what is on this page?')
     await closeSendPreference(page)

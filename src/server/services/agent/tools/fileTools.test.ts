@@ -24,17 +24,19 @@ const part = (name: string, input: unknown, result: unknown, status: ToolPart['s
 const FILE_CONTENT = 'Entropy always increases. This sentence is far into the file and must never reach the history.'
 
 describe('file tool modules', () => {
-  test('are client-executed, admin-only, experimental and in the registry', () => {
+  test('are client-executed, for everyone, experimental and in the registry', () => {
     expect(fileTools.map((m) => m.name)).toEqual([...FILE_TOOL_NAMES])
     for (const name of FILE_TOOL_NAMES) {
-      expect(getToolModule(name)).toMatchObject({ executor: 'client', access: 'admin', maturity: 'experimental', kind: 'tool' })
+      expect(getToolModule(name)).toMatchObject({ executor: 'client', access: 'everyone', maturity: 'experimental', kind: 'tool' })
     }
   })
 
   test('are not prompt options: not listed for the prompt editor, and refused on save', () => {
-    const listed = listAddableTools({ isAdmin: true }).map((tool) => tool.name)
-    for (const name of FILE_TOOL_NAMES) expect(listed).not.toContain(name)
-    expect(() => validatePromptTools({ isAdmin: true }, [{ name: 'read_file' }])).toThrow('Unknown tool: read_file')
+    for (const isAdmin of [true, false]) {
+      const listed = listAddableTools({ isAdmin }).map((tool) => tool.name)
+      for (const name of FILE_TOOL_NAMES) expect(listed).not.toContain(name)
+      expect(() => validatePromptTools({ isAdmin }, [{ name: 'read_file' }])).toThrow('Unknown tool: read_file')
+    }
   })
 
   test('are all enabled, also without attached folders (Outputs and Agent notes are in every chat)', () => {
