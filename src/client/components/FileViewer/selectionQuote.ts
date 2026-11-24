@@ -23,6 +23,23 @@ export const nearestHeading = (container: HTMLElement, node: Node): string | und
   return found
 }
 
+/** How far below the top of the visible area a heading still counts as the start of the section in view. */
+const HEADING_IN_VIEW_SLACK = 16
+
+/**
+ * The text of the heading of the section in view: the last heading in `container` that starts above `top` (a viewport
+ * y, the top of the visible area), or just below it. Undefined above the first heading.
+ */
+export const headingInView = (container: HTMLElement, top: number): string | undefined => {
+  let found: string | undefined
+  for (const heading of container.querySelectorAll(HEADING_SELECTOR)) {
+    if (heading.getBoundingClientRect().top > top + HEADING_IN_VIEW_SLACK) break
+    const text = heading.textContent?.trim()
+    if (text) found = text
+  }
+  return found
+}
+
 /** The first heading in `container` with the text `text` (as `nearestHeading` gives it): where a quote's heading is. */
 export const findHeading = (container: HTMLElement, text: string): HTMLElement | null =>
   [...container.querySelectorAll<HTMLElement>(HEADING_SELECTOR)].find((heading) => heading.textContent?.trim() === text) ?? null

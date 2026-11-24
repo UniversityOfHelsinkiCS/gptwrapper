@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { MAX_VIEWER_FILE_HEADING_LENGTH, MAX_VIEWER_FILE_PATH_LENGTH, type ViewerFile } from '@shared/viewerFile'
 import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
 import { readChatFiles, readMinimized, withOpenedFile, writeChatFiles, writeMinimized } from './viewerPersistence'
 
@@ -39,7 +40,17 @@ export interface FileViewerControls {
    * which is the only way to close it.
    */
   remove: (path: string) => void
+  /**
+   * Called by the shown viewer with a function that tells where in its file the user is (the PDF page, the Markdown
+   * heading in view), or null when it goes away. Read only when a message is sent, so scrolling re-renders nothing.
+   */
+  setPositionReader: (reader: ViewerPositionReader | null) => void
+  /** Where the user is in the file now, as the viewer of `path` tells it; just the path when it cannot. */
+  readPosition: (path: string) => ViewerFile
 }
+
+/** Where the user is in the file the viewer shows. */
+export type ViewerPositionReader = () => ViewerFile
 
 interface ViewerState {
   context: string | undefined
@@ -143,13 +154,34 @@ export const FileViewerProvider = ({ available, chatContext, children }: { avail
     },
     [chatContext],
   )
+  const positionReaderRef = useRef<ViewerPositionReader | null>(null)
+  const setPositionReader = useCallback((reader: ViewerPositionReader | null) => {
+    positionReaderRef.current = reader
+  }, [])
+  const readPosition = useCallback((path: string): ViewerFile => {
+    const position = positionReaderRef.current?.()
+    return position?.path === path ? position : { path }
+  }, [])
   const { target, files, minimized, focusOnOpen } = current
   const value = useMemo(
-    () => ({ target, files, minimized, focusOnOpen, open, minimize, expand, remove }),
-    [target, files, minimized, focusOnOpen, open, minimize, expand, remove],
+    () => ({ target, files, minimized, focusOnOpen, open, minimize, expand, remove, setPositionReader, readPosition }),
+    [target, files, minimized, focusOnOpen, open, minimize, expand, remove, setPositionReader, readPosition],
   )
   return <FileViewerContext.Provider value={available ? value : null}>{children}</FileViewerContext.Provider>
 }
 
 /** The viewer controls, or null when the viewer is not available here. */
 export const useFileViewer = (): FileViewerControls | null => useContext(FileViewerContext)
+
+/**
+ * The file the user has open in the viewer now, with where they are in it, for a message being sent (`viewerFile`).
+ * Undefined without an open file or while it is minimized. On narrow screens the chat covering the viewer ("Back to
+ * chat") is not minimizing, so the file still counts. A path too long to send is left out, a long heading cut.
+ */
+export const activeViewerFile = (viewer: FileViewerControls | null): ViewerFile | undefined => {
+  if (!viewer?.target || viewer.minimized) return undefined
+  const { path, page, heading } = viewer.readPosition(viewer.target.path)
+  if (path.length > MAX_VIEWER_FILE_PATH_LENGTH) return undefined
+  const cutHeading = heading?.slice(0, MAX_VIEWER_FILE_HEADING_LENGTH)
+  return { path, ...(page ? { page } : {}), ...(cutHeading ? { heading: cutHeading } : {}) }
+}

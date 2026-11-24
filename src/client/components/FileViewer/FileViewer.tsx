@@ -14,8 +14,8 @@ import { MarkdownContent } from '../ChatV2/MarkdownContent'
 import { ExperimentalChip } from '../MyFiles/ExperimentalChip'
 import { MAX_VIEWER_TEXT_BYTES, viewerFileKind } from './fileKind'
 import FileTitleMenu from './FileTitleMenu'
-import type { ViewerTarget } from './FileViewerContext'
-import { findHeading, pdfPageOf, selectionToQuote, type AddQuoteOptions, type PendingQuote } from './selectionQuote'
+import { useFileViewer, type ViewerTarget } from './FileViewerContext'
+import { findHeading, headingInView, pdfPageOf, selectionToQuote, type AddQuoteOptions, type PendingQuote } from './selectionQuote'
 import { usePdfViewer } from './usePdfViewer'
 import { readingPositionKey, readReadingPosition, writeReadingPosition } from './viewerPersistence'
 import { PDF_VIEWER_SCOPE_CLASS } from '../../util/pdfjs'
@@ -208,6 +208,33 @@ const FileViewer = ({
     if (isPdf && positionKeyRef.current) writeReadingPosition(positionKeyRef.current, { page: pdf.page })
   }, [isPdf, pdf.page])
 
+  // The heading of the Markdown section in view, kept from the last time it could be measured: a hidden viewer (narrow
+  // mode showing the chat, the sources in its slot) has no layout.
+  const headingInViewRef = useRef<string | undefined>(undefined)
+  const measureHeadingInView = useCallback(() => {
+    const region = regionRef.current
+    const content = contentRef.current
+    if (region && content && region.clientHeight > 0 && positionKeyRef.current) {
+      headingInViewRef.current = headingInView(content, region.getBoundingClientRect().top + (toolbarRef.current?.offsetHeight ?? 0))
+    }
+    return headingInViewRef.current
+  }, [])
+
+  // Where the user is in the file, read by the chat when a message is sent: the PDF page, the Markdown heading in view.
+  const pdfPageRef = useRef<number | undefined>(undefined)
+  pdfPageRef.current = isPdf && pdf.status.state === 'ready' && pdf.status.path === target.path ? pdf.page : undefined
+  const setPositionReader = useFileViewer()?.setPositionReader
+  useEffect(() => {
+    if (!setPositionReader) return
+    const path = target.path
+    setPositionReader(() => {
+      const page = kind === 'pdf' ? pdfPageRef.current : undefined
+      const heading = kind === 'markdown' ? measureHeadingInView() : undefined
+      return { path, ...(page ? { page } : {}), ...(heading ? { heading } : {}) }
+    })
+    return () => setPositionReader(null)
+  }, [setPositionReader, target.path, kind, measureHeadingInView])
+
   // Markdown and text scroll to the target heading, else to the remembered position. A hidden viewer (narrow mode
   // showing the chat, the sources in its slot) has no size to scroll in, so this waits until it is shown.
   const pendingScroll = useRef<((region: HTMLElement) => void) | null>(null)
@@ -216,7 +243,8 @@ const FileViewer = ({
     if (!region || region.clientHeight === 0 || !pendingScroll.current) return
     pendingScroll.current(region)
     pendingScroll.current = null
-  }, [])
+    measureHeadingInView()
+  }, [measureHeadingInView])
   useEffect(() => {
     if (isPdf || !positionKey) return
     pendingScroll.current = (region) => {
@@ -269,11 +297,15 @@ const FileViewer = ({
     if (isPdf || !region || !key || region.clientHeight === 0 || pendingScroll.current) return
     const scroll = scrollFraction(region)
     clearTimeout(saveScrollTimer.current)
-    saveScrollTimer.current = setTimeout(() => writeReadingPosition(key, { scroll }), SAVE_SCROLL_DELAY_MS)
+    saveScrollTimer.current = setTimeout(() => {
+      writeReadingPosition(key, { scroll })
+      measureHeadingInView()
+    }, SAVE_SCROLL_DELAY_MS)
   }
 
   useEffect(() => {
     regionRef.current?.scrollTo?.({ top: 0 })
+    headingInViewRef.current = undefined
   }, [target.path])
 
   const act = (action: SelectionAction) => {

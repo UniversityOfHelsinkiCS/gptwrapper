@@ -55,7 +55,7 @@ import { PromptEditorState } from '../Prompt/context'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { AttachFolders, parseStoredFolders } from '../MyFiles/AttachFolders'
 import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
-import { FileViewerProvider, useFileViewer } from '../FileViewer/FileViewerContext'
+import { activeViewerFile, FileViewerProvider, useFileViewer } from '../FileViewer/FileViewerContext'
 import type { AddQuoteOptions, PendingQuote } from '../FileViewer/selectionQuote'
 import SplitSeparator, { MIN_CHAT_WIDTH, useSplitRatio } from '../FileViewer/SplitSeparator'
 import FileRailButton from '../FileViewer/FileRailButton'
@@ -229,6 +229,9 @@ const ChatV2Content = () => {
 
     const formData = new FormData()
 
+    // The file open in the viewer, where the user is in it now. A resent message keeps the one it was sent with.
+    const viewerFile = resendPrevious ? undefined : activeViewerFile(fileViewer)
+
     // A file waiting in the chat box stays for the next message, it is not sent with a quiz answer.
     const file = quizAnswer ? undefined : fileInputRef.current?.files?.[0]
 
@@ -277,6 +280,7 @@ const ChatV2Content = () => {
           fileContent: parsedFileContent, // Store file content separately
           quizAnswer,
           ...(quotes?.length ? { quotes } : {}),
+          ...(viewerFile ? { viewerFile } : {}),
         })
 
     setMessages(newMessages)
