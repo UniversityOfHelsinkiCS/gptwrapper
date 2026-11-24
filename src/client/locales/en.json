@@ -1097,6 +1097,7 @@
     "fileAttached": "File attached: {{file}}",
     "fileRemoved": "File removed",
     "closeNotification": "Close notification",
+    "showFullNotification": "Show the whole notification",
     "unseenReleasesOne": "{{count}} new change",
     "unseenReleases": "{{count}} new changes",
     "userMessageHeading": "Your message",

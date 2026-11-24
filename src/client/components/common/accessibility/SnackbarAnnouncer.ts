@@ -183,7 +183,7 @@ export const announceSnackbar = (node: HTMLElement, _isAppearing: boolean, key: 
   // StrictMode mounts notistack's transition twice in development, which calls onEnter again with the same key
   if (visibleSnackbars.has(key)) return
 
-  const message = node.querySelector('#notistack-snackbar')?.textContent?.trim()
+  const message = (node.querySelector('[data-snackbar-message]') ?? node.querySelector('#notistack-snackbar'))?.textContent?.trim()
   if (!message) return
 
   // The live regions do the announcing, prevent the snackbar itself from being read a second time

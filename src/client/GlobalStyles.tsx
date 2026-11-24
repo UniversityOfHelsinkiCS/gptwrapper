@@ -18,12 +18,38 @@ export default function Styles() {
           backgroundColor: theme.palette.background.default,
         },
         html: {
-          scrollPaddingTop: 'var(--floating-top, 0px)',
-          scrollPaddingBottom: 'var(--chatbox-height, 0px)',
+          scrollPaddingTop: 'max(var(--floating-top, 0px), var(--snackbar-cover-top, 0px))',
+          scrollPaddingBottom: 'max(var(--chatbox-height, 0px), var(--snackbar-cover-bottom, 0px))',
           [SHORT_VIEWPORT]: {
-            scrollPaddingTop: 0,
-            scrollPaddingBottom: 0,
+            scrollPaddingTop: 'var(--snackbar-cover-top, 0px)',
+            scrollPaddingBottom: 'var(--snackbar-cover-bottom, 0px)',
           },
+        },
+        'html .notistack-SnackbarContainer': {
+          top: '14px',
+          right: '20px',
+          left: 'auto',
+          width: '400px',
+          maxWidth: 'calc(100% - 40px)',
+          transform: 'none',
+          alignItems: 'stretch',
+          [theme.breakpoints.down('md')]: {
+            left: 'calc(var(--snackbar-left, 0px) + 16px)',
+            right: '16px',
+            top: 'max(var(--snackbar-top, 62px), calc(var(--back-button-bottom, 0px) - 2px))',
+            width: 'auto',
+            maxWidth: 'none',
+          },
+        },
+        'html[data-snackbar-placement="bottom"] .notistack-SnackbarContainer': {
+          top: 'auto',
+          bottom: 'calc(var(--chatbox-height, 0px) + 16px)',
+          [SHORT_VIEWPORT]: {
+            bottom: '16px',
+          },
+        },
+        'html .notistack-SnackbarContainer .notistack-Snackbar': {
+          minWidth: 0,
         },
         '*::-webkit-scrollbar': {
           width: 'var(--sb-size)',

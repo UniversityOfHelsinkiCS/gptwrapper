@@ -43,12 +43,12 @@ import TemplateModal from './TemplateModal'
 import PromptModalV2 from './PromptModalV2'
 import RagModal from '../Rag/RagModal'
 import HYLoadingSpinner from './general/HYLoadingSpinner'
+import NotificationBanner from '../common/NotificationBanner'
 import { CustomIcon } from './general/CustomIcon'
 import { parseFileContent } from '../../util/fileParsing'
 import { ChatExpiredView } from './ChatExpiredView'
 import { canManageCourse } from './util'
 import { ApiErrorView } from '../common/ApiErrorView'
-import NotificationBanner from '../common/NotificationBanner'
 import { PromptEditorState } from '../Prompt/context'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { AttachFolders, parseStoredFolders } from '../MyFiles/AttachFolders'
@@ -574,6 +574,15 @@ const ChatV2Content = () => {
     }
   }, [rightPanelCollapsed])
 
+  useEffect(() => {
+    if (!isEmbeddedMode) return
+    const rootStyle = document.documentElement.style
+    rootStyle.setProperty('--snackbar-left', 'var(--sidebar-width-collapsed)')
+    return () => {
+      rootStyle.removeProperty('--snackbar-left')
+    }
+  }, [isEmbeddedMode])
+
   // Browsers scroll a focused element clear of these, see scroll-padding in GlobalStyles.tsx (WCAG 2.4.11)
   useEffect(() => {
     if (!showFloatingButtons) return
@@ -717,7 +726,7 @@ const ChatV2Content = () => {
                 variant="outlined"
                 sx={{
                   padding: 2,
-                  mt: 2,
+                  mt: showFloatingButtons ? 6 : 2,
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 2,

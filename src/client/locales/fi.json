@@ -1098,6 +1098,7 @@
     "fileAttached": "Tiedosto liitetty: {{file}}",
     "fileRemoved": "Tiedosto poistettu",
     "closeNotification": "Sulje ilmoitus",
+    "showFullNotification": "Näytä koko ilmoitus",
     "unseenReleasesOne": "{{count}} uusi muutos",
     "unseenReleases": "{{count}} uutta muutosta",
     "userMessageHeading": "Sinun viestisi",

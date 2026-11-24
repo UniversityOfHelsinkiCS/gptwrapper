@@ -1073,6 +1073,7 @@
     "fileAttached": "Fil bifogad: {{file}}",
     "fileRemoved": "Filen har tagits bort",
     "closeNotification": "Stäng avisering",
+    "showFullNotification": "Visa hela aviseringen",
     "unseenReleasesOne": "{{count}} ny ändring",
     "unseenReleases": "{{count}} nya ändringar",
     "userMessageHeading": "Ditt meddelande",

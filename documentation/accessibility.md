@@ -68,6 +68,9 @@ Always import `enqueueSnackbar` from [`components/common/Snackbar.tsx`](../src/c
 - **Focus after close** ([`SnackbarFocus.ts`](../src/client/components/common/accessibility/SnackbarFocus.ts)): closing a snackbar with its focused close button moves focus to the next open snackbar, else to `#chat-input`, else back to where focus was before the notifications.
 - **Labelling**: the notistack container is labelled as a region with the number of open notifications, and error/warning snackbars get a visually hidden severity prefix.
 
+- **Moving away from focus** (`useMoveSnackbarsAwayFromFocus`): when keyboard focus (`:focus-visible`) moves to an element under a snackbar, the snackbars move to the bottom of the viewport (bottom right on large screens, above the chat input) by setting `data-snackbar-placement="bottom"` on `<html>`, and back to the top when focus moves under them there. When the last snackbar closes they return to the top. `useSnackbarCoverVariables` sets `--snackbar-cover-top` / `--snackbar-cover-bottom`, which are used as `scroll-padding`, so that the browser also scrolls a focused element clear of the snackbars (WCAG 2.4.11).
+- **Compact** (`useCompactSnackbars`, below `md` or in a short viewport): at most two snackbars are shown instead of four, and a long message is cut to two lines with a "Show the whole notification" toggle (`aria-expanded`). The text is smaller than notistack's default in all sizes.
+
 **Do not show form errors only in a snackbar.** A snackbar disappears, so an error the user needs in order to fix their input (validation, a failed save, a rejected file) must also stay visible next to the form (WCAG 2.2.1). Use the helpers in [`common/FormError.tsx`](../src/client/components/common/FormError.tsx):
 
 - `useFormError()` — `[error, setError]`; `setError` also announces the message assertively through the live regions above. When you move focus to the invalid field instead, call `setError(message, { announce: false })`: the field's error is read from its `aria-describedby`, and announcing it too makes screen readers read it twice.
@@ -76,7 +79,7 @@ Always import `enqueueSnackbar` from [`components/common/Snackbar.tsx`](../src/c
 
 Snackbars remain fine for confirmations (saved, copied, deleted) and for errors of one-off actions that the user can see failed and retry.
 
-Known gaps (snackbars are not reachable by keyboard while a dialog is open, the virtual cursor does not pause the timer, the oldest snackbar is dropped when a fifth arrives) are listed in the accessibility statement.
+Known gaps (snackbars are not reachable by keyboard while a dialog is open, the virtual cursor does not pause the timer, the oldest snackbar is dropped when a fifth arrives, or a third in a compact view, and a snackbar can still cover an element that is not focused, or a focused one at high zoom when there is no room for it at the top or the bottom) are listed in the accessibility statement.
 
 ## Focus
 

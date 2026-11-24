@@ -9,7 +9,7 @@ import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { initShibbolethPinger } from 'unfuck-spa-shibboleth-session'
-import { EmbeddedProvider } from './contexts/EmbeddedContext'
+import { EmbeddedProvider, useIsEmbedded } from './contexts/EmbeddedContext'
 import NotificationBanner from './components/common/NotificationBanner'
 import { DarkModeProvider } from './contexts/DarkModeContext'
 import useCurrentUser from './hooks/useCurrentUser'
@@ -29,7 +29,14 @@ import { Feedback } from './components/Feedback'
 import { SuperSpeedLoginAs } from './components/Admin/SuperSpeedLoginAs'
 import { useLoggedInAs } from './hooks/useLoggedInAs'
 import { announceSnackbar } from './components/common/accessibility/SnackbarAnnouncer'
-import { MAX_SNACKBARS, forgetClosedSnackbar, snackbarComponents } from './components/common/Snackbar'
+import {
+  MAX_SNACKBARS,
+  forgetClosedSnackbar,
+  snackbarComponents,
+  useCompactSnackbars,
+  useMoveSnackbarsAwayFromFocus,
+  useSnackbarCoverVariables,
+} from './components/common/Snackbar'
 import { resolveContentView, getRedirect } from './util/contentView'
 import safeLocalStorage from './util/safeLocalStorage'
 
@@ -125,24 +132,49 @@ const ThemedApp = () => {
       <CssBaseline />
       <Styles />
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fi}>
-        <SnackbarProvider
-          maxSnack={MAX_SNACKBARS}
-          autoHideDuration={null}
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          Components={snackbarComponents}
-          onEnter={announceSnackbar}
-          onClose={forgetClosedSnackbar}
-          domRoot={snackbarRoot ?? undefined}
-        >
+        <AppSnackbarProvider snackbarRoot={snackbarRoot}>
           <EmbeddedProvider>
             <AnalyticsProvider>
               <Layout snackbarRootRef={setSnackbarRoot} />
             </AnalyticsProvider>
           </EmbeddedProvider>
-        </SnackbarProvider>
+        </AppSnackbarProvider>
       </LocalizationProvider>
     </ThemeProvider>
   )
+}
+
+const AppSnackbarProvider = ({ snackbarRoot, children }: { snackbarRoot: HTMLElement | null; children: React.ReactNode }) => {
+  useSnackbarCoverVariables(snackbarRoot)
+  useMoveSnackbarsAwayFromFocus()
+  const compact = useCompactSnackbars()
+
+  return (
+    <SnackbarProvider
+      maxSnack={compact ? 2 : MAX_SNACKBARS}
+      dense
+      autoHideDuration={null}
+      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      Components={snackbarComponents}
+      onEnter={announceSnackbar}
+      onClose={forgetClosedSnackbar}
+      domRoot={snackbarRoot ?? undefined}
+    >
+      {children}
+    </SnackbarProvider>
+  )
+}
+
+const useEmbeddedSnackbarPlacement = () => {
+  const isEmbedded = useIsEmbedded()
+  useEffect(() => {
+    if (!isEmbedded) return
+    const rootStyle = document.documentElement.style
+    rootStyle.setProperty('--snackbar-top', '18px')
+    return () => {
+      rootStyle.removeProperty('--snackbar-top')
+    }
+  }, [isEmbedded])
 }
 
 const Layout = ({ snackbarRootRef }: { snackbarRootRef: (node: HTMLElement | null) => void }) => {
@@ -153,6 +185,7 @@ const Layout = ({ snackbarRootRef }: { snackbarRootRef: (node: HTMLElement | nul
   const [apiKeysOpen, setApiKeysOpen] = React.useState(false)
   const [disclaimerStatus, setDisclaimerStatus] = React.useState(false)
   const headerRef = React.useRef<HTMLElement>(null)
+  useEmbeddedSnackbarPlacement()
 
   useEffect(() => {
     if (user && !user.termsAcceptedAt && !safeLocalStorage.getItem('adminLoggedInAs')) {
