@@ -17,8 +17,10 @@ const row = (userId: string, tokenPercent: number, costPercent: number): UsageCo
   costPercent,
 })
 
-const comparison = { rows: [row('low', 90, 10), row('over', 20, 130), row('bonus', 50, 100), row('mid', 5, 60)], isLoading: false }
-vi.mock('../../../hooks/useUsageComparison', () => ({ default: () => comparison }))
+// The server sorts and pages, so the mock returns the rows as they are and records the requested params.
+const comparison = { rows: [row('over', 20, 130), row('bonus', 50, 100), row('mid', 5, 60), row('low', 90, 10)], count: 120, isLoading: false }
+const useUsageComparison = vi.fn((_params: unknown) => comparison)
+vi.mock('../../../hooks/useUsageComparison', () => ({ default: (params: unknown) => useUsageComparison(params) }))
 
 import en from '../../../locales/en.json'
 import UsageComparisonTable from './UsageComparisonTable'
@@ -28,7 +30,12 @@ const i18n = i18next.createInstance()
 beforeAll(async () => {
   await i18n.use(initReactI18next).init({ resources: { en }, lng: 'en', fallbackLng: 'en', defaultNS: 'common' })
 })
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  useUsageComparison.mockClear()
+})
+
+const lastParams = () => useUsageComparison.mock.calls.at(-1)?.[0]
 
 const renderTable = () =>
   render(
@@ -41,9 +48,10 @@ const bodyRows = () => screen.getAllByRole('row').slice(1)
 const usernames = () => bodyRows().map((tableRow) => within(tableRow).getByRole('rowheader').textContent?.replace('F L', ''))
 
 describe('UsageComparisonTable', () => {
-  test('sorts by the budget % descending by default', () => {
+  test('requests the first page by the budget % descending by default and shows the rows in the order received', () => {
     renderTable()
 
+    expect(lastParams()).toEqual({ orderBy: 'costPercent', order: 'desc', limit: 50, offset: 0 })
     expect(usernames()).toEqual(['over', 'bonus', 'mid', 'low'])
     expect(screen.getByRole('columnheader', { name: en.admin.costPercent }).getAttribute('aria-sort')).toBe('descending')
   })
@@ -52,12 +60,23 @@ describe('UsageComparisonTable', () => {
     renderTable()
 
     fireEvent.click(screen.getByRole('button', { name: en.admin.costPercent }))
-    expect(usernames()).toEqual(['low', 'mid', 'bonus', 'over'])
+    expect(lastParams()).toMatchObject({ orderBy: 'costPercent', order: 'asc' })
     expect(screen.getByRole('columnheader', { name: en.admin.costPercent }).getAttribute('aria-sort')).toBe('ascending')
 
     fireEvent.click(screen.getByRole('button', { name: en.admin.tokenPercent }))
-    expect(usernames()).toEqual(['low', 'bonus', 'over', 'mid'])
+    expect(lastParams()).toMatchObject({ orderBy: 'tokenPercent', order: 'desc' })
     expect(screen.getByRole('columnheader', { name: en.admin.tokenPercent }).getAttribute('aria-sort')).toBe('descending')
+  })
+
+  test('pages through the rows and goes back to the first page when the sort changes', () => {
+    renderTable()
+
+    fireEvent.click(screen.getByRole('button', { name: /next page/i }))
+    expect(lastParams()).toMatchObject({ limit: 50, offset: 50 })
+    expect(screen.getByText('51–100 of 120')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: en.admin.tokenPercent }))
+    expect(lastParams()).toMatchObject({ orderBy: 'tokenPercent', offset: 0 })
   })
 
   test('marks users at or over 100% of the budget with a text cue', () => {

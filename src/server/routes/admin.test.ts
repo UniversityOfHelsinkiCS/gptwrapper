@@ -32,7 +32,7 @@ import { DEFAULT_TOKEN_LIMIT, getModelPrice, WEEKLY_BUDGET } from '@config'
 import { ApiKey, ChatInstance, UserChatInstanceUsage, User, Enrolment, Responsibility } from '../db/models'
 import { COURSE_TOKEN_BONUS } from '../services/chatInstances/usage'
 import { PRICE_BASELINE_MODEL } from '../../shared/usage'
-import type { UsageComparisonRow } from '../../shared/usage'
+import type { UsageComparisonResponse } from '../../shared/usage'
 import adminRouter from './admin'
 
 let currentUser: { id: string; isAdmin: boolean }
@@ -367,12 +367,13 @@ describe('GET /admin/usage-comparison', () => {
 
   test('compares the old token % with the new cost % per user, highest cost % first', async () => {
     const res = await api.fetch('/admin/usage-comparison')
-    const body: UsageComparisonRow[] = await res.json()
+    const { results, count }: UsageComparisonResponse = await res.json()
 
     expect(res.status).toBe(200)
-    expect(body.map((row) => row.userId)).toEqual(['over', 'bonus', 'cheap'])
+    expect(count).toBe(3)
+    expect(results.map((row) => row.userId)).toEqual(['over', 'bonus', 'cheap'])
 
-    const [over, bonus, cheap] = body
+    const [over, bonus, cheap] = results
 
     expect(cheap.tokenLimit).toBe(DEFAULT_TOKEN_LIMIT)
     expect(cheap.tokenPercent).toBeCloseTo(50)
@@ -406,8 +407,29 @@ describe('GET /admin/usage-comparison', () => {
 
     const res = await api.fetch('/admin/usage-comparison')
 
-    expect(await res.json()).toEqual([])
+    expect(await res.json()).toEqual({ results: [], count: 0 })
     expect(Enrolment.findAll).not.toHaveBeenCalled()
+  })
+
+  const userIds = async (query: string) => {
+    const res = await api.fetch(`/admin/usage-comparison?${query}`)
+    const { results, count }: UsageComparisonResponse = await res.json()
+    return { ids: results.map((row) => row.userId), count }
+  }
+
+  test('sorts by the requested column and order', async () => {
+    expect((await userIds('orderBy=costPercent&order=asc')).ids).toEqual(['cheap', 'bonus', 'over'])
+    expect((await userIds('orderBy=tokenPercent&order=desc')).ids).toEqual(['cheap', 'bonus', 'over'])
+  })
+
+  test('returns the requested page and the count of all rows', async () => {
+    expect(await userIds('limit=2')).toEqual({ ids: ['over', 'bonus'], count: 3 })
+    expect(await userIds('limit=2&offset=2')).toEqual({ ids: ['cheap'], count: 3 })
+  })
+
+  test('falls back to the defaults on invalid params', async () => {
+    expect(await userIds('orderBy=username&order=sideways&limit=abc&offset=-5')).toEqual({ ids: ['over', 'bonus', 'cheap'], count: 3 })
+    expect((await userIds('limit=0')).ids).toEqual(['over'])
   })
 
   test('rejects non-admins', async () => {
