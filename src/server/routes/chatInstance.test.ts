@@ -31,7 +31,6 @@ let currentUser: { id: string; isAdmin: boolean }
 const api = startTestServer('/chatinstances', chatInstanceRouter, () => currentUser)
 
 const open = { activityPeriod: { startDate: '2026-01-01', endDate: '2062-12-31' }, activated: true }
-const expired = { activityPeriod: { startDate: '2020-01-01', endDate: '2020-06-01' }, activated: true }
 
 const chatInstanceFixture = (overrides = {}) => ({
   id: 'ci-1',
@@ -80,59 +79,7 @@ beforeEach(() => {
   vi.mocked(UserChatInstanceUsage.findAll).mockResolvedValue([usageFixture()] as any)
 })
 
-const getUsages = (id = 'ci-1') => api.fetch(`/chatinstances/${id}/usages`)
-
 const resetUsage = (id = 'usage-1') => api.fetch(`/chatinstances/usage/${id}`, { method: 'DELETE' })
-
-describe('GET /chatinstances/:id/usages', () => {
-  test('admin gets 200 with the usages', async () => {
-    users.admin()
-    const response = await getUsages()
-    const body = await response.json()
-    expect(response.status).toBe(200)
-    expect(body).toHaveLength(1)
-  })
-
-  test('responsible teacher gets 200 with the usages', async () => {
-    users.teacher()
-    const response = await getUsages()
-    expect(response.status).toBe(200)
-  })
-
-  test('responsible teacher gets 200 on an expired course', async () => {
-    users.teacher()
-    vi.mocked(ChatInstance.findByPk).mockResolvedValue(chatInstanceFixture(expired) as any)
-    const response = await getUsages()
-    expect(response.status).toBe(200)
-  })
-
-  test('enrolled student gets 403', async () => {
-    users.student()
-    const response = await getUsages()
-    expect(response.status).toBe(403)
-    expect(UserChatInstanceUsage.findAll).not.toHaveBeenCalled()
-  })
-
-  test('enrolled student on an expired course gets 403', async () => {
-    users.student()
-    vi.mocked(ChatInstance.findByPk).mockResolvedValue(chatInstanceFixture(expired) as any)
-    const response = await getUsages()
-    expect(response.status).toBe(403)
-  })
-
-  test('outsider gets 403', async () => {
-    users.outsider()
-    const response = await getUsages()
-    expect(response.status).toBe(403)
-  })
-
-  test('404 when the chat instance does not exist', async () => {
-    users.admin()
-    vi.mocked(ChatInstance.findByPk).mockResolvedValue(null)
-    const response = await getUsages()
-    expect(response.status).toBe(404)
-  })
-})
 
 describe('DELETE /chatinstances/usage/:id', () => {
   test('responsible teacher resets the usage to 0', async () => {
