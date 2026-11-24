@@ -1,4 +1,4 @@
-import { Box } from '@mui/material'
+import { Box, type SxProps, type Theme } from '@mui/material'
 import { useCallback, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import safeLocalStorage from '../../util/safeLocalStorage'
@@ -66,12 +66,15 @@ const SplitSeparator = ({
   onChange,
   getRange,
   controls,
+  sx,
 }: {
   value: number
   onChange: (value: number) => void
   getRange: () => SplitRange | null
   /** The id of the chat column it resizes. */
   controls?: string
+  /** Placement in the parent layout */
+  sx?: SxProps<Theme>
 }) => {
   const { t } = useTranslation()
   const dragging = useRef(false)
@@ -129,23 +132,26 @@ const SplitSeparator = ({
       onPointerMove={onPointerMove}
       onPointerUp={stopDragging}
       onPointerCancel={stopDragging}
-      sx={{
-        flex: '0 0 auto',
-        m: 0,
-        border: 0,
-        width: '9px',
-        height: '100vh',
-        position: 'sticky',
-        top: 0,
-        cursor: 'col-resize',
-        touchAction: 'none',
-        display: 'flex',
-        justifyContent: 'center',
-        // A thin line in a wider grab area, thicker while hovered or dragged.
-        '&::before': { content: '""', width: '1px', height: '100%', bgcolor: 'divider', transition: 'width 0.1s' },
-        '&:hover::before, &:active::before': { width: '3px', bgcolor: 'primary.main' },
-        ...focusIndicatorStyle({ selector: '&:focus-visible' }),
-      }}
+      sx={[
+        {
+          flex: '0 0 auto',
+          m: 0,
+          border: 0,
+          width: '9px',
+          height: '100vh',
+          position: 'sticky',
+          top: 0,
+          cursor: 'col-resize',
+          touchAction: 'none',
+          display: 'flex',
+          justifyContent: 'center',
+          // A thin line in a wider grab area, thicker while hovered or dragged.
+          '&::before': { content: '""', width: '1px', height: '100%', bgcolor: 'divider', transition: 'width 0.1s' },
+          '&:hover::before, &:active::before': { width: '3px', bgcolor: 'primary.main' },
+          ...focusIndicatorStyle({ selector: '&:focus-visible' }),
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
     />
   )
 }

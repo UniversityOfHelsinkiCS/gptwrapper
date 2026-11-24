@@ -667,6 +667,15 @@ const ChatV2Content = () => {
     }
   }, [globalMenuOffset])
 
+  useEffect(() => {
+    if (!isEmbeddedMode) return
+    const rootStyle = document.documentElement.style
+    rootStyle.setProperty('--snackbar-left', 'var(--sidebar-width-collapsed)')
+    return () => {
+      rootStyle.removeProperty('--snackbar-left')
+    }
+  }, [isEmbeddedMode])
+
   // Browsers scroll a focused element clear of these, see scroll-padding in GlobalStyles.tsx (WCAG 2.4.11)
   useEffect(() => {
     if (!showFloatingButtons) return
@@ -791,50 +800,63 @@ const ChatV2Content = () => {
     )
   }
 
+  // Columns: sidebar, chat, separator, file viewer slot, right rail. The empty ones are 0 wide. With a file open, the
+  // chat and the slot split the space by the separator's ratio (40/60 by default); a narrow-screen file covers the chat.
+  // The fr values are scaled up so that rounding never leaves their sum below 1 (which would leave space unused).
+  const chatTrack = narrowViewerShown ? '0px' : slotShown ? `minmax(${MIN_CHAT_WIDTH}px, ${splitRatio * 100}fr)` : 'minmax(0, 1fr)'
+  const slotTrack = slotShown ? `minmax(0, ${(1 - splitRatio) * 100}fr)` : narrowViewerShown ? 'minmax(0, 1fr)' : '0px'
+
   return (
     <Box
       sx={{
         minHeight: '100vh',
         position: 'relative',
-        display: 'flex',
+        display: 'grid',
+        gridTemplateColumns: `[sidebar] auto [chat] ${chatTrack} [separator] auto [slot] ${slotTrack} [rail] auto`,
+        gridTemplateRows: 'auto 1fr',
       }}
     >
+      {/* First in the focus order, above the chat */}
+      <NotificationBanner
+        sx={[{ gridColumn: 'chat', gridRow: 1 }, showFloatingButtons ? bannerBelowFloatingButtonsSx : {}, narrowViewerShown ? { display: 'none' } : {}]}
+      />
       {/* Chat side panel column -------------------------------------------------------------------------------------------*/}
-      {/* Embedded chat keeps the collapsed sidebar visible so that no floating buttons cover the conversation */}
-      {isEmbeddedMode && <SideBar open={false} setOpen={setSideBarOpen} user={user} handleReset={handleResetRequest} messages={messages} />}
-      {isEmbeddedMode || isMobile ? (
-        <Drawer
-          open={sideBarOpen}
-          onClose={() => {
-            setSideBarOpen(!sideBarOpen)
-          }}
-          sx={{ '& .MuiDrawer-paper': { maxWidth: '100vw' } }}
-        >
-          <SideBar
-            open={true} // always open in drawer
-            autoFocus
-            setOpen={setSideBarOpen}
-            user={user}
-            handleReset={handleResetRequest}
-            messages={messages}
-          />
-        </Drawer>
-      ) : (
-        <SideBar open={sideBarOpen} setOpen={setSideBarOpen} user={user} handleReset={handleResetRequest} messages={messages} />
-      )}
+      <Box sx={{ gridColumn: 'sidebar', gridRow: '1 / span 2' }}>
+        {/* Embedded chat keeps the collapsed sidebar visible so that no floating buttons cover the conversation */}
+        {isEmbeddedMode && <SideBar open={false} setOpen={setSideBarOpen} user={user} handleReset={handleResetRequest} messages={messages} />}
+        {isEmbeddedMode || isMobile ? (
+          <Drawer
+            open={sideBarOpen}
+            onClose={() => {
+              setSideBarOpen(!sideBarOpen)
+            }}
+            sx={{ '& .MuiDrawer-paper': { maxWidth: '100vw' } }}
+          >
+            <SideBar
+              open={true} // always open in drawer
+              autoFocus
+              setOpen={setSideBarOpen}
+              user={user}
+              handleReset={handleResetRequest}
+              messages={messages}
+            />
+          </Drawer>
+        ) : (
+          <SideBar open={sideBarOpen} setOpen={setSideBarOpen} user={user} handleReset={handleResetRequest} messages={messages} />
+        )}
+      </Box>
       {/* Chat view column ------------------------------------------------------------------------------------------------ */}
-      {/* The banner spans the whole space between the side panels, the chat below it stays narrower */}
-      {/* With a file open, the chat and the right slot split the space by the separator's ratio (40/60 by default). */}
       <Box
         ref={chatColumnRef}
         id="chat-column"
         sx={{
-          ...(slotShown ? { flex: `${splitRatio} 1 0px`, minWidth: `${MIN_CHAT_WIDTH}px` } : { flex: 1, minWidth: 0 }),
+          gridColumn: 'chat',
+          gridRow: 2,
+          minWidth: 0,
           display: narrowViewerShown ? 'none' : 'flex',
           flexDirection: 'column',
         }}
       >
-        <NotificationBanner sx={showFloatingButtons ? bannerBelowFloatingButtonsSx : undefined} />
         <Box
           ref={chatContainerRef}
           data-skip-target
@@ -890,7 +912,7 @@ const ChatV2Content = () => {
                 variant="outlined"
                 sx={{
                   padding: 2,
-                  mt: 2,
+                  mt: showFloatingButtons ? 6 : 2,
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 2,
@@ -995,12 +1017,22 @@ const ChatV2Content = () => {
       {/* Kept in the same place in every layout, so the viewer keeps its file and position when the layout changes. */}
       {viewerTarget && myFilesStore && (
         <>
-          {slotShown && <SplitSeparator value={splitRatio} onChange={setSplitRatio} getRange={getSplitRange} controls="chat-column" />}
+          {slotShown && (
+            <SplitSeparator
+              value={splitRatio}
+              onChange={setSplitRatio}
+              getRange={getSplitRange}
+              controls="chat-column"
+              sx={{ gridColumn: 'separator', gridRow: '1 / span 2', alignSelf: 'start' }}
+            />
+          )}
           <Box
             ref={measureSlot}
             data-testid="file-viewer-slot"
             sx={{
-              flex: slotShown ? `${1 - splitRatio} 1 0px` : 1,
+              gridColumn: 'slot',
+              gridRow: '1 / span 2',
+              alignSelf: 'start',
               minWidth: 0,
               height: '100vh',
               position: 'sticky',
@@ -1067,6 +1099,9 @@ const ChatV2Content = () => {
           <Box
             data-testid="right-rail"
             sx={{
+              gridColumn: 'rail',
+              gridRow: '1 / span 2',
+              alignSelf: 'start',
               width: rightPanelContentWidth,
               height: '100vh',
               display: 'flex',
