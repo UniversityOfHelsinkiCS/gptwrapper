@@ -8,10 +8,11 @@ import safeLocalStorage from '../../util/safeLocalStorage'
 /** At most this many reading positions are kept; the least recently saved ones are dropped first. */
 export const MAX_READING_POSITIONS = 50
 
-/** At most this many files are kept per chat context; opening another one drops the oldest. */
+/** At most this many files are kept per chat context; opening another one drops the first opened. */
 export const MAX_CHAT_FILES = 10
 
 const FILES_KEY_PREFIX = 'file-viewer-files-'
+const ACTIVE_KEY_PREFIX = 'file-viewer-active-'
 /** Before the file list, only the open file was remembered. It is read once as the list's only file. */
 const OPEN_FILE_KEY_PREFIX = 'file-viewer-open-'
 const MINIMIZED_KEY_PREFIX = 'file-viewer-minimized-'
@@ -25,37 +26,77 @@ interface StoredPosition {
   position: ReadingPosition
 }
 
+/** The files of a chat context in the order they were first opened, and the one the viewer shows (null without files). */
+export interface ChatFiles {
+  files: string[]
+  active: string | null
+}
+
 /** The storage key for the files of a chat context: the course id, or `general` for the general chat. */
 export const chatFilesStorageKey = (chatContext: string) => `${FILES_KEY_PREFIX}${chatContext}`
+
+/** The storage key for the file the viewer shows in a chat context. */
+export const activeFileStorageKey = (chatContext: string) => `${ACTIVE_KEY_PREFIX}${chatContext}`
 
 /** The storage key of the open file before the file list. */
 export const openFileStorageKey = (chatContext: string) => `${OPEN_FILE_KEY_PREFIX}${chatContext}`
 
-/** The files opened in a chat context, newest first: the first one is the open file. Anything malformed is skipped. */
-export const readChatFiles = (chatContext: string): string[] => {
-  const stored = safeLocalStorage.getItem(chatFilesStorageKey(chatContext))
-  if (stored === null) {
-    const openFile = safeLocalStorage.getItem(openFileStorageKey(chatContext))
-    return openFile ? [openFile] : []
-  }
+const parseFiles = (stored: string): string[] => {
   try {
     const parsed: unknown = JSON.parse(stored)
     if (!Array.isArray(parsed)) return []
-    const paths = parsed.filter((path): path is string => typeof path === 'string' && path.length > 0)
-    return Array.from(new Set(paths)).slice(0, MAX_CHAT_FILES)
+    return Array.from(new Set(parsed.filter((path): path is string => typeof path === 'string' && path.length > 0)))
   } catch {
     return []
   }
 }
 
-export const writeChatFiles = (chatContext: string, paths: string[]) => {
-  safeLocalStorage.removeItem(openFileStorageKey(chatContext))
-  if (paths.length > 0) safeLocalStorage.setItem(chatFilesStorageKey(chatContext), JSON.stringify(paths.slice(0, MAX_CHAT_FILES)))
-  else safeLocalStorage.removeItem(chatFilesStorageKey(chatContext))
+/**
+ * The files opened in a chat context, first opened first, and the one shown. Anything malformed is skipped; a shown
+ * file missing from the list falls back to the last one. Two older formats are read as well: a list without a stored
+ * shown file was newest first with the shown file first, and before the list only the open file was stored.
+ */
+export const readChatFiles = (chatContext: string): ChatFiles => {
+  const stored = safeLocalStorage.getItem(chatFilesStorageKey(chatContext))
+  if (stored === null) {
+    const openFile = safeLocalStorage.getItem(openFileStorageKey(chatContext))
+    return openFile ? { files: [openFile], active: openFile } : { files: [], active: null }
+  }
+  const active = safeLocalStorage.getItem(activeFileStorageKey(chatContext))
+  if (active === null) {
+    const newestFirst = parseFiles(stored).slice(0, MAX_CHAT_FILES)
+    return { files: [...newestFirst].reverse(), active: newestFirst[0] ?? null }
+  }
+  const files = parseFiles(stored).slice(-MAX_CHAT_FILES)
+  return { files, active: files.includes(active) ? active : files.at(-1) ?? null }
 }
 
-/** The list with `path` opened: moved (or added) to the front, the oldest dropped beyond `MAX_CHAT_FILES`. */
-export const withOpenedFile = (paths: string[], path: string): string[] => [path, ...paths.filter((other) => other !== path)].slice(0, MAX_CHAT_FILES)
+export const writeChatFiles = (chatContext: string, { files, active }: ChatFiles) => {
+  safeLocalStorage.removeItem(openFileStorageKey(chatContext))
+  if (files.length > 0 && active) {
+    safeLocalStorage.setItem(chatFilesStorageKey(chatContext), JSON.stringify(files.slice(-MAX_CHAT_FILES)))
+    safeLocalStorage.setItem(activeFileStorageKey(chatContext), active)
+  } else {
+    safeLocalStorage.removeItem(chatFilesStorageKey(chatContext))
+    safeLocalStorage.removeItem(activeFileStorageKey(chatContext))
+  }
+}
+
+/**
+ * The list with `path` opened: a listed file keeps its place, a new one is added at the end, dropping the first opened
+ * beyond `MAX_CHAT_FILES`.
+ */
+export const withOpenedFile = (paths: string[], path: string): string[] => (paths.includes(path) ? paths : [...paths, path].slice(-MAX_CHAT_FILES))
+
+/**
+ * The file to show instead of `paths[index]` when it goes away: the nearest one after it that is kept, or else the
+ * nearest one before it. Undefined when none is kept.
+ */
+export const nearestKeptFile = (paths: string[], index: number, kept: (path: string) => boolean): string | undefined => {
+  for (let next = index + 1; next < paths.length; next++) if (kept(paths[next])) return paths[next]
+  for (let previous = index - 1; previous >= 0; previous--) if (kept(paths[previous])) return paths[previous]
+  return undefined
+}
 
 /** Whether the viewer is minimized to the rail in a chat context. */
 export const minimizedStorageKey = (chatContext: string) => `${MINIMIZED_KEY_PREFIX}${chatContext}`

@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { MAX_VIEWER_FILE_HEADING_LENGTH, MAX_VIEWER_FILE_PATH_LENGTH, type ViewerFile } from '@shared/viewerFile'
 import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
-import { readChatFiles, readMinimized, withOpenedFile, writeChatFiles, writeMinimized } from './viewerPersistence'
+import { nearestKeptFile, readChatFiles, readMinimized, withOpenedFile, writeChatFiles, writeMinimized } from './viewerPersistence'
 
 /**
  * What to show in the viewer: a My files path, optionally with a position to open it at (a PDF page or a Markdown
@@ -16,7 +16,10 @@ export interface ViewerTarget {
 export interface FileViewerControls {
   /** The open file, or null when the viewer is closed. A minimized viewer still has its file open. */
   target: ViewerTarget | null
-  /** The files opened in this chat context, newest first (at most `MAX_CHAT_FILES`). The open file is the first one. */
+  /**
+   * The files opened in this chat context, in the order they were first opened (at most `MAX_CHAT_FILES`). Switching
+   * between them keeps the order. The open file is one of them.
+   */
   files: string[]
   /** Whether the open file is minimized to the rail. The active file (shown to the user) is `target` when this is false. */
   minimized: boolean
@@ -26,8 +29,8 @@ export interface FileViewerControls {
    */
   focusOnOpen: boolean
   /**
-   * Opens a file, at `page` / `heading` when given, moves it to the front of `files` (adding it there) and expands a
-   * minimized viewer. Each call is a new navigation: opening the file that is already open with another page or heading
+   * Opens a file, at `page` / `heading` when given, adds it to the end of `files` unless it is there already, and
+   * expands a minimized viewer. Each call is a new navigation: opening the file that is already open with another page or heading
    * jumps there.
    */
   open: (target: ViewerTarget) => void
@@ -36,8 +39,8 @@ export interface FileViewerControls {
   /** Expands a minimized viewer back to its file. */
   expand: () => void
   /**
-   * Removes a file from `files`. Removing the open file opens the next one; removing the last one closes the viewer,
-   * which is the only way to close it.
+   * Removes a file from `files`. Removing the open file opens the next one in `files` (the previous one when it was
+   * the last); removing the only one closes the viewer, which is the only way to close it.
    */
   remove: (path: string) => void
   /**
@@ -67,7 +70,7 @@ interface ViewerState {
 const initialState = (context: string | undefined, remembered: boolean): ViewerState => ({
   context,
   target: null,
-  files: remembered && context ? readChatFiles(context) : [],
+  files: remembered && context ? readChatFiles(context).files : [],
   minimized: false,
   focusOnOpen: false,
 })
@@ -79,8 +82,8 @@ const FileViewerContext = createContext<FileViewerControls | null>(null)
  * cards open files and the chat view shows them, so all read it from here. With `available` false (embedded mode, no
  * OPFS) nothing is provided and the viewer stays off.
  * The files and whether the viewer is minimized are per `chatContext` (a course id, or `general`): they are remembered,
- * and on load (or when switching back to the context) files no longer in My files are dropped and the newest one is
- * reopened. Without `chatContext` nothing is remembered.
+ * and on load (or when switching back to the context) files no longer in My files are dropped and the file shown
+ * last is reopened (or the nearest one in the list, when it is gone). Without `chatContext` nothing is remembered.
  */
 export const FileViewerProvider = ({ available, chatContext, children }: { available: boolean; chatContext?: string; children: ReactNode }) => {
   const store = useMyFilesStore()
@@ -94,22 +97,24 @@ export const FileViewerProvider = ({ available, chatContext, children }: { avail
 
   useEffect(() => {
     if (!available || !store || !chatContext) return
-    const stored = readChatFiles(chatContext)
+    const { files: stored, active } = readChatFiles(chatContext)
     if (stored.length === 0) return
     let cancelled = false
     void (async () => {
       const entries = await Promise.all(stored.map((path) => store.stat(path).catch(() => null)))
       if (cancelled) return
-      const files = stored.filter((_, index) => entries[index]?.kind === 'file')
+      const exists = (path: string) => entries[stored.indexOf(path)]?.kind === 'file'
+      const files = stored.filter(exists)
       // Unless a file was opened meanwhile.
       if (stateRef.current.context !== chatContext || stateRef.current.target) return
-      writeChatFiles(chatContext, files)
-      if (files.length === 0) {
+      const shown = active && exists(active) ? active : nearestKeptFile(stored, active ? stored.indexOf(active) : -1, exists)
+      writeChatFiles(chatContext, { files, active: shown ?? null })
+      if (!shown) {
         writeMinimized(chatContext, false)
         setState({ ...initialState(chatContext, false), files })
         return
       }
-      setState({ context: chatContext, target: { path: files[0] }, files, minimized: readMinimized(chatContext), focusOnOpen: false })
+      setState({ context: chatContext, target: { path: shown }, files, minimized: readMinimized(chatContext), focusOnOpen: false })
     })()
     return () => {
       cancelled = true
@@ -121,7 +126,7 @@ export const FileViewerProvider = ({ available, chatContext, children }: { avail
       const files = withOpenedFile(stateRef.current.files, next.path)
       setState({ context: chatContext, target: next, files, minimized: false, focusOnOpen: true })
       if (chatContext) {
-        writeChatFiles(chatContext, files)
+        writeChatFiles(chatContext, { files, active: next.path })
         writeMinimized(chatContext, false)
       }
     },
@@ -140,17 +145,21 @@ export const FileViewerProvider = ({ available, chatContext, children }: { avail
   const remove = useCallback(
     (path: string) => {
       const prev = stateRef.current
+      const index = prev.files.indexOf(path)
+      if (index === -1) return
       const files = prev.files.filter((other) => other !== path)
-      if (files.length === prev.files.length) return
+      let target = prev.target
       if (files.length === 0) {
+        target = null
         setState({ ...initialState(chatContext, false), files })
         if (chatContext) writeMinimized(chatContext, false)
       } else if (prev.target?.path === path) {
-        setState({ ...prev, target: { path: files[0] }, files, focusOnOpen: false })
+        target = { path: nearestKeptFile(prev.files, index, (other) => other !== path)! }
+        setState({ ...prev, target, files, focusOnOpen: false })
       } else {
         setState({ ...prev, files })
       }
-      if (chatContext) writeChatFiles(chatContext, files)
+      if (chatContext) writeChatFiles(chatContext, { files, active: target?.path ?? files.at(-1) ?? null })
     },
     [chatContext],
   )
