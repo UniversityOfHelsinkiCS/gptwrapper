@@ -1179,7 +1179,6 @@
     "filesMenu": "Filer i den här chatten",
     "filesMenuHint": "Tryck på Delete för att ta bort den markerade filen från den här chatten.",
     "removeFile": "Ta bort {{name}} från den här chatten",
-    "expandNamedWithCount": "Öppna {{name}} ({{count}} filer i den här chatten)",
     "tooLarge": "Filen är för stor för att visas.",
     "unsupported": "Den här typen av fil kan inte visas.",
     "image": "Bild (visas inte)",

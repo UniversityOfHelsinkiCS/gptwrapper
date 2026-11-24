@@ -1125,7 +1125,7 @@ const ChatV2Content = () => {
             )}
             {rightSide.railFile && viewerTarget && (
               <Box sx={{ display: 'flex', justifyContent: 'center', pt: rightSide.sourcesPanel ? 1 : 3 }}>
-                <FileRailButton path={viewerTarget.path} count={fileViewer?.files.length} onExpand={expandViewer} buttonRef={railFileButtonRef} />
+                <FileRailButton path={viewerTarget.path} onExpand={expandViewer} buttonRef={railFileButtonRef} />
               </Box>
             )}
           </Box>

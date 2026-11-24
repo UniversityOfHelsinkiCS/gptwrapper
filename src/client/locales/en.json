@@ -1203,7 +1203,6 @@
     "filesMenu": "Files in this chat",
     "filesMenuHint": "Press Delete to remove the focused file from this chat.",
     "removeFile": "Remove {{name}} from this chat",
-    "expandNamedWithCount": "Open {{name}} ({{count}} files in this chat)",
     "tooLarge": "This file is too large to display.",
     "unsupported": "This type of file cannot be displayed.",
     "image": "Image (not shown)",

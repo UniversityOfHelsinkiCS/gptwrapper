@@ -1204,7 +1204,6 @@
     "filesMenu": "Tämän keskustelun tiedostot",
     "filesMenuHint": "Poista valittu tiedosto tästä keskustelusta painamalla Delete.",
     "removeFile": "Poista {{name}} tästä keskustelusta",
-    "expandNamedWithCount": "Avaa {{name}} ({{count}} tiedostoa tässä keskustelussa)",
     "tooLarge": "Tiedosto on liian suuri näytettäväksi.",
     "unsupported": "Tämän tyyppistä tiedostoa ei voi näyttää.",
     "image": "Kuva (ei näytetä)",
