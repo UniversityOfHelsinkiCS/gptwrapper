@@ -337,11 +337,12 @@ adminTest('the open PDF and its page are remembered over a reload and a chat res
     await expect(page.getByTestId('assistant-message')).toHaveCount(0)
     await expect(viewer.getByTestId('file-viewer-pdf-page')).toHaveText('Page 8 / 12')
 
-    // Closed, it stays closed over a reload. (With the keyboard: a snackbar may cover the button.)
-    await viewer.getByRole('button', { name: 'Close book.pdf' }).press('Enter')
+    // Minimized, it stays minimized over a reload. (With the keyboard: a snackbar may cover the button.)
+    await viewer.getByRole('button', { name: 'Minimize book.pdf' }).press('Enter')
     await page.reload()
     await expect(page.locator('#chat-input')).toBeVisible()
-    await expect(page.getByTestId('file-viewer')).toHaveCount(0)
+    await expect(page.getByTestId('right-rail').getByRole('button', { name: 'Open book.pdf' })).toBeVisible()
+    await expect(viewer).toBeHidden()
   } finally {
     rmSync(root, { recursive: true, force: true })
   }
@@ -384,11 +385,11 @@ adminTest('the source of a PDF quote opens the file at the quoted page', async (
     await closeSendPreference(page)
     await expect(page.getByTestId('assistant-message')).toBeVisible()
 
-    // Back to page 1, which is remembered, then closed.
+    // Back to page 1, which is remembered, then minimized.
     await pdf.evaluate((container) => container.scrollTo({ top: 0 }))
     await expect(viewer.getByTestId('file-viewer-pdf-page')).toHaveText('Page 1 / 6')
-    await viewer.getByRole('button', { name: 'Close book.pdf' }).press('Enter')
-    await expect(viewer).toHaveCount(0)
+    await viewer.getByRole('button', { name: 'Minimize book.pdf' }).press('Enter')
+    await expect(viewer).toBeHidden()
 
     const source = page.getByTestId('user-message').getByRole('button', { name: 'Open book.pdf · p. 4 in the file viewer' })
     await source.click()
