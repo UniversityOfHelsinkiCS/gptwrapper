@@ -12,7 +12,7 @@ import { resetUsage } from '../util/cron'
 import { getUsageComparison } from '../services/chatInstances/usageComparison'
 import logger from '../util/logger'
 import type { RequestWithUser } from '../types'
-import type { UsageComparisonResponse } from '../../shared/usage'
+import { USAGE_COMPARISON_SORT_KEYS, type UsageComparisonResponse, type UsageComparisonSortKey } from '../../shared/usage'
 import type { ApiUser, ChatInstanceSearchResponse, ChatInstanceSearchResult, CourseParticipant, CourseParticipantsResponse } from '../../shared/types'
 
 const adminRouter = express.Router()
@@ -80,8 +80,20 @@ adminRouter.get('/users/:search', async (req, res) => {
 })
 
 // This week's usage of each user under the old token system and the cost system, for tuning the budget before the switch.
-adminRouter.get('/usage-comparison', async (_req, res) => {
-  const comparison: UsageComparisonResponse = await getUsageComparison()
+adminRouter.get('/usage-comparison', async (req, res) => {
+  const DEFAULT_LIMIT = 50
+  const MAX_LIMIT = 100
+
+  const orderByParam = String(req.query.orderBy ?? '')
+  const orderBy = (USAGE_COMPARISON_SORT_KEYS as readonly string[]).includes(orderByParam) ? (orderByParam as UsageComparisonSortKey) : 'costPercent'
+  const order = req.query.order === 'asc' ? 'asc' : 'desc'
+
+  const parsedLimit = parseInt(String(req.query.limit ?? ''), 10)
+  const limit = Number.isNaN(parsedLimit) ? DEFAULT_LIMIT : Math.min(Math.max(parsedLimit, 1), MAX_LIMIT)
+  const parsedOffset = parseInt(String(req.query.offset ?? ''), 10)
+  const offset = Number.isNaN(parsedOffset) ? 0 : Math.max(parsedOffset, 0)
+
+  const comparison: UsageComparisonResponse = await getUsageComparison({ orderBy, order, limit, offset })
 
   res.send(comparison)
 })

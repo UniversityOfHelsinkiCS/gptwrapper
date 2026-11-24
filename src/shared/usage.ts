@@ -146,8 +146,18 @@ export type UsageComparisonRow = {
   costPercent: number
 }
 
-/** Response of `GET /api/admin/usage-comparison`: users with usage this week, sorted by `costPercent` descending */
-export type UsageComparisonResponse = UsageComparisonRow[]
+export const USAGE_COMPARISON_SORT_KEYS = ['costPercent', 'tokenPercent'] as const
+export type UsageComparisonSortKey = (typeof USAGE_COMPARISON_SORT_KEYS)[number]
+export type SortOrder = 'asc' | 'desc'
+
+/**
+ * Response of `GET /api/admin/usage-comparison?orderBy&order&limit&offset`: one page of the users with usage this week,
+ * sorted by `orderBy` (default `costPercent`) in `order` (default `desc`), and the number of all such users.
+ */
+export type UsageComparisonResponse = {
+  results: UsageComparisonRow[]
+  count: number
+}
 
 /** User status under `USAGE_ENFORCEMENT=tokens`: weekly tokens of the general chat or of the requested course. */
 export type TokenUserStatus = {
