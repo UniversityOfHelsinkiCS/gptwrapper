@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import i18next from 'i18next'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
-import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import type { ValidModelName } from '@config'
 
 // vitest's `define` turns an unset DEFAULT_MODEL into the string 'undefined', which src/config.ts rejects
@@ -189,6 +189,23 @@ describe('ModelSelector hides internal models', () => {
 })
 
 describe('ModelSelector price indicator', () => {
+  beforeEach(() => {
+    currentUser.user.isAdmin = true
+  })
+  afterEach(() => {
+    currentUser.user.isAdmin = false
+  })
+
+  test('is not shown to non-admins', () => {
+    currentUser.user.isAdmin = false
+    const { menu, toggle } = openSelector()
+    fireEvent.click(toggle)
+
+    expect(within(menu).queryByTestId('gpt-6-luna-price')).toBeNull()
+    expect(within(getSideMenu()).queryByTestId('gpt-5.1-price')).toBeNull()
+    expect(within(menu).getByTestId('gpt-6-luna-option').getAttribute('aria-label')).not.toMatch(/Cost/)
+  })
+
   test('each model shows dots and its multiplier (drawn from data-price), hidden from screen readers', () => {
     const { menu, toggle } = openSelector()
     fireEvent.click(toggle)

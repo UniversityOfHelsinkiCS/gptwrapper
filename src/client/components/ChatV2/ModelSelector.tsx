@@ -108,12 +108,14 @@ const ModelSelector = ({
     const description = descriptionKey && t(descriptionKey)
     const selfHostedLabel = tags.includes('local') && t('chat:selfHostedModel')
     const freeLabel = isFreeModel(name) && t('chat:freeModel')
-    const priceIndicator = modelPriceIndicator(name)
+    // Admin-only for now
+    const priceIndicator = user?.isAdmin ? modelPriceIndicator(name) : undefined
     const multiplier = priceIndicator?.multiplier.toLocaleString(i18n.language)
     const baselineName = getModelDisplayName(PRICE_BASELINE_MODEL)
     const costLabel =
       priceIndicator &&
       (priceIndicator.multiplier === 1 ? t('chat:modelCostSame', { model: baselineName }) : t('chat:modelCost', { multiplier, model: baselineName }))
+
     return (
       <MenuItem
         key={name}
