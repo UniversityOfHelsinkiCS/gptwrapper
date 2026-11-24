@@ -13,6 +13,7 @@ import type { MyFilesStore } from '../../util/myFiles/store'
 import { MarkdownContent } from '../ChatV2/MarkdownContent'
 import { ExperimentalChip } from '../MyFiles/ExperimentalChip'
 import { MAX_VIEWER_TEXT_BYTES, viewerFileKind } from './fileKind'
+import FileTitleMenu from './FileTitleMenu'
 import type { ViewerTarget } from './FileViewerContext'
 import { findHeading, pdfPageOf, selectionToQuote, type AddQuoteOptions, type PendingQuote } from './selectionQuote'
 import { usePdfViewer } from './usePdfViewer'
@@ -137,12 +138,17 @@ const useSelectionQuote = (contentRef: RefObject<HTMLElement | null>, path: stri
  * covers the chat: it adds a "Back to chat" button and leaves room at the top right for the global menu, which floats
  * over the viewer there.
  * Opening a file (a new `target`) moves focus into the viewer, unless `focusOnOpen` is false (a file restored on load).
+ * With `files` (the chat's files, two or more) the file name is a menu for switching between them (`onSwitchFile`) and
+ * removing them from the chat (`onRemoveFile`).
  */
 const FileViewer = ({
   store,
   target,
   onMinimize,
   focusOnOpen = true,
+  files,
+  onSwitchFile,
+  onRemoveFile,
   onAddQuote,
   quickActionsDisabled = false,
   floatingToolbar = true,
@@ -152,6 +158,9 @@ const FileViewer = ({
   target: ViewerTarget
   onMinimize?: () => void
   focusOnOpen?: boolean
+  files?: string[]
+  onSwitchFile?: (path: string) => void
+  onRemoveFile?: (path: string) => void
   onAddQuote?: (pending: PendingQuote, options?: AddQuoteOptions) => void
   quickActionsDisabled?: boolean
   floatingToolbar?: boolean
@@ -336,11 +345,14 @@ const FileViewer = ({
             {t('fileViewer:backToChat')}
           </Button>
         )}
-        <Tooltip title={target.path} describeChild>
-          <Typography id={titleId} component="h2" variant="subtitle1" fontWeight={600} noWrap sx={{ minWidth: 0 }}>
-            {name}
-          </Typography>
-        </Tooltip>
+        <FileTitleMenu
+          titleId={titleId}
+          path={target.path}
+          files={files && onSwitchFile && onRemoveFile ? files : [target.path]}
+          onSwitch={(path) => onSwitchFile?.(path)}
+          onRemove={(path) => onRemoveFile?.(path)}
+          onFocusFallback={() => regionRef.current?.focus()}
+        />
         <ExperimentalChip sx={{ ml: 0, flexShrink: 0 }} />
         {/* The PDF controls get their own row, after the close button. */}
         {isPdf && pdf.status.state === 'ready' && (

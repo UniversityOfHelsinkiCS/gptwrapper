@@ -1,13 +1,18 @@
 import safeLocalStorage from '../../util/safeLocalStorage'
 
 /**
- * What the file viewer remembers in local storage: the file open in each chat context (a course, or the general chat),
- * whether it is minimized there, and a reading position per file version.
+ * What the file viewer remembers in local storage: the files opened in each chat context (a course, or the general
+ * chat), whether the viewer is minimized there, and a reading position per file version.
  */
 
 /** At most this many reading positions are kept; the least recently saved ones are dropped first. */
 export const MAX_READING_POSITIONS = 50
 
+/** At most this many files are kept per chat context; opening another one drops the oldest. */
+export const MAX_CHAT_FILES = 10
+
+const FILES_KEY_PREFIX = 'file-viewer-files-'
+/** Before the file list, only the open file was remembered. It is read once as the list's only file. */
 const OPEN_FILE_KEY_PREFIX = 'file-viewer-open-'
 const MINIMIZED_KEY_PREFIX = 'file-viewer-minimized-'
 const POSITIONS_KEY = 'file-viewer-positions'
@@ -20,18 +25,37 @@ interface StoredPosition {
   position: ReadingPosition
 }
 
-/** The storage key for the file open in a chat context: the course id, or `general` for the general chat. */
+/** The storage key for the files of a chat context: the course id, or `general` for the general chat. */
+export const chatFilesStorageKey = (chatContext: string) => `${FILES_KEY_PREFIX}${chatContext}`
+
+/** The storage key of the open file before the file list. */
 export const openFileStorageKey = (chatContext: string) => `${OPEN_FILE_KEY_PREFIX}${chatContext}`
 
-export const readOpenFile = (chatContext: string): string | null => {
-  const stored = safeLocalStorage.getItem(openFileStorageKey(chatContext))
-  return stored ? stored : null
+/** The files opened in a chat context, newest first: the first one is the open file. Anything malformed is skipped. */
+export const readChatFiles = (chatContext: string): string[] => {
+  const stored = safeLocalStorage.getItem(chatFilesStorageKey(chatContext))
+  if (stored === null) {
+    const openFile = safeLocalStorage.getItem(openFileStorageKey(chatContext))
+    return openFile ? [openFile] : []
+  }
+  try {
+    const parsed: unknown = JSON.parse(stored)
+    if (!Array.isArray(parsed)) return []
+    const paths = parsed.filter((path): path is string => typeof path === 'string' && path.length > 0)
+    return Array.from(new Set(paths)).slice(0, MAX_CHAT_FILES)
+  } catch {
+    return []
+  }
 }
 
-export const writeOpenFile = (chatContext: string, path: string | null) => {
-  if (path) safeLocalStorage.setItem(openFileStorageKey(chatContext), path)
-  else safeLocalStorage.removeItem(openFileStorageKey(chatContext))
+export const writeChatFiles = (chatContext: string, paths: string[]) => {
+  safeLocalStorage.removeItem(openFileStorageKey(chatContext))
+  if (paths.length > 0) safeLocalStorage.setItem(chatFilesStorageKey(chatContext), JSON.stringify(paths.slice(0, MAX_CHAT_FILES)))
+  else safeLocalStorage.removeItem(chatFilesStorageKey(chatContext))
 }
+
+/** The list with `path` opened: moved (or added) to the front, the oldest dropped beyond `MAX_CHAT_FILES`. */
+export const withOpenedFile = (paths: string[], path: string): string[] => [path, ...paths.filter((other) => other !== path)].slice(0, MAX_CHAT_FILES)
 
 /** Whether the viewer is minimized to the rail in a chat context. */
 export const minimizedStorageKey = (chatContext: string) => `${MINIMIZED_KEY_PREFIX}${chatContext}`

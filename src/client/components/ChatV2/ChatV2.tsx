@@ -708,6 +708,18 @@ const ChatV2Content = () => {
     focusViewer()
   }
 
+  const switchFile = useCallback((path: string) => fileViewer?.open({ path }), [fileViewer])
+
+  // Removing the last file closes the viewer: the focus goes to the chat box.
+  const removeFile = useCallback(
+    (path: string) => {
+      const last = fileViewer?.files.length === 1 && fileViewer.files[0] === path
+      flushSync(() => fileViewer?.remove(path))
+      if (last) document.getElementById('chat-input')?.focus()
+    },
+    [fileViewer],
+  )
+
   const showNarrowChat = useCallback(() => {
     flushSync(() => setNarrowView('chat'))
     document.getElementById('chat-input')?.focus()
@@ -996,7 +1008,10 @@ const ChatV2Content = () => {
                   store={myFilesStore}
                   target={viewerTarget}
                   onMinimize={isNarrow ? undefined : minimizeViewer}
-                  focusOnOpen={!fileViewer?.restored}
+                  focusOnOpen={fileViewer?.focusOnOpen}
+                  files={fileViewer?.files}
+                  onSwitchFile={switchFile}
+                  onRemoveFile={removeFile}
                   onAddQuote={addQuote}
                   quickActionsDisabled={isStreaming}
                   floatingToolbar={!isNarrow && !isCoarsePointer}
@@ -1068,7 +1083,7 @@ const ChatV2Content = () => {
             )}
             {rightSide.railFile && viewerTarget && (
               <Box sx={{ display: 'flex', justifyContent: 'center', pt: rightSide.sourcesPanel ? 1 : 3 }}>
-                <FileRailButton path={viewerTarget.path} onExpand={expandViewer} buttonRef={railFileButtonRef} />
+                <FileRailButton path={viewerTarget.path} count={fileViewer?.files.length} onExpand={expandViewer} buttonRef={railFileButtonRef} />
               </Box>
             )}
           </Box>
