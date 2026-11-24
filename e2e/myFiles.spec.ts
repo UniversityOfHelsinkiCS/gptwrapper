@@ -602,16 +602,27 @@ adminTest('switches between the files of the chat from the file name menu and re
     await dialog.getByRole('button', { name: 'Open summary.md' }).click()
     const summary = page.getByRole('region', { name: 'summary.md' })
     await expect(summary.getByRole('heading', { level: 1, name: 'Summary' })).toBeVisible()
+    // The shown file is remembered, although it is not the first one in the list.
+    await page.reload()
+    await expect(summary.getByRole('heading', { level: 1, name: 'Summary' })).toBeVisible()
 
-    // Switching back opens the lecture where it was left.
+    // The files are listed in the order they were first opened. Switching back opens the lecture where it was left.
     await summary.getByRole('button', { name: 'summary.md', exact: true }).click()
     const menu = page.getByRole('menu', { name: 'Files in this chat' })
-    await expect(menu.getByRole('menuitemradio')).toHaveCount(2)
+    const items = menu.getByTestId('file-viewer-files-item')
+    await expect(items).toHaveCount(2)
+    const order = ['Course notes/lecture.md', 'Course notes/summary.md']
+    await expect.poll(() => items.evaluateAll((elements) => elements.map((element) => element.getAttribute('data-path')))).toEqual(order)
     await expect(menu.getByRole('menuitemradio', { name: /summary\.md/ })).toHaveAttribute('aria-checked', 'true')
     await menu.getByRole('menuitemradio', { name: /lecture\.md/ }).click()
     await expect(menu).toBeHidden()
     await expect(lecture).toBeFocused()
     await expect.poll(() => lecture.evaluate(fraction)).toBeCloseTo(0.5, 1)
+    // Switching does not reorder the files.
+    await lecture.getByRole('button', { name: 'lecture.md', exact: true }).click()
+    await expect.poll(() => items.evaluateAll((elements) => elements.map((element) => element.getAttribute('data-path')))).toEqual(order)
+    await page.keyboard.press('Escape')
+    await expect(menu).toBeHidden()
 
     // The rail button counts the files.
     await lecture.getByRole('button', { name: 'Minimize lecture.md' }).click()

@@ -37,8 +37,9 @@ const Viewer = ({ store }: { store: MyFilesStore }) => {
   )
 }
 
+/** Opens the chat with `files`, the first one shown. */
 const renderViewer = async (store: MyFilesStore, files: string[]) => {
-  writeChatFiles('course-1', files)
+  writeChatFiles('course-1', { files, active: files[0] })
   render(
     <I18nextProvider i18n={i18n}>
       <MyFilesStoreProvider store={store}>
@@ -96,12 +97,15 @@ describe('FileViewer file menu', () => {
     fireEvent.click(second)
     await screen.findByText('B')
     expect(shownPath()).toBe('b.md')
-    // The picked file is now the newest, and has the focus.
-    expect(readChatFiles('course-1')).toEqual(['b.md', 'Course/a.md'])
+    // The picked file is shown and has the focus; the list keeps its order.
+    expect(readChatFiles('course-1')).toEqual({ files: ['Course/a.md', 'b.md'], active: 'b.md' })
     await waitFor(() => expect(document.activeElement).toBe(screen.getByTestId('file-viewer')))
+    const reopened = items(openMenu())
+    expect(reopened.map((item) => item.getAttribute('data-path'))).toEqual(['Course/a.md', 'b.md'])
+    expect(reopened[1].getAttribute('aria-checked')).toBe('true')
   })
 
-  test('removing files: another one with ✕, the open one with Delete (the next opens), the last one closes the viewer', async () => {
+  test('removing files: another one with ✕, the open one with Delete (the next opens), the only one closes the viewer', async () => {
     const store = await storeWith({ 'a.md': 'A', 'b.md': 'B', 'c.md': 'C' })
     await renderViewer(store, ['a.md', 'b.md', 'c.md'])
     await screen.findByText('A')
@@ -112,7 +116,7 @@ describe('FileViewer file menu', () => {
     expect(remove.getAttribute('aria-hidden')).toBe('true')
     expect(remove.getAttribute('tabindex')).toBe('-1')
     fireEvent.click(remove)
-    expect(readChatFiles('course-1')).toEqual(['a.md', 'b.md'])
+    expect(readChatFiles('course-1')).toEqual({ files: ['a.md', 'b.md'], active: 'a.md' })
     expect(shownPath()).toBe('a.md')
     // The menu stays open for removing more.
     menu = screen.getByRole('menu')
@@ -121,14 +125,14 @@ describe('FileViewer file menu', () => {
     fireEvent.keyDown(items(menu)[0], { key: 'Delete' })
     await screen.findByText('B')
     expect(shownPath()).toBe('b.md')
-    expect(readChatFiles('course-1')).toEqual(['b.md'])
+    expect(readChatFiles('course-1')).toEqual({ files: ['b.md'], active: 'b.md' })
     menu = screen.getByRole('menu')
     expect(items(menu)).toHaveLength(1)
     expect(items(menu)[0].getAttribute('aria-checked')).toBe('true')
 
     fireEvent.keyDown(items(menu)[0], { key: 'Backspace' })
     expect(await screen.findByTestId('closed')).toBeTruthy()
-    expect(readChatFiles('course-1')).toEqual([])
+    expect(readChatFiles('course-1')).toEqual({ files: [], active: null })
   })
 
   test('closing the menu with one file left focuses the viewer, as the menu button is gone', async () => {

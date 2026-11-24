@@ -6,7 +6,7 @@ import type { MyFilesStore } from '../../util/myFiles/store'
 import { MyFilesStoreProvider } from '../MyFiles/MyFilesStoreContext'
 import { activeViewerFile, FileViewerProvider, useFileViewer, type FileViewerControls, type ViewerPositionReader } from './FileViewerContext'
 import { MAX_VIEWER_FILE_HEADING_LENGTH, MAX_VIEWER_FILE_PATH_LENGTH, type ViewerFile } from '@shared/viewerFile'
-import { openFileStorageKey, readChatFiles, readMinimized, writeChatFiles, writeMinimized } from './viewerPersistence'
+import { chatFilesStorageKey, openFileStorageKey, readChatFiles, readMinimized, writeChatFiles, writeMinimized } from './viewerPersistence'
 
 beforeEach(() => localStorage.clear())
 afterEach(cleanup)
@@ -51,9 +51,9 @@ const storeWith = async (...paths: string[]) => {
 }
 
 describe('FileViewerProvider persistence', () => {
-  test('remembers the files per chat context and reopens the newest', async () => {
+  test('remembers the files per chat context and reopens the one shown last', async () => {
     const store = await storeWith('a.md', 'b.md')
-    writeChatFiles('course-1', ['a.md', 'b.md'])
+    writeChatFiles('course-1', { files: ['a.md', 'b.md'], active: 'a.md' })
     const { rerender } = render(ui(store, 'course-1'))
     await waitFor(() => expect(target()).toBe('a.md'))
     expect(files()).toBe('a.md,b.md')
@@ -63,25 +63,33 @@ describe('FileViewerProvider persistence', () => {
     expect(target()).toBe('')
     click('open-b.md')
     expect(target()).toBe('b.md')
-    expect(readChatFiles('general')).toEqual(['b.md'])
-    expect(readChatFiles('course-1')).toEqual(['a.md', 'b.md'])
+    expect(readChatFiles('general')).toEqual({ files: ['b.md'], active: 'b.md' })
+    expect(readChatFiles('course-1')).toEqual({ files: ['a.md', 'b.md'], active: 'a.md' })
 
     rerender(ui(store, 'course-1'))
     await waitFor(() => expect(target()).toBe('a.md'))
   })
 
   test('files no longer in My files are dropped quietly, and with none left the viewer stays closed', async () => {
-    const store = await storeWith('b.md', 'folder/file.md')
-    writeChatFiles('course-1', ['gone.md', 'b.md', 'folder'])
-    const { unmount } = render(ui(store, 'course-1'))
+    const store = await storeWith('a.md', 'b.md', 'folder/file.md')
+    // The shown file is gone: the next one is shown.
+    writeChatFiles('course-1', { files: ['a.md', 'gone.md', 'folder', 'b.md'], active: 'gone.md' })
+    const first = render(ui(store, 'course-1'))
     await waitFor(() => expect(target()).toBe('b.md'))
-    expect(files()).toBe('b.md')
-    expect(readChatFiles('course-1')).toEqual(['b.md'])
-    unmount()
+    expect(files()).toBe('a.md,b.md')
+    expect(readChatFiles('course-1')).toEqual({ files: ['a.md', 'b.md'], active: 'b.md' })
+    first.unmount()
 
-    writeChatFiles('course-2', ['gone.md'])
+    // The last one is gone: the previous one is shown.
+    writeChatFiles('course-1', { files: ['a.md', 'b.md', 'gone.md'], active: 'gone.md' })
+    const second = render(ui(store, 'course-1'))
+    await waitFor(() => expect(target()).toBe('b.md'))
+    expect(files()).toBe('a.md,b.md')
+    second.unmount()
+
+    writeChatFiles('course-2', { files: ['gone.md'], active: 'gone.md' })
     render(ui(store, 'course-2'))
-    await waitFor(() => expect(readChatFiles('course-2')).toEqual([]))
+    await waitFor(() => expect(readChatFiles('course-2')).toEqual({ files: [], active: null }))
     expect(target()).toBe('')
   })
 
@@ -91,22 +99,31 @@ describe('FileViewerProvider persistence', () => {
     render(ui(store, 'course-1'))
     await waitFor(() => expect(target()).toBe('a.md'))
     click('open-b.md')
-    expect(readChatFiles('course-1')).toEqual(['b.md', 'a.md'])
+    expect(readChatFiles('course-1')).toEqual({ files: ['a.md', 'b.md'], active: 'b.md' })
     expect(localStorage.getItem(openFileStorageKey('course-1'))).toBe(null)
+  })
+
+  test('a list stored newest first without the shown file is reordered, its first file reopened', async () => {
+    const store = await storeWith('a.md', 'b.md')
+    localStorage.setItem(chatFilesStorageKey('course-1'), '["b.md","a.md"]')
+    render(ui(store, 'course-1'))
+    await waitFor(() => expect(target()).toBe('b.md'))
+    expect(files()).toBe('a.md,b.md')
+    expect(readChatFiles('course-1')).toEqual({ files: ['a.md', 'b.md'], active: 'b.md' })
   })
 
   test('nothing is reopened when the viewer is not available', async () => {
     const store = await storeWith('a.md')
-    writeChatFiles('course-1', ['a.md'])
+    writeChatFiles('course-1', { files: ['a.md'], active: 'a.md' })
     render(ui(store, 'course-1', false))
     await act(async () => {})
     expect(target()).toBe('')
-    expect(readChatFiles('course-1')).toEqual(['a.md'])
+    expect(readChatFiles('course-1')).toEqual({ files: ['a.md'], active: 'a.md' })
   })
 
   test('a restored file does not take the focus, an opened one does', async () => {
     const store = await storeWith('a.md', 'b.md')
-    writeChatFiles('course-1', ['a.md'])
+    writeChatFiles('course-1', { files: ['a.md'], active: 'a.md' })
     render(ui(store, 'course-1'))
     await waitFor(() => expect(target()).toBe('a.md'))
     expect(state()).toBe('expanded no-focus')
@@ -116,50 +133,51 @@ describe('FileViewerProvider persistence', () => {
 })
 
 describe('FileViewerProvider file list', () => {
-  test('opening adds to the front, and opening a listed file moves it there', async () => {
+  test('opening adds to the end, and opening a listed file keeps the order', async () => {
     const store = await storeWith('a.md', 'b.md', 'c.md')
     render(ui(store, 'course-1'))
     click('open-a.md')
     click('open-b.md')
     click('open-c.md')
-    expect(files()).toBe('c.md,b.md,a.md')
+    expect(files()).toBe('a.md,b.md,c.md')
     click('open-a.md')
-    expect(files()).toBe('a.md,c.md,b.md')
+    expect(files()).toBe('a.md,b.md,c.md')
     expect(target()).toBe('a.md')
-    expect(readChatFiles('course-1')).toEqual(['a.md', 'c.md', 'b.md'])
+    expect(readChatFiles('course-1')).toEqual({ files: ['a.md', 'b.md', 'c.md'], active: 'a.md' })
   })
 
   test('a file opened before the remembered ones are checked joins them', async () => {
     const store = await storeWith('a.md', 'b.md')
-    writeChatFiles('course-1', ['a.md'])
+    writeChatFiles('course-1', { files: ['a.md'], active: 'a.md' })
     render(ui(store, 'course-1'))
     click('open-b.md')
     await act(async () => {})
     expect(target()).toBe('b.md')
-    expect(files()).toBe('b.md,a.md')
+    expect(files()).toBe('a.md,b.md')
   })
 
-  test('removing the open file opens the next one without the focus, removing the last one closes the viewer', async () => {
+  test('removing the open file opens the next one (or the previous) without the focus, removing the only one closes the viewer', async () => {
     const store = await storeWith('a.md', 'b.md', 'c.md')
     render(ui(store, 'course-1'))
     click('open-a.md')
     click('open-b.md')
     click('open-c.md')
+    click('open-b.md')
 
-    click('remove-a.md')
+    click('remove-b.md')
     expect(target()).toBe('c.md')
-    expect(files()).toBe('c.md,b.md')
+    expect(files()).toBe('a.md,c.md')
+    expect(state()).toBe('expanded no-focus')
 
     click('remove-c.md')
-    expect(target()).toBe('b.md')
-    expect(state()).toBe('expanded no-focus')
-    expect(readChatFiles('course-1')).toEqual(['b.md'])
+    expect(target()).toBe('a.md')
+    expect(readChatFiles('course-1')).toEqual({ files: ['a.md'], active: 'a.md' })
 
     click('minimize')
-    click('remove-b.md')
+    click('remove-a.md')
     expect(target()).toBe('')
     expect(files()).toBe('')
-    expect(readChatFiles('course-1')).toEqual([])
+    expect(readChatFiles('course-1')).toEqual({ files: [], active: null })
     expect(readMinimized('course-1')).toBe(false)
   })
 })
@@ -189,7 +207,7 @@ describe('FileViewerProvider minimize', () => {
 
   test('opening a file expands a minimized viewer', async () => {
     const store = await storeWith('a.md', 'b.md')
-    writeChatFiles('course-1', ['a.md'])
+    writeChatFiles('course-1', { files: ['a.md'], active: 'a.md' })
     writeMinimized('course-1', true)
     render(ui(store, 'course-1'))
     await waitFor(() => expect(state()).toBe('minimized no-focus'))
