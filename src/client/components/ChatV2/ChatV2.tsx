@@ -414,7 +414,7 @@ const ChatV2Content = () => {
 
     if (downloadFile) {
       try {
-        downloadDiscussionAsFile(messages, t, downloadFormat)
+        await downloadDiscussionAsFile(messages, t, downloadFormat, i18n.language)
         enqueueSnackbar(t('download:success'), { variant: 'success' })
       } catch (error) {
         console.error('Failed to download conversation:', error)

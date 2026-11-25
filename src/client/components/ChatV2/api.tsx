@@ -7,8 +7,7 @@ import { saveFileWithDialog } from '../../util/saveFile'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { Document, Paragraph, TextRun, HeadingLevel, Packer } from 'docx'
-import { jsPDF } from 'jspdf'
+import { buildExportDocument } from './exportDocument'
 
 export const useToolResults = (toolCallId: string) => {
   return useGetQuery<ChatToolOutput | { expired: true }>({
@@ -17,91 +16,6 @@ export const useToolResults = (toolCallId: string) => {
     enabled: !!toolCallId,
     retry: false,
   })
-}
-
-// Helper function to parse markdown and create TextRun objects
-const parseMarkdownToTextRuns = (text: string): TextRun[] => {
-  const runs: TextRun[] = []
-  let currentPos = 0
-
-  // Match patterns: ***text***, **text**, *text*, `text`, and links [text](url)
-  const patterns = [
-    { regex: /\*\*\*(.+?)\*\*\*/g, format: { bold: true, italics: true } },
-    { regex: /\*\*(.+?)\*\*/g, format: { bold: true } },
-    { regex: /\*(.+?)\*/g, format: { italics: true } },
-    { regex: /`(.+?)`/g, format: { font: 'Courier New' } },
-  ]
-
-  const matches: Array<{ start: number; end: number; text: string; format: any }> = []
-
-  // Find all matches
-  patterns.forEach(({ regex, format }) => {
-    const re = new RegExp(regex)
-    let match
-    while ((match = re.exec(text)) !== null) {
-      matches.push({
-        start: match.index,
-        end: match.index + match[0].length,
-        text: match[1],
-        format,
-      })
-    }
-  })
-
-  // Sort matches by position
-  matches.sort((a, b) => a.start - b.start)
-
-  // Remove overlapping matches (keep longer/earlier ones)
-  const filteredMatches: typeof matches = []
-  let lastEnd = 0
-  matches.forEach((match) => {
-    if (match.start >= lastEnd) {
-      filteredMatches.push(match)
-      lastEnd = match.end
-    }
-  })
-
-  // Build TextRuns
-  filteredMatches.forEach((match) => {
-    // Add plain text before this match
-    if (match.start > currentPos) {
-      const plainText = text.substring(currentPos, match.start)
-      if (plainText) {
-        runs.push(new TextRun({ text: plainText }))
-      }
-    }
-    // Add formatted text
-    runs.push(new TextRun({ text: match.text, ...match.format }))
-    currentPos = match.end
-  })
-
-  // Add remaining plain text
-  if (currentPos < text.length) {
-    const remainingText = text.substring(currentPos)
-    if (remainingText) {
-      runs.push(new TextRun({ text: remainingText }))
-    }
-  }
-
-  // If no matches, return plain text
-  if (runs.length === 0 && text) {
-    runs.push(new TextRun({ text }))
-  }
-
-  return runs.length > 0 ? runs : [new TextRun({ text: ' ' })]
-}
-
-// Helper function to detect heading level and extract text
-const parseHeading = (line: string): { isHeading: boolean; level: number; text: string } => {
-  const headingMatch = line.match(/^(#{1,6})\s+(.+)$/)
-  if (headingMatch) {
-    return {
-      isHeading: true,
-      level: headingMatch[1].length,
-      text: headingMatch[2],
-    }
-  }
-  return { isHeading: false, level: 0, text: line }
 }
 
 export const sendConversationEmail = async (messages: ClientChatMessage[], t: TFunction) => {
@@ -114,32 +28,37 @@ export const sendConversationEmail = async (messages: ClientChatMessage[], t: TF
   return response
 }
 
-export const downloadDiscussionAsFile = (messages: ClientChatMessage[], t: TFunction, format: 'md' | 'docx' | 'pdf' | 'txt' = 'md') => {
-  if (format === 'docx') {
-    downloadDiscussionAsDocx(messages, t)
-  } else if (format === 'pdf') {
-    downloadDiscussionAsPdf(messages, t)
-  } else if (format === 'txt') {
-    downloadDiscussionAsText(messages, t)
-  } else {
-    downloadDiscussionAsMarkdown(messages, t)
-  }
+export type DownloadFormat = 'md' | 'docx' | 'pdf' | 'txt'
+
+const DOWNLOAD_TYPES: Record<DownloadFormat, { mime: string; accept: Record<string, string[]> }> = {
+  md: { mime: 'text/markdown;charset=utf-8', accept: { 'text/markdown': ['.md'] } },
+  txt: { mime: 'text/plain;charset=utf-8', accept: { 'text/plain': ['.txt'] } },
+  docx: {
+    mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    accept: { 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] },
+  },
+  pdf: { mime: 'application/pdf', accept: { 'application/pdf': ['.pdf'] } },
 }
 
-const downloadDiscussionAsMarkdown = async (messages: ClientChatMessage[], t: TFunction) => {
-  const textContent = formatMessagesAsText(messages, t)
-  const blob = new Blob([textContent], { type: 'text/markdown;charset=utf-8' })
+const downloadFilename = (format: DownloadFormat, date = new Date()) => {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const stamp = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`
+  return `currechat-discussion-${stamp}.${format}`
+}
 
-  const date = new Date()
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  const seconds = String(date.getSeconds()).padStart(2, '0')
-  const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.md`
-
-  await saveFileWithDialog(blob, filename, { 'text/markdown': ['.md'] })
+export const downloadDiscussionAsFile = async (messages: ClientChatMessage[], t: TFunction, format: DownloadFormat = 'md', language?: string) => {
+  let blob: Blob
+  if (format === 'docx') {
+    const { exportDocxBlob } = await import('./exportDocx')
+    blob = await exportDocxBlob(buildExportDocument(messages, t, language))
+  } else if (format === 'pdf') {
+    const { exportPdfBlob } = await import('./exportPdf')
+    blob = await exportPdfBlob(buildExportDocument(messages, t, language))
+  } else {
+    const text = format === 'txt' ? formatMessagesAsPlainText(messages, t) : formatMessagesAsText(messages, t)
+    blob = new Blob([text], { type: DOWNLOAD_TYPES[format].mime })
+  }
+  await saveFileWithDialog(blob, downloadFilename(format), DOWNLOAD_TYPES[format].accept)
 }
 
 export const formatMessagesAsPlainText = (messages: ClientChatMessage[], t: TFunction): string => {
@@ -204,408 +123,6 @@ export const formatMessagesAsPlainText = (messages: ClientChatMessage[], t: TFun
   })
 
   return textLines.join('\n')
-}
-
-const downloadDiscussionAsText = async (messages: ClientChatMessage[], t: TFunction) => {
-  const date = new Date()
-  const textContent = formatMessagesAsPlainText(messages, t)
-  const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' })
-
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  const seconds = String(date.getSeconds()).padStart(2, '0')
-  const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.txt`
-
-  await saveFileWithDialog(blob, filename, { 'text/plain': ['.txt'] })
-}
-
-const downloadDiscussionAsDocx = async (messages: ClientChatMessage[], t: TFunction) => {
-  const date = new Date()
-  const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
-
-  const children: Paragraph[] = [
-    new Paragraph({
-      text: `${t('chat:conversation')} ${formattedDate}`,
-      heading: HeadingLevel.HEADING_1,
-      spacing: { after: 400 },
-    }),
-  ]
-
-  messages.forEach((msg) => {
-    const content = messageToText(msg)
-    let header = ''
-    let modelInfo = ''
-
-    if (msg.role === 'user') {
-      header = '[USER]'
-
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: header,
-              bold: true,
-              color: '000000',
-            }),
-          ],
-          spacing: { before: 300, after: 100 },
-        }),
-      )
-
-      // Split content by newlines and create separate paragraphs
-      const contentLines = content.split('\n')
-      contentLines.forEach((line, index) => {
-        const heading = parseHeading(line)
-        if (heading.isHeading) {
-          // Create heading paragraph
-          const headingLevels = [
-            HeadingLevel.HEADING_1,
-            HeadingLevel.HEADING_2,
-            HeadingLevel.HEADING_3,
-            HeadingLevel.HEADING_4,
-            HeadingLevel.HEADING_5,
-            HeadingLevel.HEADING_6,
-          ]
-          children.push(
-            new Paragraph({
-              text: heading.text,
-              heading: headingLevels[heading.level - 1],
-              spacing: { before: 200, after: 100 },
-            }),
-          )
-        } else {
-          const textRuns = parseMarkdownToTextRuns(line || ' ')
-          children.push(
-            new Paragraph({
-              children: textRuns,
-              spacing: {
-                after: index === contentLines.length - 1 ? 100 : 0,
-              },
-            }),
-          )
-        }
-      })
-
-      if (msg.attachments) {
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `[Attachment: ${msg.attachments}]`,
-                italics: true,
-                color: '666666',
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-        )
-      }
-    } else {
-      // Assistant message
-      modelInfo = t('email:assistant')
-      if (msg.generationInfo) {
-        modelInfo = msg.generationInfo.model
-        if (msg.generationInfo.promptInfo.type === 'saved') {
-          modelInfo = `${msg.generationInfo.promptInfo.name} (${msg.generationInfo.model})`
-        }
-      }
-      header = `[ASSISTANT - ${modelInfo}]`
-
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: header,
-              bold: true,
-              color: '107eab',
-            }),
-          ],
-          spacing: { before: 300, after: 100 },
-        }),
-      )
-
-      // Split content by newlines and create separate paragraphs
-      const contentLines = content.split('\n')
-      contentLines.forEach((line, index) => {
-        const heading = parseHeading(line)
-        if (heading.isHeading) {
-          // Create heading paragraph
-          const headingLevels = [
-            HeadingLevel.HEADING_1,
-            HeadingLevel.HEADING_2,
-            HeadingLevel.HEADING_3,
-            HeadingLevel.HEADING_4,
-            HeadingLevel.HEADING_5,
-            HeadingLevel.HEADING_6,
-          ]
-          children.push(
-            new Paragraph({
-              text: heading.text,
-              heading: headingLevels[heading.level - 1],
-              spacing: { before: 200, after: 100 },
-            }),
-          )
-        } else {
-          const textRuns = parseMarkdownToTextRuns(line || ' ')
-          children.push(
-            new Paragraph({
-              children: textRuns,
-              spacing: {
-                after: index === contentLines.length - 1 ? 100 : 0,
-              },
-            }),
-          )
-        }
-      })
-
-      if (msg.error) {
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `[Error: ${msg.error}]`,
-                color: 'FF0000',
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-        )
-      }
-
-      const toolResults = messageToolResults(msg)
-      if (toolResults.length > 0) {
-        toolResults.forEach((toolCall) => {
-          if (toolCall.result && toolCall.input) {
-            const filenames = (toolCall.result.files ?? []).map((f) => f.fileName).join(', ')
-            children.push(
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: `[Sources: ${filenames} - Query: "${toolCall.input.query}"]`,
-                    italics: true,
-                    color: '666666',
-                  }),
-                ],
-                spacing: { after: 100 },
-              }),
-            )
-          }
-        })
-      }
-    }
-  })
-
-  const doc = new Document({
-    sections: [
-      {
-        children,
-      },
-    ],
-  })
-
-  const blob = await Packer.toBlob(doc)
-
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  const seconds = String(date.getSeconds()).padStart(2, '0')
-  const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.docx`
-
-  await saveFileWithDialog(blob, filename, { 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] })
-}
-
-const downloadDiscussionAsPdf = async (messages: ClientChatMessage[], t: TFunction) => {
-  const date = new Date()
-  const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
-
-  const doc = new jsPDF()
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const margin = 15
-  const maxWidth = pageWidth - 2 * margin
-  let yPosition = 20
-
-  // Title
-  doc.setFontSize(18)
-  doc.setFont('helvetica', 'bold')
-  doc.text(`${t('chat:conversation')} ${formattedDate}`, margin, yPosition)
-  yPosition += 15
-
-  messages.forEach((msg) => {
-    const content = messageToText(msg)
-
-    // Check if we need a new page
-    if (yPosition > 260) {
-      doc.addPage()
-      yPosition = 20
-    }
-
-    // Message header
-    doc.setFontSize(12)
-    doc.setFont('helvetica', 'bold')
-
-    if (msg.role === 'user') {
-      doc.setTextColor(0, 0, 0)
-      doc.text('[USER]', margin, yPosition)
-      yPosition += 8
-
-      // Message content
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(10)
-      // Strip markdown formatting for cleaner PDF output
-      const cleanContent = content
-        .replace(/\*\*\*(.+?)\*\*\*/g, '$1') // ***bold+italic***
-        .replace(/\*\*(.+?)\*\*/g, '$1') // **bold**
-        .replace(/\*(.+?)\*/g, '$1') // *italic*
-        .replace(/`(.+?)`/g, '$1') // `code`
-        .replace(/\[(.+?)\]\(.+?\)/g, '$1') // [text](url)
-
-      const contentLines = cleanContent.split('\n')
-      contentLines.forEach((line: string) => {
-        const heading = parseHeading(line)
-        if (heading.isHeading) {
-          // Render heading with appropriate size
-          const headingSizes = [16, 14, 13, 12, 11, 10]
-          doc.setFont('helvetica', 'bold')
-          doc.setFontSize(headingSizes[heading.level - 1])
-          if (yPosition > 270) {
-            doc.addPage()
-            yPosition = 20
-          }
-          doc.text(heading.text, margin, yPosition)
-          yPosition += headingSizes[heading.level - 1] / 2 + 4
-          doc.setFont('helvetica', 'normal')
-          doc.setFontSize(10)
-        } else {
-          const lines = doc.splitTextToSize(line, maxWidth)
-          lines.forEach((textLine: string) => {
-            if (yPosition > 270) {
-              doc.addPage()
-              yPosition = 20
-            }
-            doc.text(textLine, margin, yPosition)
-            yPosition += 6
-          })
-        }
-      })
-
-      // Attachments
-      if (msg.attachments) {
-        doc.setFont('helvetica', 'italic')
-        doc.setTextColor(102, 102, 102)
-        doc.setFontSize(9)
-        doc.text(`[Attachment: ${msg.attachments}]`, margin, yPosition)
-        yPosition += 6
-        doc.setTextColor(0, 0, 0)
-      }
-    } else {
-      // Assistant message
-      let modelInfo = t('email:assistant')
-      if (msg.generationInfo) {
-        modelInfo = msg.generationInfo.model
-        if (msg.generationInfo.promptInfo.type === 'saved') {
-          modelInfo = `${msg.generationInfo.promptInfo.name} (${msg.generationInfo.model})`
-        }
-      }
-
-      doc.setTextColor(16, 126, 171)
-      doc.text(`[ASSISTANT - ${modelInfo}]`, margin, yPosition)
-      doc.setTextColor(0, 0, 0)
-      yPosition += 8
-
-      // Message content
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(10)
-      // Strip markdown formatting for cleaner PDF output
-      const cleanContent = content
-        .replace(/\*\*\*(.+?)\*\*\*/g, '$1') // ***bold+italic***
-        .replace(/\*\*(.+?)\*\*/g, '$1') // **bold**
-        .replace(/\*(.+?)\*/g, '$1') // *italic*
-        .replace(/`(.+?)`/g, '$1') // `code`
-        .replace(/\[(.+?)\]\(.+?\)/g, '$1') // [text](url)
-
-      const contentLines = cleanContent.split('\n')
-      contentLines.forEach((line: string) => {
-        const heading = parseHeading(line)
-        if (heading.isHeading) {
-          // Render heading with appropriate size
-          const headingSizes = [16, 14, 13, 12, 11, 10]
-          doc.setFont('helvetica', 'bold')
-          doc.setFontSize(headingSizes[heading.level - 1])
-          if (yPosition > 270) {
-            doc.addPage()
-            yPosition = 20
-          }
-          doc.text(heading.text, margin, yPosition)
-          yPosition += headingSizes[heading.level - 1] / 2 + 4
-          doc.setFont('helvetica', 'normal')
-          doc.setFontSize(10)
-        } else {
-          const lines = doc.splitTextToSize(line, maxWidth)
-          lines.forEach((textLine: string) => {
-            if (yPosition > 270) {
-              doc.addPage()
-              yPosition = 20
-            }
-            doc.text(textLine, margin, yPosition)
-            yPosition += 6
-          })
-        }
-      })
-
-      // Error
-      if (msg.error) {
-        doc.setTextColor(255, 0, 0)
-        doc.setFontSize(9)
-        doc.text(`[Error: ${msg.error}]`, margin, yPosition)
-        doc.setTextColor(0, 0, 0)
-        yPosition += 6
-      }
-
-      // Tool calls
-      const toolResults = messageToolResults(msg)
-      if (toolResults.length > 0) {
-        doc.setFont('helvetica', 'italic')
-        doc.setTextColor(102, 102, 102)
-        doc.setFontSize(9)
-
-        toolResults.forEach((toolCall) => {
-          if (toolCall.result && toolCall.input) {
-            const filenames = (toolCall.result.files ?? []).map((f) => f.fileName).join(', ')
-            const sourceLine = `[Sources: ${filenames} - Query: "${toolCall.input.query}"]`
-            const sourceLines = doc.splitTextToSize(sourceLine, maxWidth)
-            sourceLines.forEach((line: string) => {
-              if (yPosition > 270) {
-                doc.addPage()
-                yPosition = 20
-              }
-              doc.text(line, margin, yPosition)
-              yPosition += 5
-            })
-          }
-        })
-
-        doc.setTextColor(0, 0, 0)
-      }
-    }
-
-    yPosition += 10 // Space between messages
-  })
-
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  const seconds = String(date.getSeconds()).padStart(2, '0')
-  const filename = `currechat-discussion-${year}-${month}-${day}-${hours}${minutes}${seconds}.pdf`
-
-  const pdfBlob = doc.output('blob')
-  await saveFileWithDialog(pdfBlob, filename, { 'application/pdf': ['.pdf'] })
 }
 
 export const formatMessagesAsText = (messages: ClientChatMessage[], t: TFunction): string => {

@@ -8,7 +8,7 @@ import { TextButton } from './general/Buttons'
 import { downloadDiscussionAsFile } from './api'
 
 const DownloadButton = ({ messages, disabled, collapsed = false }: { messages: ClientChatMessage[]; disabled: boolean; collapsed?: boolean }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [isCooldown, setIsCooldown] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
@@ -30,7 +30,7 @@ const DownloadButton = ({ messages, disabled, collapsed = false }: { messages: C
 
     try {
       setIsCooldown(true)
-      downloadDiscussionAsFile(messages, t, format)
+      await downloadDiscussionAsFile(messages, t, format, i18n.language)
       enqueueSnackbar(t('download:success'), { variant: 'success' })
 
       // Set cooldown for 3 seconds

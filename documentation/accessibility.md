@@ -154,6 +154,16 @@ Colour must not be the only way information is shown (WCAG 1.4.1). Pair it with 
 - Charts need a text alternative. `PromptUsageHistogram` has a "Show as table" switch that renders the same data as a table; follow that pattern for new charts, and do not distinguish series by colour alone.
 - Math in chat responses is rendered with KaTeX using `output: 'htmlAndMathml'`, so screen readers get MathML.
 
+## Downloadable documents
+
+Conversations download as .md, .txt, .docx and PDF (`downloadDiscussionAsFile` in `components/ChatV2/api.tsx`). The .docx and PDF must keep the conversation's structure (WCAG 1.3.1, 2.4.2, 3.1.1; EN 301 549 5.4):
+
+- `exportDocument.ts` builds a shared model: the title is the only H1, each message gets an H2 (sender, plus the model for the assistant), and message markdown is parsed with remark (GFM, math). Headings inside messages keep their chat level. Don't go back to line-by-line regex parsing.
+- `exportDocx.ts` uses Word's Heading 1–6 styles, real list numbering, hyperlinks and header rows in tables, and sets the title and language (from the UI language) in the document.
+- `exportPdf.ts` makes a tagged PDF/UA with pdfkit. All content must be drawn inside a structure element (via the renderer's `writeRuns`); untagged content is invisible to screen readers. Decorative drawing is marked as `Artifact`.
+- The PDF embeds Noto Sans and Noto Sans Mono (`src/client/assets/fonts/`). Glyphs missing from them (e.g. emoji, `◦`) are not drawn; the original text goes into the structure element's replacement text so screen readers still read it. Table cells can't have it, so emoji there are dropped.
+- The export libraries and fonts load only on download. Math is exported as LaTeX source.
+
 ## Labels and tooltips
 
 - Every interactive element needs an accessible name. Icon buttons get an `aria-label`; error/warning state that is shown only by colour or icon gets a visually hidden text prefix.
