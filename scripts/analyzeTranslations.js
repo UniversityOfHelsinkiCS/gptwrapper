@@ -45,6 +45,8 @@ const ROOT_PATH = './src/client'
 const LOCALES_DIR_NAME = 'locales'
 const LOCALES_PATH = './src/client/locales'
 const EXTENSION_MATCHER = /.+\.ts/
+// test files contain arbitrary 'x:y' strings (e.g. 'node:fs') that are not translation keys
+const TEST_FILE_MATCHER = /\.test\.tsx?$/
 // matches 'asd:asd'
 const TRANSLATION_KEY_REFERENCE_MATCHER = new RegExp(/['"`]\w+(?::\w+)+['"`]/, 'g')
 // matches t('asd'
@@ -496,7 +498,7 @@ async function* walk(dir) {
   for await (const d of await opendir(dir)) {
     const entry = join(dir, d.name)
     if (d.isDirectory() && d.name !== LOCALES_DIR_NAME) yield* walk(entry)
-    else if (d.isFile() && EXTENSION_MATCHER.test(d.name)) yield entry
+    else if (d.isFile() && EXTENSION_MATCHER.test(d.name) && !TEST_FILE_MATCHER.test(d.name)) yield entry
   }
 }
 
