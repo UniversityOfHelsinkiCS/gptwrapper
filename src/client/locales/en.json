@@ -243,6 +243,7 @@
     "quizCorrectOption": "correct answer",
     "quizYourAnswer": "your answer",
     "quizNotAnswered": "Not answered",
+    "quizExplanation": "Explanation",
     "quizAnswerMessage": "My answer: {{answer}}",
     "processingRequest": "Processing the request.",
     "responseReady": "The response is ready.",

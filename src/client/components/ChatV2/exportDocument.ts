@@ -4,7 +4,7 @@ import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
-import { type ClientChatMessage, messageToolResults, messageToText } from './messages'
+import { type ClientChatMessage, messageToExportText, messageToolResults } from './messages'
 
 /**
  * A conversation as a format-neutral document, shared by the .docx and PDF exports so that both keep the same
@@ -50,7 +50,7 @@ export const parseMarkdown = (text: string): Root => parser.runSync(parser.parse
 export const buildExportDocument = (messages: ClientChatMessage[], t: TFunction, language: string | undefined): ExportDocument => ({
   title: conversationTitle(t),
   lang: toLanguageTag(language),
-  sections: messages.map((msg) => {
+  sections: messages.map((msg, i) => {
     const notes: string[] = []
     let heading: string
 
@@ -68,7 +68,7 @@ export const buildExportDocument = (messages: ClientChatMessage[], t: TFunction,
       })
     }
 
-    return { heading, role: msg.role, content: parseMarkdown(messageToText(msg)), notes }
+    return { heading, role: msg.role, content: parseMarkdown(messageToExportText(msg, t, messages[i + 1])), notes }
   }),
 })
 

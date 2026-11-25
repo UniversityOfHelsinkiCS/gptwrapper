@@ -2,6 +2,9 @@ import { readMessageContent, type ToolCallResultEvent, type UserMessage } from '
 import type { AssistantMessageV2, AssistantPart, PostStreamSchemaV4Type, ToolPart } from '../../../shared/agentChat'
 import { finishParts } from './applyEvent'
 import { toolPartSource } from './tools/registry'
+import type { TFunction } from 'i18next'
+import { parseQuiz, PRESENT_QUIZ } from '../../../shared/quiz'
+import { isQuizResult, quizToMarkdown } from './tools/quizAnswerContext'
 
 /** A chat message as the client keeps it in state and localStorage. */
 export type ClientChatMessage = UserMessage | AssistantMessageV2
@@ -18,6 +21,27 @@ type HistoryMessage = PostStreamSchemaV4Type['options']['chatMessages'][number]
 export const messageToText = (msg: ClientChatMessage): string => {
   if (msg.role === 'user') return readMessageContent(msg)
   return msg.parts.flatMap((part) => (part.type === 'text' ? [part.text] : [])).join('\n\n')
+}
+
+/**
+ * The text of a message in exported conversations (download and email). Like `messageToText`, but quizzes are
+ * included as markdown, with the answer from the next message. `messageToText` leaves them out on purpose:
+ * the model history and copy should not contain them.
+ */
+export const messageToExportText = (msg: ClientChatMessage, t: TFunction, next?: ClientChatMessage): string => {
+  if (msg.role === 'user') return messageToText(msg)
+  const answer = next?.role === 'user' ? next.quizAnswer : undefined
+  return msg.parts
+    .flatMap((part) => {
+      if (part.type === 'text') return [part.text]
+      if (part.type === 'tool' && part.name === PRESENT_QUIZ && part.status === 'ok') {
+        const quiz = parseQuiz(part.input)
+        if (!quiz) return []
+        return [quizToMarkdown(quiz, isQuizResult(part.result) ? part.result : undefined, answer?.callId === part.callId ? answer : undefined, t)]
+      }
+      return []
+    })
+    .join('\n\n')
 }
 
 /**

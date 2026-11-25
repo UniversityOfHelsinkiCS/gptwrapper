@@ -246,6 +246,7 @@
     "quizCorrectOption": "oikea vastaus",
     "quizYourAnswer": "sinun vastauksesi",
     "quizNotAnswered": "Ei vastattu",
+    "quizExplanation": "Selitys",
     "quizAnswerMessage": "Vastaukseni: {{answer}}",
     "processingRequest": "Käsitellään pyyntöä.",
     "responseReady": "Vastaus on valmis.",

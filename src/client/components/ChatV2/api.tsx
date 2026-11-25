@@ -1,4 +1,4 @@
-import { type ClientChatMessage, messageToolResults, messageToText } from './messages'
+import { type ClientChatMessage, messageToExportText, messageToolResults } from './messages'
 import type { ChatToolOutput } from '../../../shared/tools'
 import { useGetQuery } from '../../hooks/apiHooks'
 import { TFunction } from 'i18next'
@@ -71,8 +71,8 @@ export const formatMessagesAsPlainText = (messages: ClientChatMessage[], t: TFun
   textLines.push('========================================')
   textLines.push('')
 
-  messages.forEach((msg) => {
-    const content = messageToText(msg)
+  messages.forEach((msg, i) => {
+    const content = messageToExportText(msg, t, messages[i + 1])
 
     // Strip all markdown formatting for plain text
     const cleanContent = content
@@ -127,8 +127,8 @@ export const formatMessagesAsPlainText = (messages: ClientChatMessage[], t: TFun
 
 export const formatMessagesAsText = (messages: ClientChatMessage[], t: TFunction): string => {
   const textContent = messages
-    .map((msg) => {
-      const content = messageToText(msg)
+    .map((msg, i) => {
+      const content = messageToExportText(msg, t, messages[i + 1])
       let header = ''
 
       if (msg.role === 'user') {
@@ -314,8 +314,9 @@ const formatEmailContent = (content: string): string => {
 
 export const formatEmail = (messages: ClientChatMessage[], t: TFunction): string => {
   const emailContent = messages
-    .map((msg) => {
-      const formattedContent = msg.role === 'assistant' ? formatEmailContent(messageToText(msg)) : escapeHtml(messageToText(msg))
+    .map((msg, i) => {
+      const text = messageToExportText(msg, t, messages[i + 1])
+      const formattedContent = msg.role === 'assistant' ? formatEmailContent(text) : escapeHtml(text)
 
       let title = ''
       if (msg.role === 'assistant') {

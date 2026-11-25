@@ -250,6 +250,7 @@
     "quizCorrectOption": "rätt svar",
     "quizYourAnswer": "ditt svar",
     "quizNotAnswered": "Inte besvarad",
+    "quizExplanation": "Förklaring",
     "quizAnswerMessage": "Mitt svar: {{answer}}",
     "processingRequest": "Din förfrågan behandlas.",
     "responseReady": "Svaret är klart.",

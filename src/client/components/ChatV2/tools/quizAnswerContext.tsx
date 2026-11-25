@@ -51,6 +51,28 @@ export const QUIZ_OUTCOME_KEY = { correct: 'chat:quizCorrect', incorrect: 'chat:
   string
 >
 
+/** A quiz as markdown for exported conversations: the question, the options with the correct and picked ones marked, the outcome and the explanation. */
+export const quizToMarkdown = (quiz: Quiz, result: QuizResult | undefined, answer: QuizAnswer | undefined, t: TFunction): string => {
+  const options = answer?.selected.includes(QUIZ_IDK) ? [...quiz.options, { id: QUIZ_IDK, text: t('chat:quizIdk') }] : quiz.options
+  const optionLines = options.map((option) => {
+    const markers = [
+      answer && result?.correct.includes(option.id) ? t('chat:quizCorrectOption') : null,
+      answer?.selected.includes(option.id) ? t('chat:quizYourAnswer') : null,
+    ].filter(Boolean)
+    const prefix = option.id === QUIZ_IDK ? '' : `${option.id}) `
+    return `- ${prefix}${option.text}${markers.map((marker) => ` (${marker})`).join('')}`
+  })
+
+  const blocks = [`**${t('chat:quizTitle')}**`, quiz.question, optionLines.join('\n')]
+  if (!answer) {
+    blocks.push(`*${t('chat:quizNotAnswered')}*`)
+  } else if (result) {
+    blocks.push(`**${t(QUIZ_OUTCOME_KEY[quizOutcome(result.correct, answer.selected)])}**`)
+    blocks.push(`**${t('chat:quizExplanation')}:** ${result.explanation}`)
+  }
+  return blocks.join('\n\n')
+}
+
 export const quizResultAnnouncement = (parts: AssistantPart[], answer: QuizAnswer, t: TFunction): string => {
   const part = parts.find((p) => p.type === 'tool' && p.name === PRESENT_QUIZ && p.callId === answer.callId)
   if (part?.type !== 'tool' || !isQuizResult(part.result)) return ''

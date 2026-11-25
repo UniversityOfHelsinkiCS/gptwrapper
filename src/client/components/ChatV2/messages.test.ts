@@ -9,6 +9,7 @@ import { oldFormatMessages, oldFormatMessageWithToolCalls } from './__fixtures__
 import {
   MESSAGES_VERSION,
   type ClientChatMessage,
+  messageToExportText,
   messageToolResults,
   messageToText,
   migrateMessages,
@@ -321,5 +322,69 @@ describe('messageToText with subagents', () => {
         ],
       }),
     ).toBe('answer')
+  })
+})
+
+describe('messageToExportText', () => {
+  const t = ((key: string) => key) as any
+  const quizPart = (status: 'ok' | 'error' | 'running' = 'ok'): AssistantPart => ({
+    type: 'tool',
+    callId: 'q1',
+    name: 'present_quiz',
+    status,
+    input: {
+      question: 'What is 2 + 2?',
+      options: [
+        { id: 'a', text: '3' },
+        { id: 'b', text: '4' },
+      ],
+      multiSelect: false,
+      correct: ['b'],
+      explanation: 'Two plus two is four.',
+    },
+    result: { correct: ['b'], explanation: 'Two plus two is four.' },
+  })
+  const withQuiz = (status?: 'ok' | 'error' | 'running'): AssistantMessageV2 => ({
+    role: 'assistant',
+    parts: [{ type: 'text', text: 'before' }, quizPart(status), { type: 'text', text: 'after' }],
+  })
+  const answer: ClientChatMessage = { role: 'user', content: 'My answer: 3', quizAnswer: { callId: 'q1', selected: ['a'] } }
+
+  test('an answered quiz is included in order, with the markers, the outcome and the explanation', () => {
+    const text = messageToExportText(withQuiz(), t, answer)
+    expect(text).toBe(
+      [
+        'before',
+        '**chat:quizTitle**',
+        'What is 2 + 2?',
+        '- a) 3 (chat:quizYourAnswer)\n- b) 4 (chat:quizCorrectOption)',
+        '**chat:quizIncorrect**',
+        '**chat:quizExplanation:** Two plus two is four.',
+        'after',
+      ].join('\n\n'),
+    )
+  })
+
+  test('"I don\'t know" is listed when picked', () => {
+    const idk: ClientChatMessage = { role: 'user', content: 'x', quizAnswer: { callId: 'q1', selected: ['idk'] } }
+    const text = messageToExportText(withQuiz(), t, idk)
+    expect(text).toContain('- chat:quizIdk (chat:quizYourAnswer)')
+    expect(text).toContain('**chat:quizIdkResult**')
+  })
+
+  test('an unanswered quiz is marked as not answered and does not reveal the answer', () => {
+    const text = messageToExportText(withQuiz(), t, { role: 'user', content: 'something else' })
+    expect(text).toContain('*chat:quizNotAnswered*')
+    expect(text).not.toContain('chat:quizCorrectOption')
+    expect(text).not.toContain('Two plus two is four.')
+  })
+
+  test('running and failed quiz parts are left out', () => {
+    expect(messageToExportText(withQuiz('running'), t)).toBe('before\n\nafter')
+    expect(messageToExportText(withQuiz('error'), t)).toBe('before\n\nafter')
+  })
+
+  test('messageToText still leaves the quiz out', () => {
+    expect(messageToText(withQuiz())).toBe('before\n\nafter')
   })
 })
