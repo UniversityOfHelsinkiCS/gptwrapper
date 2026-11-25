@@ -1,4 +1,6 @@
 import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { strFromU8, unzipSync } from 'fflate'
 import type { TFunction } from 'i18next'
 import PDFDocument from 'pdfkit'
@@ -262,7 +264,8 @@ describe('.docx export', () => {
 
 // ---------------------------------------------------------------- PDF
 
-const font = (name: string) => new Uint8Array(readFileSync(new URL(`../../assets/fonts/${name}.ttf`, import.meta.url)))
+const fontDir = join(dirname(fileURLToPath(import.meta.url)), '../../assets/fonts')
+const font = (name: string) => new Uint8Array(readFileSync(join(fontDir, `${name}.ttf`)))
 const fonts: PdfFonts = {
   regular: font('NotoSans-Regular'),
   bold: font('NotoSans-Bold'),
