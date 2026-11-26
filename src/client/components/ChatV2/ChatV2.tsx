@@ -54,7 +54,7 @@ import NotificationBanner from '../common/NotificationBanner'
 import { PromptEditorState } from '../Prompt/context'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { AttachFolders, parseStoredFolders } from '../MyFiles/AttachFolders'
-import { useAttachOpenedFolder } from '../MyFiles/attachOpenedFolder'
+import { announceFolderAttached, foldersToAttach, useAttachOpenedFolder } from '../MyFiles/attachOpenedFolder'
 import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
 import { activeViewerFile, FileViewerProvider, useFileViewer } from '../FileViewer/FileViewerContext'
 import type { AddQuoteOptions, PendingQuote } from '../FileViewer/selectionQuote'
@@ -336,7 +336,20 @@ const ChatV2Content = () => {
 
     // The browser runs the file tools itself and checks every path the agent asks for (`agentTools.ts`). They are on
     // without attached folders too: `Outputs/` and `Agent notes/` are in every chat.
-    const folders = attachedFolders
+    // A quoted file's folder joins the chat if it is not there (a new conversation, a restored or detached file), so
+    // that the agent can read the file it is asked about.
+    const quotedFolders =
+      canAttachFolders && quotes?.length
+        ? foldersToAttach(
+            quotes.map((quote) => quote.path),
+            attachedFolders,
+          )
+        : []
+    const folders = quotedFolders.length ? [...attachedFolders, ...quotedFolders] : attachedFolders
+    if (quotedFolders.length) {
+      setAttachedFolders(folders)
+      quotedFolders.forEach((folder) => announceFolderAttached(t, folder))
+    }
     const clientTools: ClientTools | undefined = canAttachFolders
       ? { attachedFolders: folders, execute: (name, toolInput) => executeFileTool(myFilesStore, folders, name, toolInput) }
       : undefined

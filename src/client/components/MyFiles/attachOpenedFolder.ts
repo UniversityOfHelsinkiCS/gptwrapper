@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { type TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import { MAX_ATTACHED_FOLDERS } from '../../../shared/fileTools'
 import { isReservedPath, splitPath, topLevelFolder } from '../../util/myFiles/paths'
@@ -17,6 +18,20 @@ export const folderToAttach = (path: string, attachedFolders: readonly string[])
   if (attachedFolders.includes(folder) || attachedFolders.length >= MAX_ATTACHED_FOLDERS) return null
   return folder
 }
+
+/**
+ * The folders to attach for the files of `paths` (the files quoted in a message), in order and without repeats, as
+ * many as fit next to `attachedFolders`.
+ */
+export const foldersToAttach = (paths: readonly string[], attachedFolders: readonly string[]): string[] =>
+  paths.reduce<string[]>((added, path) => {
+    const folder = folderToAttach(path, [...attachedFolders, ...added])
+    return folder ? [...added, folder] : added
+  }, [])
+
+/** Tells screen reader users that `folder` was attached to the chat. */
+export const announceFolderAttached = (t: TFunction, folder: string) =>
+  announceToScreenReader(t('myFiles:folderAttachedOnOpen', { name: folderLabel(t, folder), interpolation: { escapeValue: false } }))
 
 /**
  * Attaches the folder of each file the user opens in the viewer (from My files, a quote card or an agent tool link),
@@ -39,6 +54,6 @@ export const useAttachOpenedFolder = (viewer: FileViewerControls | null, attache
     const folder = folderToAttach(target.path, attachedFolders)
     if (!folder) return
     setAttachedFolders([...attachedFolders, folder])
-    announceToScreenReader(t('myFiles:folderAttachedOnOpen', { name: folderLabel(t, folder), interpolation: { escapeValue: false } }))
+    announceFolderAttached(t, folder)
   }, [target, userOpened])
 }
