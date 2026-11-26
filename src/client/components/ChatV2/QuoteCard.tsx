@@ -50,7 +50,7 @@ export const QuoteCard = ({ quote }: { quote: Quote }) => {
               // A new target each time, so opening the same file again jumps to this quote's page or heading.
               onClick={() => openSource({ path: quote.path, page: quote.page, heading: quote.heading })}
               data-testid="quote-card-open"
-              sx={{ fontWeight: 600, textAlign: 'left', verticalAlign: 'baseline' }}
+              sx={{ fontWeight: 600, color: 'text.primary', textAlign: 'left', verticalAlign: 'baseline' }}
             >
               <span aria-hidden>📄 </span>
               {source}

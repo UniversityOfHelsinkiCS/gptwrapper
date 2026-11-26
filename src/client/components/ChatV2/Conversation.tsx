@@ -32,22 +32,7 @@ import { BlueButton, OutlineButtonBlack } from './general/Buttons'
 import { focusIndicatorStyle } from 'src/client/util/accessibility'
 import { visuallyHidden } from '@mui/utils'
 import { QuoteCard } from './QuoteCard'
-import type { QuickAction } from '@shared/quote'
-
-/**
- * The text of a user message as the chat shows it: a quick action on a quote shows the action's name, not the request
- * sent to the model.
- */
-const UserMessageText = ({ message }: { message: UserMessage }) => {
-  const { t } = useTranslation()
-  if (!message.quickAction || !message.quotes?.length) return readMessageContent(message)
-  const labels: Record<QuickAction, string> = {
-    explain: t('fileViewer:explain'),
-    summarize: t('fileViewer:summarize'),
-    translate: t('fileViewer:translate'),
-  }
-  return labels[message.quickAction]
-}
+import { QuickActionMessage } from './QuickActionMessage'
 
 const UserMessageItem = ({ message }: { message: UserMessage }) => (
   <Box
@@ -65,8 +50,14 @@ const UserMessageItem = ({ message }: { message: UserMessage }) => (
       width: 'fit-content',
     }}
   >
-    {message.quotes?.map((quote, idx) => <QuoteCard key={idx} quote={quote} />)}
-    <UserMessageText message={message} />
+    {message.quickAction && message.quotes?.length ? (
+      <QuickActionMessage message={message} action={message.quickAction} />
+    ) : (
+      <>
+        {message.quotes?.map((quote, idx) => <QuoteCard key={idx} quote={quote} />)}
+        {readMessageContent(message)}
+      </>
+    )}
 
     {readMessageImages(message).map((url, idx) => (
       <Box
