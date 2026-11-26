@@ -5,9 +5,11 @@ import { I18nextProvider, initReactI18next } from 'react-i18next'
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('../common/accessibility/SnackbarAnnouncer', () => ({ announceToScreenReader: vi.fn() }))
+vi.mock('../../util/featureEvents', () => ({ trackFeatureEvent: vi.fn() }))
 
 import { MAX_ATTACHED_FOLDERS } from '../../../shared/fileTools'
 import en from '../../locales/en.json'
+import { trackFeatureEvent } from '../../util/featureEvents'
 import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
 import type { FileViewerControls, ViewerTarget } from '../FileViewer/FileViewerContext'
 import { foldersToAttach, folderToAttach, useAttachOpenedFolder } from './attachOpenedFolder'
@@ -17,7 +19,10 @@ const i18n = i18next.createInstance()
 beforeAll(async () => {
   await i18n.use(initReactI18next).init({ resources: { en }, lng: 'en', fallbackLng: 'en', defaultNS: 'common' })
 })
-beforeEach(() => vi.mocked(announceToScreenReader).mockClear())
+beforeEach(() => {
+  vi.mocked(announceToScreenReader).mockClear()
+  vi.mocked(trackFeatureEvent).mockClear()
+})
 afterEach(cleanup)
 
 const fullList = Array.from({ length: MAX_ATTACHED_FOLDERS }, (_, i) => `Folder ${i}`)
@@ -83,6 +88,8 @@ describe('useAttachOpenedFolder', () => {
     const { setAttachedFolders } = renderAttach(viewerWith({ path: 'Course notes/lecture.md' }, true), ['Thesis'])
     expect(setAttachedFolders).toHaveBeenCalledWith(['Thesis', 'Course notes'])
     expect(announceToScreenReader).toHaveBeenCalledWith('Folder Course notes attached to the chat')
+    // The automatic attach is not the user attaching a folder
+    expect(trackFeatureEvent).not.toHaveBeenCalled()
   })
 
   test('does nothing for a file restored on load', () => {

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { ensureReservedFolders, importFiles, intoFolder, sourcesFromFiles, type ImportSource } from './importFiles'
+import { ensureReservedFolders, importFiles, intoFolder, sourcesFromFiles, uploadFileType, type ImportSource } from './importFiles'
 import { createMemoryStore } from './memoryStore'
 import { isReservedPath, isWithin, normalizePath } from './paths'
 import { isMyFilesError } from './store'
@@ -164,5 +164,24 @@ describe('importFiles', () => {
   test('sourcesFromFiles uses the file name when there is no relative path', () => {
     const file = new File(['x'], 'single.md')
     expect(sourcesFromFiles([file])).toEqual([{ path: 'single.md', file }])
+  })
+})
+
+describe('uploadFileType', () => {
+  test('is the extension all the files share, lowercased', () => {
+    expect(uploadFileType(['a.pdf', 'Course/B.PDF'])).toBe('pdf')
+    expect(uploadFileType(['notes.md'])).toBe('md')
+  })
+
+  test('is mixed for different extensions', () => {
+    expect(uploadFileType(['a.pdf', 'b.md'])).toBe('mixed')
+  })
+
+  test('is mixed when a file has no usable extension', () => {
+    expect(uploadFileType(['Makefile'])).toBe('mixed')
+    expect(uploadFileType(['a.md', 'README'])).toBe('mixed')
+    expect(uploadFileType(['weird.ex_t'])).toBe('mixed')
+    expect(uploadFileType(['long.abcdefghijklmnopq'])).toBe('mixed')
+    expect(uploadFileType(['dir.d/file'])).toBe('mixed')
   })
 })

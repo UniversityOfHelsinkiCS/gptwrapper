@@ -1,7 +1,8 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import i18next from 'i18next'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
-import { afterEach, beforeAll, describe, expect, test } from 'vitest'
+import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
+vi.mock('../../util/featureEvents', () => ({ trackFeatureEvent: vi.fn() }))
 import type { SubagentPart } from '../../../shared/agentChat'
 import en from '../../locales/en.json'
 import { SubagentCard } from './SubagentCard'

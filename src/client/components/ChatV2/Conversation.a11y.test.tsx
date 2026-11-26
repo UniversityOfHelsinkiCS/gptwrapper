@@ -7,6 +7,7 @@ import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
 vi.mock('../../../config', () => ({ ValidModelNameSchema: { parse: (v: unknown) => v } }))
 vi.mock('react-syntax-highlighter', () => ({ PrismAsync: () => null }))
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({ oneDark: {} }))
+vi.mock('../../util/featureEvents', () => ({ trackFeatureEvent: vi.fn() }))
 
 import type { AssistantPart } from '../../../shared/agentChat'
 import { type ClientChatMessage, migrateMessages, parseStoredMessages, serializeMessages } from './messages'

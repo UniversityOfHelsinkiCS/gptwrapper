@@ -1,14 +1,19 @@
 import { useEffect } from 'react'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, test } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+vi.mock('../../util/featureEvents', () => ({ trackFeatureEvent: vi.fn() }))
 import { createMemoryStore } from '../../util/myFiles/memoryStore'
 import type { MyFilesStore } from '../../util/myFiles/store'
 import { MyFilesStoreProvider } from '../MyFiles/MyFilesStoreContext'
 import { activeViewerFile, FileViewerProvider, useFileViewer, type FileViewerControls, type ViewerPositionReader } from './FileViewerContext'
 import { MAX_VIEWER_FILE_HEADING_LENGTH, MAX_VIEWER_FILE_PATH_LENGTH, type ViewerFile } from '@shared/viewerFile'
+import { trackFeatureEvent } from '../../util/featureEvents'
 import { chatFilesStorageKey, openFileStorageKey, readChatFiles, readMinimized, writeChatFiles, writeMinimized } from './viewerPersistence'
 
-beforeEach(() => localStorage.clear())
+beforeEach(() => {
+  localStorage.clear()
+  vi.mocked(trackFeatureEvent).mockClear()
+})
 afterEach(cleanup)
 
 const Controls = () => {
@@ -18,8 +23,8 @@ const Controls = () => {
       <output data-testid="target">{viewer?.target?.path ?? ''}</output>
       <output data-testid="files">{viewer?.files.join(',') ?? ''}</output>
       <output data-testid="state">{viewer ? `${viewer.minimized ? 'minimized' : 'expanded'} ${viewer.focusOnOpen ? 'focus' : 'no-focus'}` : ''}</output>
-      {['a.md', 'b.md', 'c.md'].map((path) => (
-        <button key={path} data-testid={`open-${path}`} onClick={() => viewer?.open({ path })} />
+      {['a.md', 'b.md', 'c.md', 'd.pdf', 'e.txt', 'f.csv'].map((path) => (
+        <button key={path} data-testid={`open-${path}`} onClick={() => viewer?.open({ path }, 'my_files')} />
       ))}
       {['a.md', 'b.md', 'c.md'].map((path) => (
         <button key={path} data-testid={`remove-${path}`} onClick={() => viewer?.remove(path)} />
@@ -282,5 +287,44 @@ describe('activeViewerFile', () => {
     expect(activeViewerFile(controls('a.md', { path: 'a.md', heading }))).toEqual({ path: 'a.md', heading: heading.slice(0, MAX_VIEWER_FILE_HEADING_LENGTH) })
     const longPath = 'a'.repeat(MAX_VIEWER_FILE_PATH_LENGTH + 1)
     expect(activeViewerFile(controls(longPath, { path: longPath }))).toBe(undefined)
+  })
+})
+
+describe('FileViewerProvider feature events', () => {
+  test('each open sends a viewer open with the file type and the source', async () => {
+    const store = await storeWith('a.md', 'd.pdf', 'e.txt')
+    render(ui(store, 'course-1'))
+    click('open-a.md')
+    click('open-d.pdf')
+    click('open-e.txt')
+    // Opening the open file again is a new open
+    click('open-e.txt')
+    expect(vi.mocked(trackFeatureEvent).mock.calls).toEqual([
+      [{ feature: 'viewer', action: 'open', fileType: 'md', source: 'my_files' }],
+      [{ feature: 'viewer', action: 'open', fileType: 'pdf', source: 'my_files' }],
+      [{ feature: 'viewer', action: 'open', fileType: 'txt', source: 'my_files' }],
+      [{ feature: 'viewer', action: 'open', fileType: 'txt', source: 'my_files' }],
+    ])
+  })
+
+  test('sends nothing for a file the viewer cannot show', async () => {
+    const store = await storeWith('f.csv')
+    render(ui(store, 'course-1'))
+    click('open-f.csv')
+    expect(trackFeatureEvent).not.toHaveBeenCalled()
+  })
+
+  test('restoring from storage, expanding, minimizing and removing send nothing', async () => {
+    const store = await storeWith('a.md', 'b.md')
+    writeChatFiles('course-1', { files: ['a.md', 'b.md'], active: 'a.md' })
+    writeMinimized('course-1', true)
+    render(ui(store, 'course-1'))
+    await waitFor(() => expect(state()).toBe('minimized no-focus'))
+    click('expand')
+    click('minimize')
+    click('expand')
+    click('remove-a.md')
+    expect(target()).toBe('b.md')
+    expect(trackFeatureEvent).not.toHaveBeenCalled()
   })
 })

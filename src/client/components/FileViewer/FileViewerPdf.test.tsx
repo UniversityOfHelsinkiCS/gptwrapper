@@ -4,6 +4,7 @@ import { I18nextProvider, initReactI18next } from 'react-i18next'
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('react-syntax-highlighter', () => ({ PrismAsync: () => null }))
+vi.mock('../../util/featureEvents', () => ({ trackFeatureEvent: vi.fn() }))
 
 /** A stand-in for pdf.js's viewer: records what the FileViewer asks of it, and lets the test fire its events. */
 const fake = vi.hoisted(() => {

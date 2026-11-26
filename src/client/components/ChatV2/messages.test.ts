@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('../../../config', async () => ({ ValidModelNameSchema: (await import('zod/v4')).z.string() }))
+vi.mock('../../util/featureEvents', () => ({ trackFeatureEvent: vi.fn() }))
 
 import { act, renderHook } from '@testing-library/react'
 import { readMessageContent } from '../../../shared/chat'

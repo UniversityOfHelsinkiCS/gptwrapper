@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import i18next from 'i18next'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
 import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
+vi.mock('../../../util/featureEvents', () => ({ trackFeatureEvent: vi.fn() }))
 import type { AssistantPart, ToolPart } from '../../../../shared/agentChat'
 import en from '../../../locales/en.json'
 import { createMemoryStore } from '../../../util/myFiles/memoryStore'

@@ -4,6 +4,7 @@ import { I18nextProvider, initReactI18next } from 'react-i18next'
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('react-syntax-highlighter', () => ({ PrismAsync: () => null }))
+vi.mock('../../util/featureEvents', () => ({ trackFeatureEvent: vi.fn() }))
 
 import en from '../../locales/en.json'
 import { createMemoryStore } from '../../util/myFiles/memoryStore'
@@ -31,7 +32,7 @@ const Viewer = ({ store }: { store: MyFilesStore }) => {
       target={viewer.target}
       focusOnOpen={viewer.focusOnOpen}
       files={viewer.files}
-      onSwitchFile={(path) => viewer.open({ path })}
+      onSwitchFile={(path) => viewer.open({ path }, 'chat_files')}
       onRemoveFile={viewer.remove}
     />
   )

@@ -2,12 +2,14 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import i18next from 'i18next'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
 import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
+vi.mock('../../util/featureEvents', () => ({ trackFeatureEvent: vi.fn() }))
 
 import en from '../../locales/en.json'
 import { createMemoryStore } from '../../util/myFiles/memoryStore'
 import type { MyFilesStore } from '../../util/myFiles/store'
 import { FileViewerProvider, useFileViewer } from '../FileViewer/FileViewerContext'
 import { MyFilesStoreProvider } from '../MyFiles/MyFilesStoreContext'
+import { trackFeatureEvent } from '../../util/featureEvents'
 import { QuoteCard } from './QuoteCard'
 
 const i18n = i18next.createInstance()
@@ -18,6 +20,7 @@ beforeAll(async () => {
 afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
+  vi.mocked(trackFeatureEvent).mockClear()
 })
 
 const renderCard = (quote: { path: string; page?: number; heading?: string; text: string }) =>
@@ -107,6 +110,7 @@ describe('QuoteCard source', () => {
     expect(screen.getByTestId('quote-card-source').textContent).toBe('📄 book.pdf · p. 12')
     fireEvent.click(button)
     expect(JSON.parse(screen.getByTestId('viewer-target').textContent!)).toEqual({ path: 'Course/book.pdf', page: 12 })
+    expect(vi.mocked(trackFeatureEvent).mock.calls).toEqual([[{ feature: 'viewer', action: 'open', fileType: 'pdf', source: 'quote' }]])
   })
 
   test('opens a Markdown file at the quoted heading', async () => {

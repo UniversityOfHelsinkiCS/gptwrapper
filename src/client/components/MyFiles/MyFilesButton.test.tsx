@@ -6,11 +6,14 @@ import en from '../../locales/en.json'
 import type { User } from '../../types'
 import { createMemoryStore } from '../../util/myFiles/memoryStore'
 import type { MyFilesStore } from '../../util/myFiles/store'
+import { trackFeatureEvent } from '../../util/featureEvents'
+import { FileViewerProvider, useFileViewer } from '../FileViewer/FileViewerContext'
 import MyFilesButton from './MyFilesButton'
 import { MyFilesStoreProvider } from './MyFilesStoreContext'
 
 let embedded = false
 vi.mock('../../contexts/EmbeddedContext', () => ({ useIsEmbedded: () => embedded }))
+vi.mock('../../util/featureEvents', () => ({ trackFeatureEvent: vi.fn() }))
 
 const i18n = i18next.createInstance()
 
@@ -19,6 +22,7 @@ beforeAll(async () => {
 })
 beforeEach(() => {
   embedded = false
+  vi.mocked(trackFeatureEvent).mockClear()
 })
 afterEach(cleanup)
 
@@ -138,5 +142,50 @@ describe('MyFilesButton', () => {
 
     await waitFor(() => expect(screen.queryByText('Course')).toBeNull())
     expect((await store.list()).map((entry) => entry.path)).toEqual(['Agent notes', 'Outputs'])
+  })
+
+  test('sends one upload event per picked selection, with the shared extension or mixed', async () => {
+    renderButton(admin)
+    await openDialog()
+    await pick('my-files-input-folder', [folderFile('Course/a.md', 'a', 1000), folderFile('Course/b.MD', 'b', 1000)])
+    await waitFor(() => expect(screen.getByTestId('my-files-status').textContent).toContain('New: 2'))
+    await pick('my-files-input-files', [new File(['x'], 'slides.pdf'), new File(['y'], 'notes.md')])
+    await waitFor(() => expect(screen.getByTestId('my-files-status').textContent).toContain('New: 2'))
+    expect(vi.mocked(trackFeatureEvent).mock.calls).toEqual([
+      [{ feature: 'my_files', action: 'upload', fileCount: 2, fileType: 'md' }],
+      [{ feature: 'my_files', action: 'upload', fileCount: 2, fileType: 'mixed' }],
+    ])
+  })
+
+  test('sends an upload event for dropped files', async () => {
+    renderButton(admin)
+    await openDialog()
+    const files = [new File(['x'], 'a.txt'), new File(['y'], 'b.txt'), new File(['z'], 'c.txt')]
+    await act(async () => {
+      fireEvent.drop(screen.getByTestId('my-files-drop-zone'), { dataTransfer: { items: [], files } })
+    })
+    await waitFor(() => expect(screen.getByTestId('my-files-status').textContent).toContain('New: 3'))
+    expect(vi.mocked(trackFeatureEvent).mock.calls).toEqual([[{ feature: 'my_files', action: 'upload', fileCount: 3, fileType: 'txt' }]])
+  })
+
+  test('opening a file in the viewer sends a viewer open from My files', async () => {
+    const store = createMemoryStore()
+    await store.write('Course/notes.md', 'x')
+    const ViewerTarget = () => <output data-testid="viewer-target">{useFileViewer()?.target?.path ?? ''}</output>
+    render(
+      <I18nextProvider i18n={i18n}>
+        <MyFilesStoreProvider store={store}>
+          <FileViewerProvider available>
+            <MyFilesButton user={admin} />
+            <ViewerTarget />
+          </FileViewerProvider>
+        </MyFilesStoreProvider>
+      </I18nextProvider>,
+    )
+    const dialog = await openDialog()
+    fireEvent.click(await within(dialog).findByRole('button', { name: /^Course/ }))
+    fireEvent.click(within(dialog).getByTestId('my-files-open'))
+    expect(screen.getByTestId('viewer-target').textContent).toBe('Course/notes.md')
+    expect(vi.mocked(trackFeatureEvent).mock.calls).toEqual([[{ feature: 'viewer', action: 'open', fileType: 'md', source: 'my_files' }]])
   })
 })

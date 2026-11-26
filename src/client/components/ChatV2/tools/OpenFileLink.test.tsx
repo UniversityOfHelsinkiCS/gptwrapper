@@ -3,6 +3,7 @@ import i18next from 'i18next'
 import type { ReactNode } from 'react'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
 import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
+vi.mock('../../../util/featureEvents', () => ({ trackFeatureEvent: vi.fn() }))
 import type { AssistantPart, SubagentPart, ToolPart } from '../../../../shared/agentChat'
 import en from '../../../locales/en.json'
 import { createMemoryStore } from '../../../util/myFiles/memoryStore'
@@ -13,6 +14,7 @@ import { SubagentCard } from '../SubagentCard'
 import { FileToolPart } from './FileToolPart'
 import { readPdfFileOf, toolFileToOpen } from './OpenFileLink'
 import { OutputFiles } from './OutputFiles'
+import { trackFeatureEvent } from '../../../util/featureEvents'
 
 const i18n = i18next.createInstance()
 
@@ -22,6 +24,7 @@ beforeAll(async () => {
 afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
+  vi.mocked(trackFeatureEvent).mockClear()
 })
 
 const readPdf = (path: string, pages?: string): ToolPart => ({
@@ -136,6 +139,7 @@ describe('Open links on file tool steps', () => {
     renderWith(store, <FileToolPart part={readPdf('Course notes/book.pdf', '3-5')} />)
     fireEvent.click(await screen.findByRole('button', { name: 'Open book.pdf' }))
     expect(viewerTarget()).toEqual({ path: 'Course notes/book.pdf', page: 3 })
+    expect(vi.mocked(trackFeatureEvent).mock.calls).toEqual([[{ feature: 'viewer', action: 'open', fileType: 'pdf', source: 'agent_link' }]])
   })
 
   test('write_file in Outputs opens the file', async () => {
@@ -207,6 +211,7 @@ describe('Open on the output files list', () => {
     renderWith(store, <OutputFiles parts={parts} />)
     fireEvent.click(await screen.findByRole('button', { name: 'Open plan.md' }))
     expect(viewerTarget()).toEqual({ path: 'Outputs/plan.md' })
+    expect(vi.mocked(trackFeatureEvent).mock.calls).toEqual([[{ feature: 'viewer', action: 'open', fileType: 'md', source: 'agent_link' }]])
     await settled(stat)
     expect(screen.getAllByTestId('output-file-open')).toHaveLength(1)
   })

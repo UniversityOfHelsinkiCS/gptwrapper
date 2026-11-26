@@ -8,6 +8,7 @@ import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs'
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest'
 
 vi.mock('../../../config', async () => ({ ValidModelNameSchema: (await import('zod/v4')).z.string() }))
+vi.mock('../../util/featureEvents', () => ({ trackFeatureEvent: vi.fn() }))
 
 import { buildExportDocument, type ExportDocument } from './exportDocument'
 import { exportDocxBlob } from './exportDocx'
