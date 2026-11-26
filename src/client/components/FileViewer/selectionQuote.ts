@@ -1,4 +1,4 @@
-import { MAX_QUOTE_LENGTH, type TextQuote } from '@shared/quote'
+import { MAX_QUOTE_LENGTH, type QuickAction, type TextQuote } from '@shared/quote'
 
 /** A quote made from a selection in the viewer, waiting to be sent. `truncated` when the selection was cut to the maximum length. */
 export interface PendingQuote {
@@ -6,8 +6,11 @@ export interface PendingQuote {
   truncated: boolean
 }
 
-/** How a quote goes to the chat: as a chip waiting for a typed question ("Ask…"), or sent right away with `message` (a quick action). */
-export type AddQuoteOptions = { message?: string; send?: boolean }
+/**
+ * How a quote goes to the chat: as a chip waiting for a typed question ("Ask…"), or sent right away with `message` (the
+ * quick action `action`).
+ */
+export type AddQuoteOptions = { message?: string; send?: boolean; action?: QuickAction }
 
 const HEADING_SELECTOR = 'h1, h2, h3, h4, h5, h6'
 

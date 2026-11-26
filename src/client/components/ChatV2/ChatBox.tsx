@@ -21,7 +21,7 @@ import { ValidModelName } from '../../../config'
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat'
 import { StatusAnnouncer } from '../common/accessibility/StatusAnnouncer'
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
-import { quoteFileName, type Quote } from '@shared/quote'
+import { type QuickAction, quoteFileName, type Quote } from '@shared/quote'
 import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
 import type { AddQuoteOptions, PendingQuote } from '../FileViewer/selectionQuote'
 
@@ -101,8 +101,11 @@ export const ChatBox = ({
   setFileName: (name: string) => void
   handleCancel: (reason: 'canceled' | 'error') => void
   handleContinue: (message: string, ignoredWarnings: WarningType[]) => void
-  /** `quotes` is the pending quote from the file viewer, if any. It stays pending while a quiz is being answered. */
-  handleSubmit: (message: string, quotes?: Quote[]) => void
+  /**
+   * `quotes` is the pending quote from the file viewer, if any. It stays pending while a quiz is being answered.
+   * `quickAction` is the quick action that sent the quote with `message`.
+   */
+  handleSubmit: (message: string, quotes?: Quote[], quickAction?: QuickAction) => void
   handleReset: () => void
   handleStop: () => void
   isMobile: boolean
@@ -219,10 +222,10 @@ export const ChatBox = ({
     send({ focusInput: true })
   }
 
-  const addQuote = (pending: PendingQuote, { message: quickMessage, send: sendNow }: AddQuoteOptions = {}) => {
+  const addQuote = (pending: PendingQuote, { message: quickMessage, send: sendNow, action }: AddQuoteOptions = {}) => {
     if (sendNow) {
       if (disabled || budgetResetsAt || !quickMessage) return
-      handleSubmit(quickMessage, [pending.quote])
+      handleSubmit(quickMessage, [pending.quote], action)
       refetchStatus()
       return
     }

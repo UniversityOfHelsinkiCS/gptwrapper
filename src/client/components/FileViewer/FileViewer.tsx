@@ -313,7 +313,7 @@ const FileViewer = ({
     if (action !== 'ask' && quickActionsDisabled) return
     hideFloating()
     if (action === 'ask') onAddQuote(selected)
-    else onAddQuote(selected, { message: quickMessages[action], send: true })
+    else onAddQuote(selected, { message: quickMessages[action], send: true, action })
   }
 
   const quickMessages = {

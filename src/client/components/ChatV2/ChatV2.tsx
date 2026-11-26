@@ -10,7 +10,7 @@ import type { AssistantMessageV2 } from '@shared/agentChat'
 import type { MessageContent, MessageGenerationInfo, ToolCallResultEvent } from '@shared/chat'
 import { getLanguageValue } from '@shared/utils'
 import { QUIZ_IDK, type QuizAnswer } from '@shared/quiz'
-import type { Quote } from '@shared/quote'
+import type { QuickAction, Quote } from '@shared/quote'
 import { useIsEmbedded } from '../../contexts/EmbeddedContext'
 import { useChatScroll } from './useChatScroll'
 import useCourse from '../../hooks/useCourse'
@@ -213,6 +213,7 @@ const ChatV2Content = () => {
     /** A failed answer whose run the server can continue (it has a `resumeId`). */
     failedAnswer?: AssistantMessageV2,
     quotes?: Quote[],
+    quickAction?: QuickAction,
   ) => {
     if (!userStatus) return
 
@@ -283,6 +284,7 @@ const ChatV2Content = () => {
           fileContent: parsedFileContent, // Store file content separately
           quizAnswer,
           ...(quotes?.length ? { quotes } : {}),
+          ...(quotes?.length && quickAction ? { quickAction } : {}),
           ...(viewerFile ? { viewerFile } : {}),
         })
 
@@ -522,9 +524,9 @@ const ChatV2Content = () => {
    * Sends the chat box text: as the explanation of the quiz answer while an option is picked, otherwise as a message
    * (with its quotes). A message with quotes is never a quiz answer (a quick action can be sent while an option is picked).
    */
-  const handleChatBoxSubmit = (message: string, quotes?: Quote[]) => {
+  const handleChatBoxSubmit = (message: string, quotes?: Quote[], quickAction?: QuickAction) => {
     if (quotes || !openQuizSelection || !openQuiz) {
-      handleSendMessage(message, false, [], undefined, undefined, undefined, quotes)
+      handleSendMessage(message, false, [], undefined, undefined, undefined, quotes, quickAction)
       return
     }
     const explanation = message.trim().slice(0, 10_000)
