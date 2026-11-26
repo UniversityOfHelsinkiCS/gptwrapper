@@ -351,7 +351,7 @@ describe('write tools', () => {
 
   test('write_file creates and replaces files in Outputs and Agent notes', async () => {
     const created = await run('write_file', { path: 'Outputs/plan/week1.md', content: 'Read chapter 1.' })
-    expect(okContent(created)).toBe('Created "Outputs/plan/week1.md" (15 bytes).')
+    expect(okContent(created)).toBe('Created "Outputs/plan/week1.md" (15 bytes). Link it as [week1.md](Outputs/plan/week1.md).')
     expect(created).toMatchObject({ artifact: { tool: 'write_file', path: 'Outputs/plan/week1.md', bytes: 15, created: true } })
     expect(await store.readText('Outputs/plan/week1.md')).toBe('Read chapter 1.')
 

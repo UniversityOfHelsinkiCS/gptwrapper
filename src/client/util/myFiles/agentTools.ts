@@ -11,7 +11,7 @@ import {
   type FileToolName,
   type FileToolSummary,
 } from '../../../shared/fileTools'
-import { AGENT_NOTES_FOLDER, isReservedPath, isWithin, OUTPUTS_FOLDER, RESERVED_FOLDERS, splitPath } from './paths'
+import { AGENT_NOTES_FOLDER, baseName, isReservedPath, isWithin, OUTPUTS_FOLDER, RESERVED_FOLDERS, splitPath } from './paths'
 import { defaultPdfPagesReader, PdfParseError, type PdfPagesReader } from './pdfText'
 import { isMyFilesError, type MyFilesEntry, type MyFilesStore } from './store'
 
@@ -465,7 +465,7 @@ const writeFile = async (ctx: Context, input: FileToolInput<'write_file'>): Prom
   const entry = await ctx.store.write(path, input.content)
   await ctx.store.flush()
   return {
-    content: `${existing ? 'Replaced' : 'Created'} ${quote(path)} (${entry.size} bytes).`,
+    content: `${existing ? 'Replaced' : 'Created'} ${quote(path)} (${entry.size} bytes).${isWithin(path, OUTPUTS_FOLDER) ? ` Link it as [${baseName(path)}](${encodeURI(path)}).` : ''}`,
     artifact: { tool: 'write_file', path, bytes: entry.size, created: !existing },
   }
 }

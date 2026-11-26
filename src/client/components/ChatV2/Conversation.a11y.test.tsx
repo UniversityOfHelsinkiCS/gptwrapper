@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import i18next from 'i18next'
 import { createRef, StrictMode } from 'react'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
@@ -15,6 +15,9 @@ import { oldFormatMessages } from './__fixtures__/oldFormatMessages'
 import en from '../../locales/en.json'
 import Conversation from './Conversation'
 import type { QuizSelection } from './tools/quizAnswerContext'
+import { createMemoryStore } from '../../util/myFiles/memoryStore'
+import type { MyFilesStore } from '../../util/myFiles/store'
+import { MyFilesStoreProvider } from '../MyFiles/MyFilesStoreContext'
 
 const i18n = i18next.createInstance()
 
@@ -26,7 +29,10 @@ beforeAll(async () => {
     defaultNS: 'common',
   })
 })
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  vi.restoreAllMocks()
+})
 
 const RESPONSE_TEXT = 'The capital of Finland is Helsinki.'
 
@@ -40,36 +46,26 @@ const textParts = (text: string): AssistantPart[] => {
   return partsCache.get(text)!
 }
 
-const renderConversation = ({ completion, ...props }: Props) =>
-  render(
-    <StrictMode>
-      <I18nextProvider i18n={i18n}>
-        <Conversation
-          endState="none"
-          {...props}
-          streamingParts={textParts(completion)}
-          isMobile={false}
-          latestResponseIndex={props.messages.length - 1}
-          latestResponseRef={createRef<HTMLDivElement>()}
-        />
-      </I18nextProvider>
-    </StrictMode>,
+/** With `store`, My files is that store; without it, whatever the browser has (none in jsdom). */
+const conversationProps = ({ completion, store, ...props }: Props & { store?: MyFilesStore }) => {
+  const conversation = (
+    <Conversation
+      endState="none"
+      {...props}
+      streamingParts={textParts(completion)}
+      isMobile={false}
+      latestResponseIndex={props.messages.length - 1}
+      latestResponseRef={createRef<HTMLDivElement>()}
+    />
   )
+  return (
+    <StrictMode>
+      <I18nextProvider i18n={i18n}>{store ? <MyFilesStoreProvider store={store}>{conversation}</MyFilesStoreProvider> : conversation}</I18nextProvider>
+    </StrictMode>
+  )
+}
 
-const conversationProps = ({ completion, ...props }: Props) => (
-  <StrictMode>
-    <I18nextProvider i18n={i18n}>
-      <Conversation
-        endState="none"
-        {...props}
-        streamingParts={textParts(completion)}
-        isMobile={false}
-        latestResponseIndex={props.messages.length - 1}
-        latestResponseRef={createRef<HTMLDivElement>()}
-      />
-    </I18nextProvider>
-  </StrictMode>
-)
+const renderConversation = (props: Props & { store?: MyFilesStore }) => render(conversationProps(props))
 
 const userTurn: ClientChatMessage[] = [{ role: 'user', content: 'What is the capital of Finland?' }]
 
@@ -451,5 +447,99 @@ describe('Conversation quotes', () => {
     // The card comes before the question in the bubble.
     const text = userMessage.textContent!
     expect(text.indexOf('Quoted text')).toBeLessThan(text.indexOf('What does this mean?'))
+  })
+})
+
+describe('links to output files in the answer', () => {
+  const answerWithLink = (text: string, path = 'Outputs/kello.html'): ClientChatMessage => ({
+    role: 'assistant',
+    parts: [
+      {
+        type: 'tool',
+        callId: 'w1',
+        name: 'write_file',
+        input: { path },
+        status: 'ok',
+        result: { tool: 'write_file', path, bytes: 3, created: true },
+      },
+      { type: 'text', text },
+    ],
+  })
+
+  const renderWithStore = async (text: string, fileContent?: string, path = 'Outputs/kello.html') => {
+    const store = createMemoryStore()
+    if (fileContent !== undefined) await store.write(path, fileContent)
+    renderConversation({ messages: [...userTurn, answerWithLink(text, path)], completion: '', isStreaming: false, store })
+  }
+
+  test('a sandbox: link to a written file downloads it like the button, with no space added after it', async () => {
+    const createObjectURL = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob-url')
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    await renderWithStore('Done! [Download the page](sandbox:/mnt/data/kello.html).', 'abc')
+
+    const link = screen.getByTestId('output-file-link')
+    expect(link.tagName).toBe('BUTTON')
+    expect(link.closest('p')?.textContent).toBe('Done! Download the page.')
+
+    await act(async () => {
+      fireEvent.click(link)
+    })
+    await waitFor(() => expect(click).toHaveBeenCalledTimes(1))
+    expect(await (createObjectURL.mock.calls[0][0] as Blob).text()).toBe('abc')
+  })
+
+  test('says when the linked file is no longer in My files', async () => {
+    await renderWithStore('[kello.html](Outputs/kello.html)')
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('output-file-link'))
+    })
+    await waitFor(() => expect(screen.getAllByText('kello.html is no longer in My files.')).toHaveLength(1))
+  })
+
+  test('a javascript: link that mentions Outputs/ gets the clean path, not the script', async () => {
+    await renderWithStore('[x](javascript:alert(1)//Outputs/kello.html)')
+
+    expect(document.querySelector('a[href^="javascript"]')).toBeNull()
+    expect(screen.getByTestId('output-file-link').tagName).toBe('BUTTON')
+  })
+
+  test('an embedded output image is shown from My files as a data URL', async () => {
+    await renderWithStore('![Bar chart](sandbox:/mnt/data/chart.svg)', '<svg xmlns="http://www.w3.org/2000/svg"/>', 'Outputs/chart.svg')
+
+    const image = await screen.findByTestId('output-image')
+    expect(image.getAttribute('src')?.startsWith('data:image/svg+xml')).toBe(true)
+    expect(image.getAttribute('alt')).toBe('Bar chart')
+  })
+
+  test('an embedded output image that is gone shows its alt text', async () => {
+    await renderWithStore('![Bar chart](Outputs/chart.svg)', undefined, 'Outputs/chart.svg')
+
+    await waitFor(() => expect(screen.getByText('Bar chart')).toBeTruthy())
+    expect(document.querySelector('img')).toBeNull()
+  })
+
+  test('a written file named in plain text or inline code becomes a download link', async () => {
+    await renderWithStore('Saved as Outputs/kello.html. Open `kello.html`, not Outputs/kello.html.bak or `other.html`.', 'abc')
+
+    const links = screen.getAllByTestId('output-file-link')
+    expect(links.map((link) => link.textContent)).toEqual(['Outputs/kello.html', 'kello.html'])
+    expect(links[1].querySelector('code')).not.toBeNull()
+  })
+
+  test('a bare file name in bold becomes a download link, but not inside another path', async () => {
+    await renderWithStore('Lataa tiedosto **kello.html** ja avaa se. Not Files/kello.html or my-kello.html.', 'abc')
+
+    const links = screen.getAllByTestId('output-file-link')
+    expect(links.map((link) => link.textContent)).toEqual(['kello.html'])
+    expect(links[0].closest('strong')).not.toBeNull()
+  })
+
+  test('without My files the link is plain text', () => {
+    renderConversation({ messages: [...userTurn, answerWithLink('[Download](Outputs/kello.html)')], completion: '', isStreaming: false })
+
+    expect(screen.queryByTestId('output-file-link')).toBeNull()
+    expect(screen.getByText('Download').tagName).toBe('P')
   })
 })

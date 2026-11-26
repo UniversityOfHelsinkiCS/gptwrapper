@@ -21,7 +21,7 @@ import { type ClientChatMessage, messageToolResults, messageToText } from './mes
 import { isActivityPart, ToolPartView } from './tools/registry'
 import { ActivityGroup } from './ActivityGroup'
 import { groupParts } from './groupParts'
-import { OutputFiles } from './tools/OutputFiles'
+import { OutputFiles, outputFilesOf } from './tools/OutputFiles'
 import { QuizAnswerProvider, type QuizSelection } from './tools/quizAnswerContext'
 import { ThinkingBlock } from './ThinkingBlock'
 import { SubagentCard } from './SubagentCard'
@@ -177,18 +177,18 @@ const AssistantMessageInfo = ({ message, headingId, number }: { message: Assista
  * their renderer, and subagent parts as cards that render their own parts with this same component.
  * Consecutive activity parts (tools, subagents, reasoning) are folded into one activity group.
  */
-const AssistantParts = ({ parts }: { parts: AssistantPart[] }) => {
+const AssistantParts = ({ parts, outputPaths }: { parts: AssistantPart[]; outputPaths: string[] }) => {
   const renderPart = (part: AssistantPart, partIdx: number) =>
     part.type === 'tool' ? (
       <ToolPartView key={`tool-${part.callId}`} part={part} />
     ) : part.type === 'subagent' ? (
       <SubagentCard key={`subagent-${part.callId}`} part={part}>
-        <AssistantParts parts={part.parts} />
+        <AssistantParts parts={part.parts} outputPaths={outputPaths} />
       </SubagentCard>
     ) : part.type === 'reasoning' ? (
       <ThinkingBlock key={`reasoning-${partIdx}`} part={part} />
     ) : (
-      <MarkdownContent key={`text-${partIdx}`} text={part.text} />
+      <MarkdownContent key={`text-${partIdx}`} text={part.text} outputPaths={outputPaths} />
     )
 
   return (
@@ -227,6 +227,8 @@ const AssistantMessageItem = ({
   const msgId = useId()
   const headingId = useId()
   const toolResults = messageToolResults(message)
+  const outputPathsKey = outputFilesOf(message.parts).join('\n')
+  const outputPaths = React.useMemo(() => (outputPathsKey ? outputPathsKey.split('\n') : []), [outputPathsKey])
 
   return (
     <Box
@@ -251,8 +253,8 @@ const AssistantMessageItem = ({
       })}
     >
       <AssistantMessageInfo message={message} headingId={headingId} number={number} />
-      <AssistantParts parts={message.parts} />
-      <OutputFiles parts={message.parts} />
+      <AssistantParts parts={message.parts} outputPaths={outputPaths} />
+      <OutputFiles paths={outputPaths} />
       {message.error && (
         <Box sx={{ mt: 2 }}>
           <Typography variant="body1" fontStyle="italic" color="error.main">

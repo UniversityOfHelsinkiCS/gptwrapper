@@ -8,7 +8,7 @@ import en from '../../../locales/en.json'
 import { createMemoryStore } from '../../../util/myFiles/memoryStore'
 import type { MyFilesStore } from '../../../util/myFiles/store'
 import { MyFilesStoreProvider } from '../../MyFiles/MyFilesStoreContext'
-import { OutputFiles, outputFilesOf } from './OutputFiles'
+import { OutputFiles, outputFilesOf, outputPathOfHref } from './OutputFiles'
 
 const i18n = i18next.createInstance()
 
@@ -42,7 +42,7 @@ const renderList = (store: MyFilesStore, parts = PARTS) =>
   render(
     <I18nextProvider i18n={i18n}>
       <MyFilesStoreProvider store={store}>
-        <OutputFiles parts={parts} />
+        <OutputFiles paths={outputFilesOf(parts)} />
       </MyFilesStoreProvider>
     </I18nextProvider>,
   )
@@ -77,5 +77,32 @@ describe('OutputFiles', () => {
     })
     await waitFor(() => expect(screen.getByText('from-subagent.md is no longer in My files.')).toBeTruthy())
     expect(click).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('outputPathOfHref', () => {
+  test('finds Outputs/ files in the forms models write links in', () => {
+    expect(outputPathOfHref('Outputs/kello.html')).toBe('Outputs/kello.html')
+    expect(outputPathOfHref('./Outputs/my%20plan.md')).toBe('Outputs/my plan.md')
+    expect(outputPathOfHref('/Outputs/sub/a.txt#top')).toBe('Outputs/sub/a.txt')
+    expect(outputPathOfHref('file:///Outputs/kello.html')).toBe('Outputs/kello.html')
+    expect(outputPathOfHref('sandbox:/mnt/data/Outputs/kello.html')).toBe('Outputs/kello.html')
+  })
+
+  test('matches a bare file name to a file the answer wrote', () => {
+    const written = ['Outputs/kello.html']
+    expect(outputPathOfHref('kello.html', written)).toBe('Outputs/kello.html')
+    expect(outputPathOfHref('sandbox:/mnt/data/kello.html', written)).toBe('Outputs/kello.html')
+    expect(outputPathOfHref('other.html', written)).toBeUndefined()
+  })
+
+  test('leaves other links alone', () => {
+    expect(outputPathOfHref(undefined)).toBeUndefined()
+    expect(outputPathOfHref('https://example.com/Outputs/a.html')).toBeUndefined()
+    expect(outputPathOfHref('https://example.com/kello.html', ['Outputs/kello.html'])).toBeUndefined()
+    expect(outputPathOfHref('Outputs')).toBeUndefined()
+    expect(outputPathOfHref('Agent notes/x.md')).toBeUndefined()
+    expect(outputPathOfHref('Outputs/../Files/a.md')).toBeUndefined()
+    expect(outputPathOfHref('#section')).toBeUndefined()
   })
 })

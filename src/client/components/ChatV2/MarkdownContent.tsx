@@ -3,6 +3,7 @@ import { visuallyHidden } from '@mui/utils'
 import { useId, useMemo, useRef, type MouseEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown, { type Components } from 'react-markdown'
+import type { Pluggable } from 'unified'
 import { PrismAsync as SyntaxHighlighter } from 'react-syntax-highlighter'
 import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
@@ -12,6 +13,8 @@ import 'katex/dist/contrib/mhchem'
 import { ScrollableRegion } from '../common/accessibility/ScrollableRegion'
 import { accessibleOneDark } from './codeTheme'
 import CopyToClipboardButton from './CopyToClipboardButton'
+import { outputFileComponents } from './tools/OutputFiles'
+import { remarkOutputLinks } from './tools/remarkOutputLinks'
 import { preprocessMath } from './util'
 
 /**
@@ -45,9 +48,10 @@ const textOf = (children: ReactNode): string => {
 
 /**
  * Markdown with the chat's setup: gfm, math with KaTeX, highlighted code blocks with a copy button and scrollable
- * tables and formulas. Raw HTML stays escaped (no rehype-raw).
+ * tables and formulas. Raw HTML stays escaped (no rehype-raw). In a chat answer, links, images and mentions of
+ * `Outputs/` files (the answer's `outputPaths`) download or show the file from My files.
  */
-export const MarkdownContent = ({ text, source = 'chat' }: { text: string; source?: MarkdownSource }) => {
+export const MarkdownContent = ({ text, source = 'chat', outputPaths = [] }: { text: string; source?: MarkdownSource; outputPaths?: string[] }) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const processed = useMemo(() => preprocessMath(text), [text])
@@ -97,6 +101,7 @@ export const MarkdownContent = ({ text, source = 'chat' }: { text: string; sourc
   const slugCounts = new Map<string, number>()
 
   const chatComponents: Components = {
+    ...(source === 'chat' && outputFileComponents),
     pre(props) {
       const { children, node, ...rest } = props
       const codeNode = node?.children[0]
@@ -266,7 +271,7 @@ export const MarkdownContent = ({ text, source = 'chat' }: { text: string; sourc
 
   const markdown = (
     <ReactMarkdown
-      remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
+      remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }], ...(source === 'chat' ? [[remarkOutputLinks, outputPaths] as Pluggable] : [])]}
       rehypePlugins={[[rehypeKatex, katexOptions]]}
       components={source === 'file' ? fileComponents : chatComponents}
     >

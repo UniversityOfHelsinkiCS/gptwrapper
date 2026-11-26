@@ -13,8 +13,8 @@ import { MyFilesStoreProvider } from '../../MyFiles/MyFilesStoreContext'
 import { SubagentCard } from '../SubagentCard'
 import { FileToolPart } from './FileToolPart'
 import { readPdfFileOf, toolFileToOpen } from './OpenFileLink'
-import { OutputFiles } from './OutputFiles'
 import { trackFeatureEvent } from '../../../util/featureEvents'
+import { OutputFiles, outputFilesOf } from './OutputFiles'
 
 const i18n = i18next.createInstance()
 
@@ -208,7 +208,7 @@ describe('Open on the output files list', () => {
     const store = await storeWith('Outputs/plan.md', 'Outputs/data.csv')
     const stat = vi.spyOn(store, 'stat')
     const parts: AssistantPart[] = [write('Outputs/plan.md'), write('Outputs/data.csv')]
-    renderWith(store, <OutputFiles parts={parts} />)
+    renderWith(store, <OutputFiles paths={outputFilesOf(parts)} />)
     fireEvent.click(await screen.findByRole('button', { name: 'Open plan.md' }))
     expect(viewerTarget()).toEqual({ path: 'Outputs/plan.md' })
     expect(vi.mocked(trackFeatureEvent).mock.calls).toEqual([[{ feature: 'viewer', action: 'open', fileType: 'md', source: 'agent_link' }]])
