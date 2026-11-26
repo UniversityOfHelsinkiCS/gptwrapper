@@ -285,7 +285,9 @@ adminTest('Explain sends a PDF selection right away, keeping the typed draft', a
     await viewer.getByRole('toolbar', { name: 'Selection actions' }).getByRole('button', { name: 'Explain' }).click()
 
     const userMessage = page.getByTestId('user-message')
-    await expect(userMessage).toContainText('Explain this passage.')
+    // The bubble names the action, the model gets the request
+    await expect(userMessage).toContainText('Explain')
+    await expect(userMessage).not.toContainText('Explain this passage.')
     const card = userMessage.getByTestId('quote-card')
     await expect(card.getByTestId('quote-card-source')).toHaveText('📄 book.pdf · p. 1')
     await expect(card.getByTestId('quote-card-text')).toContainText('Entropy always grows')
@@ -296,6 +298,7 @@ adminTest('Explain sends a PDF selection right away, keeping the typed draft', a
     const sent = sentFrames.find((frame) => frame.includes('Explain this passage.'))
     expect(sent).toContain('"quotes":[{"kind":"text","path":"Course notes/book.pdf","page":1,"text":"Entropy always grows')
     expect(sent).not.toContain('my unsent draft')
+    expect(sent).toContain('"quickAction":"explain"')
   } finally {
     rmSync(root, { recursive: true, force: true })
   }

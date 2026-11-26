@@ -266,9 +266,9 @@ describe('FileViewer Ask…', () => {
 
     selectText(paragraph)
     fireEvent.click(toolbarButton('explain'))
-    expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, { message: 'Explain this passage.', send: true })
+    expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, { message: 'Explain this passage.', send: true, action: 'explain' })
     fireEvent.click(toolbarButton('summarize'))
-    expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, { message: 'Summarize this passage.', send: true })
+    expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, { message: 'Summarize this passage.', send: true, action: 'summarize' })
 
     fireEvent.mouseUp(paragraph)
     const floating = screen.getByRole('toolbar', { name: 'Selection actions' })
@@ -281,6 +281,7 @@ describe('FileViewer Ask…', () => {
     expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, {
       message: 'Translate this passage into English, unless our conversation suggests another language.',
       send: true,
+      action: 'translate',
     })
     expect(screen.queryByTestId('file-viewer-selection-toolbar')).toBe(null)
   })
@@ -307,7 +308,7 @@ describe('FileViewer Ask…', () => {
     const { onAddQuote, paragraph } = await renderWithAsk({ lng: localized })
     selectText(paragraph)
     fireEvent.click(toolbarButton('explain'))
-    expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, { message: explain, send: true })
+    expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, { message: explain, send: true, action: 'explain' })
     fireEvent.click(toolbarButton('translate'))
     expect(onAddQuote.mock.lastCall![1].message).toContain(language)
   })
@@ -320,7 +321,7 @@ describe('FileViewer Ask…', () => {
     fireEvent.mouseUp(paragraph)
     expect(screen.queryByTestId('file-viewer-selection-toolbar')).toBe(null)
     fireEvent.click(toolbarButton('explain'))
-    expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, { message: 'Explain this passage.', send: true })
+    expect(onAddQuote).toHaveBeenLastCalledWith(expectedQuote, { message: 'Explain this passage.', send: true, action: 'explain' })
 
     fireEvent.click(screen.getByRole('button', { name: 'Back to chat' }))
     expect(onBackToChat).toHaveBeenCalledOnce()

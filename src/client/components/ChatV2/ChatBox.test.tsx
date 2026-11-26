@@ -249,8 +249,8 @@ describe('ChatBox quote chip', () => {
     vi.mocked(announceToScreenReader).mockClear()
 
     const quick = pending('explain me')
-    act(() => actionsRef.current!.addQuote(quick, { message: 'Explain this passage.', send: true }))
-    expect(handleSubmit).toHaveBeenCalledWith('Explain this passage.', [quick.quote])
+    act(() => actionsRef.current!.addQuote(quick, { message: 'Explain this passage.', send: true, action: 'explain' }))
+    expect(handleSubmit).toHaveBeenCalledWith('Explain this passage.', [quick.quote], 'explain')
     expect(input().value).toBe('my draft')
     expect(chips()).toHaveLength(1)
     expect(chips()[0].textContent).toContain('in the chip')
@@ -271,8 +271,8 @@ describe('ChatBox quote chip', () => {
 
   test('a quick action is sent as a message while a quiz option is picked', () => {
     const { actionsRef, handleSubmit } = renderChatBox({ quizPrompt: 'reasoning' })
-    act(() => actionsRef.current!.addQuote(pending('quoted'), { message: 'Summarize this passage.', send: true }))
-    expect(handleSubmit).toHaveBeenCalledWith('Summarize this passage.', [pending('quoted').quote])
+    act(() => actionsRef.current!.addQuote(pending('quoted'), { message: 'Summarize this passage.', send: true, action: 'summarize' }))
+    expect(handleSubmit).toHaveBeenCalledWith('Summarize this passage.', [pending('quoted').quote], 'summarize')
   })
 
   test('clearQuote removes the chip', () => {
