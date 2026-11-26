@@ -10,7 +10,7 @@ import { MAX_ATTACHED_FOLDERS } from '../../../shared/fileTools'
 import en from '../../locales/en.json'
 import { announceToScreenReader } from '../common/accessibility/SnackbarAnnouncer'
 import type { FileViewerControls, ViewerTarget } from '../FileViewer/FileViewerContext'
-import { folderToAttach, useAttachOpenedFolder } from './attachOpenedFolder'
+import { foldersToAttach, folderToAttach, useAttachOpenedFolder } from './attachOpenedFolder'
 
 const i18n = i18next.createInstance()
 
@@ -45,6 +45,22 @@ describe('folderToAttach', () => {
   test('is none when the list is full', () => {
     expect(folderToAttach('Course notes/lecture.md', fullList)).toBeNull()
     expect(folderToAttach('Course notes/lecture.md', fullList.slice(1))).toBe('Course notes')
+  })
+})
+
+describe('foldersToAttach', () => {
+  test('is the folders of the quoted files not attached yet, once each, in order', () => {
+    expect(foldersToAttach(['Thesis/draft.md', 'Course notes/a.md', 'Course notes/week1/b.md', 'Course notes/c.md'], ['Thesis'])).toEqual(['Course notes'])
+    expect(foldersToAttach(['B/x.md', 'A/y.md'], [])).toEqual(['B', 'A'])
+  })
+
+  test('skips root-level files and the folders the agent always sees', () => {
+    expect(foldersToAttach(['loose.md', 'Outputs/plan.md', 'Agent notes/learner-profile.md'], [])).toEqual([])
+  })
+
+  test('adds only as many as fit', () => {
+    expect(foldersToAttach(['A/x.md', 'B/y.md'], fullList.slice(1))).toEqual(['A'])
+    expect(foldersToAttach(['A/x.md'], fullList)).toEqual([])
   })
 })
 

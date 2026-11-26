@@ -390,6 +390,36 @@ adminTest('opening a file attaches its folder to the chat', async ({ page }) => 
   }
 })
 
+adminTest('a quick action on a file whose folder is not attached attaches it', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'my-files-quote-attach-'))
+  const sentFrames: string[] = []
+  page.on('websocket', (ws) => ws.on('framesent', (frame) => sentFrames.push(String(frame.payload))))
+  try {
+    await page.goto('/test-course-course-id')
+    await acceptDisclaimer(page)
+    await useMockModel(page)
+    const viewer = await openLectureInViewer(page, root, '# Week 3\n\nAn eigenvector keeps its direction.')
+    // The student detaches the folder but keeps the file open
+    await page.getByTestId('attached-folder').press('Delete')
+    await expect(page.getByTestId('attached-folder')).toHaveCount(0)
+
+    const paragraph = viewer.getByText('An eigenvector keeps its direction.')
+    const box = (await paragraph.boundingBox())!
+    await page.mouse.move(box.x + 1, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width - 1, box.y + box.height / 2, { steps: 5 })
+    await page.mouse.up()
+    await viewer.getByRole('toolbar', { name: 'Selection actions' }).getByRole('button', { name: 'Explain' }).click()
+
+    await expect(page.getByTestId('assistant-message')).toBeVisible()
+    await expect(page.getByTestId('attached-folder')).toHaveAttribute('data-folder', 'Course notes')
+    const runStart = sentFrames.map((frame) => JSON.parse(frame)).find((message) => message.type === 'run.start')
+    expect(runStart.attachedFolders).toEqual(['Course notes'])
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
 adminTest('the agent writes a file into Outputs, downloaded from the chat and from My files', async ({ page }) => {
   await page.goto('/test-course-course-id')
   await acceptDisclaimer(page)
