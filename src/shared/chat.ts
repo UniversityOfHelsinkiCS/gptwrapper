@@ -1,7 +1,7 @@
 import z from 'zod/v4'
 import { ValidModelNameSchema } from '../config'
 import { type QuizAnswer, QuizAnswerSchema } from './quiz'
-import { type Quote, QuotesSchema } from './quote'
+import { type QuickAction, QuickActionSchema, type Quote, QuotesSchema } from './quote'
 import { type ViewerFile, ViewerFileSchema } from './viewerFile'
 
 export type ToolCallInput = {
@@ -56,6 +56,8 @@ export type UserMessage = {
   quizAnswer?: QuizAnswer
   /** Text the student quoted from their My files files. The server puts it before `content` for the model, marked as quoted material. */
   quotes?: Quote[]
+  /** Set when the message was sent with a quick action on a quote. `content` is the request for the model; the chat shows the action's name instead. */
+  quickAction?: QuickAction
   /** The file open in the file viewer when the message was sent. The server names it for the model before the question. Not shown or exported. */
   viewerFile?: ViewerFile
 }
@@ -118,5 +120,6 @@ export const ChatMessageSchema = z.object({
   fileContent: z.string().optional(),
   quizAnswer: QuizAnswerSchema.optional(),
   quotes: QuotesSchema.optional(),
+  quickAction: QuickActionSchema.optional(),
   viewerFile: ViewerFileSchema.optional(),
 })

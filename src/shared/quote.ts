@@ -25,5 +25,9 @@ export const QuotesSchema = z.array(QuoteSchema).max(MAX_QUOTES)
 export type TextQuote = z.infer<typeof TextQuoteSchema>
 export type Quote = z.infer<typeof QuoteSchema>
 
+/** The selection actions that send a quote right away with a fixed request (`UserMessage.quickAction`). */
+export const QuickActionSchema = z.enum(['explain', 'summarize', 'translate'])
+export type QuickAction = z.infer<typeof QuickActionSchema>
+
 /** The file name of a quote's path, without its folders. */
 export const quoteFileName = (quote: Pick<Quote, 'path'>): string => quote.path.split('/').filter(Boolean).at(-1) ?? quote.path
