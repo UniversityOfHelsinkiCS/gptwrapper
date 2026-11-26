@@ -31,6 +31,8 @@ import {
   type StreamChunk,
 } from './mapStreamChunk'
 import { createRunUsage } from './runUsage'
+import { featureEventsForMessage } from './chatFeatureEvents'
+import { recordFeatureEvent } from '../featureEvents'
 import type { ClientToolCaller } from './clientTools'
 import { fileToolsFor } from './tools/fileTools'
 import { readPdfFor } from './tools/readPdf'
@@ -151,6 +153,14 @@ export const runAgent = async ({ user, chargeUser = user, request, meta, signal,
   const checkpointer = resumed ?? new MemorySaver()
   const resumeState = resumed ? await readResumeState(resumed, runId) : null
   meta.resumed = !!resumed
+
+  // Every check has passed. A retry of a failed run (resumed, or started over when the run is gone) is not a new send.
+  if (!options.resumeRunId) {
+    const lastUserMessage = options.chatMessages.findLast((message) => message.role === 'user')
+    if (lastUserMessage && !('parts' in lastUserMessage)) {
+      for (const event of featureEventsForMessage(lastUserMessage)) recordFeatureEvent(event)
+    }
+  }
 
   onStart()
 
