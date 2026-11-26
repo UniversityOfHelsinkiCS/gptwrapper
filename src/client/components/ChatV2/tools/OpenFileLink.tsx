@@ -70,7 +70,7 @@ export const OpenFileLink = ({ target, sx }: { target: ViewerTarget | null; sx?:
       // The text color: the primary color is too faint on the dimmed tool steps.
       color="inherit"
       // A new target each time, so opening the file again jumps back to this page.
-      onClick={() => open({ ...target })}
+      onClick={() => open({ ...target }, 'agent_link')}
       data-testid="open-file-link"
       data-path={target.path}
       sx={[{ textAlign: 'left', verticalAlign: 'baseline', flexShrink: 0 }, ...(Array.isArray(sx) ? sx : [sx])]}

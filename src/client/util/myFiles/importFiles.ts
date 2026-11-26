@@ -1,4 +1,4 @@
-import { DEFAULT_FOLDER, RESERVED_FOLDERS, isReservedPath, normalizePath } from './paths'
+import { DEFAULT_FOLDER, RESERVED_FOLDERS, baseName, isReservedPath, normalizePath } from './paths'
 import { isMyFilesError, type MyFilesStore } from './store'
 
 /** A file picked or dropped by the student, with its path relative to what was picked (a folder's files start with the folder name). */
@@ -26,6 +26,20 @@ export const ensureReservedFolders = async (store: MyFilesStore) => {
 
 /** Files from an `<input type="file">`; a `webkitdirectory` input gives each file a relative path starting with the folder name. */
 export const sourcesFromFiles = (files: Iterable<File>): ImportSource[] => [...files].map((file) => ({ path: file.webkitRelativePath || file.name, file }))
+
+/**
+ * The `fileType` of a My files upload: the lowercase extension all the files share, or `mixed` when they differ or one
+ * has no usable extension.
+ */
+export const uploadFileType = (paths: readonly string[]): string => {
+  const extensionOf = (path: string) =>
+    baseName(path)
+      .toLowerCase()
+      .match(/\.([a-z0-9]{1,16})$/)?.[1] ?? null
+  const extensions = new Set(paths.map(extensionOf))
+  const [only] = extensions
+  return extensions.size === 1 && only ? only : 'mixed'
+}
 
 /** For "Sync folder": puts the picked folder's contents into `folder`, whatever the picked folder is called. */
 export const intoFolder = (sources: ImportSource[], folder: string): ImportSource[] =>

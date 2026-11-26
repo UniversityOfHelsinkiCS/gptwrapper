@@ -26,7 +26,7 @@ const getCustomHeaders = () => {
   return headers
 }
 
-const getFetchHeaders = (): Record<string, string> =>
+export const getFetchHeaders = (): Record<string, string> =>
   Object.fromEntries(
     Object.entries(getCustomHeaders())
       .filter(([, value]) => value !== undefined)

@@ -739,7 +739,7 @@ const ChatV2Content = () => {
     focusViewer()
   }
 
-  const switchFile = useCallback((path: string) => fileViewer?.open({ path }), [fileViewer])
+  const switchFile = useCallback((path: string) => fileViewer?.open({ path }, 'chat_files'), [fileViewer])
 
   // Removing the last file closes the viewer: the focus goes to the chat box.
   const removeFile = useCallback(

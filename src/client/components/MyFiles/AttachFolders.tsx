@@ -7,6 +7,7 @@ import { Chip, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, 
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MAX_ATTACHED_FOLDERS } from '../../../shared/fileTools'
+import { trackFeatureEvent } from '../../util/featureEvents'
 import { isReservedPath } from '../../util/myFiles/paths'
 import type { MyFilesStore } from '../../util/myFiles/store'
 import { folderLabel } from './folderLabel'
@@ -50,7 +51,10 @@ export const AttachFolders = ({
 
   const toggle = (folder: string) => {
     if (attachedFolders.includes(folder)) onChange(attachedFolders.filter((f) => f !== folder))
-    else if (attachedFolders.length < MAX_ATTACHED_FOLDERS) onChange([...attachedFolders, folder])
+    else if (attachedFolders.length < MAX_ATTACHED_FOLDERS) {
+      onChange([...attachedFolders, folder])
+      trackFeatureEvent({ feature: 'my_files', action: 'attach_folder' })
+    }
   }
 
   return (

@@ -1,6 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import type { FeatureEvent } from '@shared/featureEvents'
 import { MAX_VIEWER_FILE_HEADING_LENGTH, MAX_VIEWER_FILE_PATH_LENGTH, type ViewerFile } from '@shared/viewerFile'
+import { trackFeatureEvent } from '../../util/featureEvents'
 import { useMyFilesStore } from '../MyFiles/MyFilesStoreContext'
+import { viewerFileKind, type ViewerFileKind } from './fileKind'
 import { nearestKeptFile, readChatFiles, readMinimized, withOpenedFile, writeChatFiles, writeMinimized } from './viewerPersistence'
 
 /**
@@ -11,6 +14,18 @@ export interface ViewerTarget {
   path: string
   page?: number
   heading?: string
+}
+
+/**
+ * Where the user opened a file in the viewer from, for the `viewer` / `open` feature event: the My files dialog, a
+ * quote card, the chat's file list (switching files) or an agent tool step link.
+ */
+export type ViewerOpenSource = Extract<FeatureEvent, { feature: 'viewer' }>['source']
+
+const eventFileTypes: Record<ViewerFileKind, Extract<FeatureEvent, { feature: 'viewer' }>['fileType']> = {
+  pdf: 'pdf',
+  markdown: 'md',
+  text: 'txt',
 }
 
 export interface FileViewerControls {
@@ -31,9 +46,9 @@ export interface FileViewerControls {
   /**
    * Opens a file, at `page` / `heading` when given, adds it to the end of `files` unless it is there already, and
    * expands a minimized viewer. Each call is a new navigation: opening the file that is already open with another page or heading
-   * jumps there.
+   * jumps there. `source` is the entry point, for the feature usage event every open sends.
    */
-  open: (target: ViewerTarget) => void
+  open: (target: ViewerTarget, source: ViewerOpenSource) => void
   /** Minimizes the viewer to the rail, keeping its file. */
   minimize: () => void
   /** Expands a minimized viewer back to its file. */
@@ -122,7 +137,9 @@ export const FileViewerProvider = ({ available, chatContext, children }: { avail
   }, [available, store, chatContext])
 
   const open = useCallback(
-    (next: ViewerTarget) => {
+    (next: ViewerTarget, source: ViewerOpenSource) => {
+      const kind = viewerFileKind(next.path)
+      if (kind) trackFeatureEvent({ feature: 'viewer', action: 'open', fileType: eventFileTypes[kind], source })
       const files = withOpenedFile(stateRef.current.files, next.path)
       setState({ context: chatContext, target: next, files, minimized: false, focusOnOpen: true })
       if (chatContext) {

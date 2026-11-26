@@ -31,6 +31,7 @@ import {
   intoFolder,
   sourcesFromDataTransfer,
   sourcesFromFiles,
+  uploadFileType,
   type ImportResult,
   type ImportSource,
 } from '../../util/myFiles/importFiles'
@@ -44,6 +45,7 @@ import { folderLabel } from './folderLabel'
 import { ExperimentalChip } from './ExperimentalChip'
 import { useMyFilesStore } from './MyFilesStoreContext'
 import { useFileViewer } from '../FileViewer/FileViewerContext'
+import { trackFeatureEvent } from '../../util/featureEvents'
 import { viewerFileKind } from '../FileViewer/fileKind'
 
 const PERSIST_REQUESTED_KEY = 'myFilesPersistRequested'
@@ -435,6 +437,7 @@ const MyFilesContent = ({ store, onOpenFile }: { store: MyFilesStore; onOpenFile
     setNotice(null)
     setResult(null)
     setProgress({ done: 0, total: sources.length })
+    trackFeatureEvent({ feature: 'my_files', action: 'upload', fileCount: sources.length, fileType: uploadFileType(sources.map((source) => source.path)) })
     try {
       setResult(await importFiles(store, sources, { onProgress: (done, total) => setProgress({ done, total }) }))
     } catch {
@@ -740,7 +743,7 @@ const MyFilesDialog = ({ open, onClose }: { open: boolean; onClose: () => void }
   const openFile = viewer
     ? (path: string) => {
         setOpeningFile(true)
-        viewer.open({ path })
+        viewer.open({ path }, 'my_files')
         onClose()
       }
     : undefined

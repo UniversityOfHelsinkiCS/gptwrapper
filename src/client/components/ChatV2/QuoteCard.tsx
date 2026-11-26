@@ -48,7 +48,7 @@ export const QuoteCard = ({ quote }: { quote: Quote }) => {
               variant="body2"
               aria-label={t('fileViewer:openQuoteSource', { source, interpolation: { escapeValue: false } })}
               // A new target each time, so opening the same file again jumps to this quote's page or heading.
-              onClick={() => openSource({ path: quote.path, page: quote.page, heading: quote.heading })}
+              onClick={() => openSource({ path: quote.path, page: quote.page, heading: quote.heading }, 'quote')}
               data-testid="quote-card-open"
               sx={{ fontWeight: 600, color: 'text.primary', textAlign: 'left', verticalAlign: 'baseline' }}
             >

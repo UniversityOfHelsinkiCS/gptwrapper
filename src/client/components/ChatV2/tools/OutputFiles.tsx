@@ -42,7 +42,7 @@ const OutputFileRow = ({ path, missing, onDownload }: { path: string; missing: b
           color="inherit"
           variant="outlined"
           startIcon={<VisibilityOutlined aria-hidden />}
-          onClick={() => open({ path })}
+          onClick={() => open({ path }, 'agent_link')}
           aria-label={t('myFiles:openNamed', { name, interpolation: { escapeValue: false } })}
           data-testid="output-file-open"
         >
