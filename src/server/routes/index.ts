@@ -25,6 +25,7 @@ import toolsRouter from './tools'
 import { inProduction } from '../../config'
 import logger from '../util/logger'
 import statisticsRouter from './statistics'
+import analyticsRouter from './analytics'
 import { api as externalAPI } from './ai/openai'
 
 const router = express()
@@ -40,6 +41,10 @@ router.use('/external', externalAPI)
 
 router.use(shibbolethMiddleware)
 router.use(userMiddleware)
+
+// Mounted before requestLogger on purpose: the access log line carries the uid and a referrer with the course id,
+// and a feature event must stay anonymous (one FeatureEvent line only).
+router.use('/analytics', analyticsRouter)
 
 router.use(requestLogger)
 
