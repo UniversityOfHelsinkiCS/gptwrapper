@@ -285,8 +285,8 @@ adminTest('Explain sends a PDF selection right away, keeping the typed draft', a
     await viewer.getByRole('toolbar', { name: 'Selection actions' }).getByRole('button', { name: 'Explain' }).click()
 
     const userMessage = page.getByTestId('user-message')
-    // The bubble names the action, the model gets the request
-    await expect(userMessage).toContainText('Explain')
+    // The bubble shows the action as a header over the quote, the model gets the request
+    await expect(userMessage.getByTestId('quick-action-header')).toHaveText('Explain')
     await expect(userMessage).not.toContainText('Explain this passage.')
     const card = userMessage.getByTestId('quote-card')
     await expect(card.getByTestId('quote-card-source')).toHaveText('📄 book.pdf · p. 1')

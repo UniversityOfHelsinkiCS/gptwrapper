@@ -549,6 +549,40 @@ adminTest.describe('axe wcag scan for my files', () => {
     }
   })
 
+  adminTest('scan chat with a quick action on a quote', async ({ page }, testInfo) => {
+    const root = mkdtempSync(join(tmpdir(), 'axe-quick-action-'))
+    try {
+      mkdirSync(join(root, 'Course notes'), { recursive: true })
+      writeFileSync(join(root, 'Course notes', 'lecture.md'), '# Eigenvalues\n\nAn eigenvector keeps its direction.')
+
+      await page.goto('/general')
+      await acceptDisclaimer(page)
+      await useMockModel(page)
+      await page.getByTestId('my-files-button').click()
+      const dialog = page.getByRole('dialog', { name: 'My files' })
+      await dialog.getByTestId('my-files-input-folder').setInputFiles(join(root, 'Course notes'))
+      await expect(dialog.getByTestId('my-files-status')).toContainText('New: 1')
+      await dialog.getByRole('button', { name: /^Course notes/ }).click()
+      await dialog.getByRole('button', { name: 'Open lecture.md' }).click()
+      await expect(dialog).toBeHidden()
+
+      const viewer = page.getByRole('region', { name: 'lecture.md' })
+      const box = (await viewer.getByText('An eigenvector keeps its direction.').boundingBox())!
+      await page.mouse.move(box.x + 1, box.y + box.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(box.x + box.width - 1, box.y + box.height / 2, { steps: 5 })
+      await page.mouse.up()
+      await viewer.getByRole('toolbar', { name: 'Selection actions' }).getByRole('button', { name: 'Explain' }).click()
+      await expect(page.getByTestId('quick-action-header')).toHaveText('Explain')
+      await expect(page.getByTestId('assistant-message')).toBeVisible()
+      await page.mouse.move(0, 0)
+      await expect(page.getByRole('tooltip')).toHaveCount(0)
+      await scan(page, testInfo.title)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+
   adminTest('scan a file open in the viewer on a narrow screen', async ({ page }, testInfo) => {
     const root = mkdtempSync(join(tmpdir(), 'axe-narrow-viewer-'))
     try {
