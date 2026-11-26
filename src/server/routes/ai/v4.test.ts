@@ -42,6 +42,7 @@ vi.mock('../../util/logger', () => ({
 }))
 
 vi.mock('@sentry/node', () => ({ captureException: vi.fn() }))
+vi.mock('../../services/featureEvents', () => ({ recordFeatureEvent: vi.fn() }))
 vi.mock('../../util/redis', async () => (await import('../../tests/fakeRedis')).fakeRedisModule())
 
 import { validModels } from '@config'
@@ -58,6 +59,7 @@ import { runAgent } from '../../services/agent/runAgent'
 import { PostStreamSchemaV4 } from '../../../shared/agentChat'
 import { fakeRedisStore } from '../../tests/fakeRedis'
 import { clearLocalRuns } from '../../services/agent/resumableRuns'
+import { recordFeatureEvent } from '../../services/featureEvents'
 
 let currentUser = { id: 'user-1', isAdmin: false }
 
@@ -79,6 +81,7 @@ const stream = ({
   history = [],
   quizAnswer,
   quotes,
+  quickAction,
   viewerFile,
   resumeRunId,
 }: {
@@ -89,6 +92,7 @@ const stream = ({
   history?: unknown[]
   quizAnswer?: unknown
   quotes?: unknown
+  quickAction?: string
   viewerFile?: unknown
   resumeRunId?: string
 } = {}) => {
@@ -104,6 +108,7 @@ const stream = ({
             content: message,
             ...(quizAnswer ? { quizAnswer } : {}),
             ...(quotes ? { quotes } : {}),
+            ...(quickAction ? { quickAction } : {}),
             ...(viewerFile ? { viewerFile } : {}),
           },
         ],
@@ -917,5 +922,79 @@ describe('POST /ai/v4/stream under USAGE_ENFORCEMENT=cost', () => {
 
     expect(response.status).toBe(201)
     expect(await response.json()).toEqual({ warnings: [expect.objectContaining({ warningType: 'usage' })] })
+  })
+})
+
+describe('POST /ai/v4/stream feature events', () => {
+  const quotes = [{ kind: 'text', path: 'Course/notes.md', text: 'An eigenvector keeps its direction.' }]
+  const recorded = () => vi.mocked(recordFeatureEvent).mock.calls.map(([event]) => event)
+
+  test('records a chat send for a plain message', async () => {
+    await (await stream({ message: 'say hello' })).text()
+
+    expect(recorded()).toEqual([{ feature: 'chat', action: 'send' }])
+  })
+
+  test('records the quote event of the last user message only', async () => {
+    const history = [
+      { role: 'user', content: 'earlier', quotes },
+      { role: 'assistant', content: 'earlier answer' },
+    ]
+
+    await (await stream({ message: 'say hello', history })).text()
+
+    expect(recorded()).toEqual([{ feature: 'chat', action: 'send' }])
+  })
+
+  test('records ask_sent for quotes without a quick action', async () => {
+    await (await stream({ message: 'say hello', quotes })).text()
+
+    expect(recorded()).toEqual([
+      { feature: 'chat', action: 'send' },
+      { feature: 'quote', action: 'ask_sent' },
+    ])
+  })
+
+  test('records the quick action of a quote', async () => {
+    await (await stream({ message: 'say hello', quotes, quickAction: 'summarize' })).text()
+
+    expect(recorded()).toEqual([
+      { feature: 'chat', action: 'send' },
+      { feature: 'quote', action: 'summarize' },
+    ])
+  })
+
+  test('records nothing for a resumed run', async () => {
+    const message = `${MOCK_FLAKY_PREFIX} feature-events`
+    const error = (await readEvents(await stream({ message }))).find((e) => e.type === 'error')
+    const resumeRunId = error?.type === 'error' ? error.resumeId : undefined
+    vi.mocked(recordFeatureEvent).mockClear()
+
+    const resumed = await readEvents(await stream({ message, resumeRunId }))
+
+    expect(resumed[0]).toEqual({ type: 'resumed', pendingCallIds: [] })
+    expect(recordFeatureEvent).not.toHaveBeenCalled()
+  })
+
+  test('records nothing for a retry whose run is gone and starts over', async () => {
+    await (await stream({ message: 'say hello', resumeRunId: 'no-such-run' })).text()
+
+    expect(recordFeatureEvent).not.toHaveBeenCalled()
+  })
+
+  test('records nothing for an invalid model', async () => {
+    const response = await stream({ model: 'no-such-model' })
+
+    expect(response.status).toBe(400)
+    expect(recordFeatureEvent).not.toHaveBeenCalled()
+  })
+
+  test('records nothing when the usage limit is reached', async () => {
+    vi.mocked(getUsage).mockResolvedValue(100_000)
+
+    const response = await stream()
+
+    expect(response.status).toBe(403)
+    expect(recordFeatureEvent).not.toHaveBeenCalled()
   })
 })
