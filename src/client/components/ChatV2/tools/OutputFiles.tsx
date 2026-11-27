@@ -10,6 +10,7 @@ import { isOutputWrite } from '../../../util/myFiles/agentTools'
 import { downloadMyFile } from '../../../util/myFiles/download'
 import { baseName, isWithin, normalizePath, OUTPUTS_FOLDER } from '../../../util/myFiles/paths'
 import { isMyFilesError } from '../../../util/myFiles/store'
+import { accessibleTextColor } from '../../../theme'
 import { useOpenableFile } from '../../FileViewer/useOpenableFile'
 import { useMyFilesStore } from '../../MyFiles/MyFilesStoreContext'
 
@@ -77,7 +78,12 @@ export const OutputFileLink = ({ path, children }: { path: string; children: Rea
   if (!store) return <>{children}</>
   return (
     <>
-      <Link component="button" onClick={() => void download()} data-testid="output-file-link" sx={{ verticalAlign: 'baseline', font: 'inherit' }}>
+      <Link
+        component="button"
+        onClick={() => void download()}
+        data-testid="output-file-link"
+        sx={{ verticalAlign: 'baseline', font: 'inherit', color: (theme) => accessibleTextColor(theme, 'primary') }}
+      >
         {children}
       </Link>
       <MissingFileStatus path={path} missing={missing} inline />

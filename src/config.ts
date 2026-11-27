@@ -276,7 +276,7 @@ export const models: ModelConfig[] = [
     enabled: true,
     price: { input: 0, cachedInput: 0, output: 0 },
     displayName: 'Mock',
-    context: 2048,
+    context: 4096,
     outputLimit: 1024,
     provider: ModelProvider.Mock,
     tags: [],
